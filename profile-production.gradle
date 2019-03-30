@@ -1,0 +1,16 @@
+processTestResources {
+    filesMatching(['*.properties', '*.xml']) {
+        expand(
+                buildEnvironment: 'prod',
+                jdbcUrl: 'jdbc:postgresql:gxpatlasloc',
+                jdbcUsername: 'atlas3dev',
+                jdbcPassword: 'atlas3dev',
+                dataFilesLocation: System.properties['user.home'] + '/ATLAS3.TEST/integration-test-data',
+                testLogs: 'STDOUT',
+                zkHost: 'localhost',
+                zkPort: 2181,
+                solrHost: 'localhost',
+                solrPort: 8983
+        )
+    }
+}

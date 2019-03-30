@@ -1,0 +1,11 @@
+ext.buildEnvironment = 'dev'
+// Configuration for integration tests only, uses in-memory H2 DB attached to each build on context init
+ext.jdbcUrl = ''
+ext.jdbcUsername = ''
+ext.jdbcPassword = ''
+ext.dataFilesLocation = '/nfs/ma/home/atlas-it/atlas-test-data'
+ext.testLogs = 'FILE'
+ext.zkHost = 'lime.ebi.ac.uk'
+ext.zkPort = 2181
+ext.solrHost = 'lime.ebi.ac.uk'
+ext.solrPort = 8983

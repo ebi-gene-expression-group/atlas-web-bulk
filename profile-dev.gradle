@@ -1,0 +1,10 @@
+ext.buildEnvironment = 'dev'
+ext.jdbcUrl = 'jdbc:postgresql:gxpatlasloc'
+ext.jdbcUsername = 'atlas3dev'
+ext.jdbcPassword = 'atlas3dev'
+ext.dataFilesLocation = System.properties['user.home'] + '/ATLAS3.TEST/integration-test-data'
+ext.testLogs = 'STDOUT'
+ext.zkHost = 'localhost'
+ext.zkPort = 2181
+ext.solrHost = 'localhost'
+ext.solrPort = 8983

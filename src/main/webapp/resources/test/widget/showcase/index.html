@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+
+    <title>Expression Atlas widget showcase</title>
+
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="width" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#70BDBD"> <!-- Android Chrome mobile browser tab color -->
+
+    <!-- CSS: implied media=all -->
+    <!-- CSS concatenated and minified via ant build script-->
+    <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/css/foundation.css" type="text/css" media="all">
+    <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/css/ebi-global.css" type="text/css" media="all">
+    <link rel="stylesheet" href="https://www.ebi.ac.uk/web_guidelines/EBI-Icon-fonts/v1.1/fonts.css" type="text/css" media="all">
+
+    <!-- Use this CSS file for any custom styling -->
+    <link rel="stylesheet" href="/gxa/resources/css/foundation/theme-atlas.css" type="text/css" media="all">
+</head>
+
+<style>
+    #content {
+        counter-reset: section 0;
+    }
+
+    ol.section > li {
+        font-weight: 300;
+        font-size: 1.5625rem;
+        list-style-type: none;
+        counter-increment: section;
+    }
+
+    ol.section > li::before {
+        content: counters(section, ".") ". ";
+    }
+
+    ol.subsection > li {
+        font-weight: 400;
+        font-size: 1rem;
+        list-style-type: none;
+        counter-increment: subsection;
+    }
+
+    ol.subsection > li::before {
+        content: counters(section, ".") "." counters(subsection, ".") ". ";
+    }
+</style>
+
+<body>
+
+<div id="content" role="main" class="row column">
+    <h2>Basic use</h2>
+    <ol class="section">
+        <li class="margin-bottom-large">Search across experiments
+            <ol class="subsection">
+                <li>
+                    <a target="_blank" href="simple-search/H_sapiens-ENSG00000066279-JSON.html">Search across all Expression Atlas experiments – Species and gene query in JSON</a>
+                </li>
+                <li>
+                    <a target="_blank" href="simple-search/H_sapiens-ENSG00000066279-Plain_text.html">Search across all Expression Atlas experiments – Species and gene query in plain text</a>
+                </li>
+                <li>
+                    <a target="_blank" href="simple-search/ENSG00000066279-Plain_text.html">Search across all Expression Atlas experiments – Only gene query in plain text</a>
+                </li>
+            </ol>
+        </li>
+
+        <li class="margin-bottom-large">Search in reference experiment
+            <ol class="subsection">
+                <li>
+                    <a target="_blank" href="reference-experiment/M_musculus-ASPM.html">Search in <em>Mus musculus</em> reference experiment for a multi-species gene query</a>
+                </li>
+                <li>
+                    <a target="_blank" href="reference-experiment/R-HSA-73887.html">Search in reference experiment with a species-specific gene query</a>
+                </li>
+            </ol>
+        </li>
+    </ol>
+
+    <h2>Advanced options</h2>
+    <ol class="section">
+        <li class="margin-bottom-large">Multiple gene query terms
+            <ol class="subsection">
+                <li>
+                    <a target="_blank" href="multiple-terms/R-HSA-73887-R-HSA-1430728-JSON.html">Search in reference experiment for more than one ID in JSON</a>
+                </li>
+                <li>
+                    <a target="_blank" href="multiple-terms/R-HSA-73887-R-HSA-1430728-Plain_text.html">Search in reference experiment for more than one ID in plain text</a>
+                </li>
+            </ol>
+        </li>
+
+        <li class="margin-bottom-large">Proxying in and out
+            <ol class="subsection">
+                <li>
+                    <a target="_blank" href="proxies/inbound_proxy.html">Inbound proxy</a>
+                </li>
+                <li>
+                    <a target="_blank" href="proxies/outbound_proxy.html">Outbound proxy</a>
+                </li>
+            </ol>
+        </li>
+
+        <li class="margin-bottom-large">Callbacks
+            <ol class="subsection">
+                <li>
+                    <a target="_blank" href="callbacks/fail_callback.html">If the AJAX request fails</a>
+                </li>
+                <li>
+                    <a target="_blank" href="callbacks/render_callback.html">When the widget is mounted on the DOM</a>
+                </li>
+            </ol>
+        </li>
+
+        <li class="margin-bottom-large">More options
+            <ol class="subsection">
+                <li>
+                    <a target="_blank" href="advanced/hide_anatomogram.html">Hide the anatomogram</a>
+                </li>
+                <li>
+                    <a target="_blank" href="advanced/specific_experiment.html">Specify your favourite experiment</a>
+                </li>
+            </ol>
+        </li>
+    </ol>
+
+    <h2>Caveats</h2>
+    <ol class="section">
+        <li class="margin-bottom-large">Common errors and pitfalls
+            <ol class="subsection">
+                <li>
+                    <a target="_blank" href="caveats/ASPM.html">When a gene query matches multiple species the one with most results is shown</a>
+                </li>
+                <li>
+                    <a target="_blank" href="caveats/render_fail_callback.html">The render callback will execute before the fail callback</a>
+                </li>
+                <li>
+                    <a target="_blank" href="caveats/case_insensitive.html">Species and unqualified gene queries are case insensitive</a>
+                </li>
+                <li>
+                    <a target="_blank" href="caveats/google_analytics.html">Google Analytics is loaded by default but it will not overwrite your own tracker, however you can disable it</a>
+                </li>
+            </ol>
+        </li>
+    </ol>
+</div>
+
+</body>
+</html>

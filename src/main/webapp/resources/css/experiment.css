@@ -1,0 +1,26 @@
+th.gxaHeatmapTableDesignElement {
+    background: transparent;
+}
+
+.gxaShowCell {
+    font-size: 9px;
+}
+
+.tool-item {
+    border: none !important;
+}
+
+/* Fix for Highcharts tooltip being cut off */
+#experiment-page .highcharts-container {
+    overflow: visible !important;
+}
+#experiment-page svg {
+    overflow: visible !important;
+}
+
+#experiment-page, #feedback-button {
+    display: inline;
+}
+#feedback-button h1 {
+    color: black;
+}

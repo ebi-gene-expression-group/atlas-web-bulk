@@ -1,0 +1,5 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< uk.ac.ebi.ge:atlas-web-core >---------------------
+[INFO] Building Atlas Web Core 1.0.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
