@@ -11,6 +11,17 @@ plugins {
     id 'jacoco'
 }
 
+war {
+    archiveName 'gxa.war'
+}
+
+task explodedWar(type: Copy) {
+    into "$buildDir/exploded"
+    with war
+}
+
+war.dependsOn explodedWar
+
 group 'uk.ac.ebi.ge'
 version '1.0.0-SNAPSHOT'
 sourceCompatibility = 11
@@ -104,7 +115,7 @@ test {
 }
 
 if (!hasProperty('buildProfile')) ext.buildProfile = 'dev'
-apply from: "profile-${buildProfile}.gradle"
+apply from: "build-profiles/profile-${buildProfile}.gradle"
 
 processResources {
     exclude(['dev', 'prod'])

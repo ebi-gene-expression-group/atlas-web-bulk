@@ -7,3 +7,6 @@
 [submodule "src/main/javascript/modules/experiments-summary-panel"]
 	path = src/main/javascript/modules/experiments-summary-panel
 	url = https://github.com/ebi-gene-expression-group/experiments-summary-panel.git
+[submodule "build-profiles"]
+	path = build-profiles
+	url = https://github.com/ebi-gene-expression-group/atlas-web-build-profiles.git
