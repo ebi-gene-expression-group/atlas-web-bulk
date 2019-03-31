@@ -127,7 +127,8 @@ typings/
 
 ################################################################################################
 # Compiled and auto-generated classes
-target
+target/
+out/
 
 # IntelliJ IDEA project files
 *.iml
