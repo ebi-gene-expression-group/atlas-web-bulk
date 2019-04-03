@@ -1,8 +1,8 @@
 package uk.ac.ebi.atlas.trader;
 
 import org.springframework.stereotype.Component;
+import uk.ac.ebi.atlas.experimentimport.ExperimentDao;
 import uk.ac.ebi.atlas.experimentimport.ExperimentDto;
-import uk.ac.ebi.atlas.experimentimport.GxaExperimentDao;
 import uk.ac.ebi.atlas.experimentimport.idf.IdfParser;
 import uk.ac.ebi.atlas.experimentimport.idf.IdfParserOutput;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
@@ -18,13 +18,13 @@ public class ExpressionAtlasExperimentTrader extends ExperimentTrader {
     private final RnaSeqDifferentialExperimentFactory differentialExperimentFactory;
     private final MicroarrayExperimentFactory microarrayExperimentFactory;
 
-    public ExpressionAtlasExperimentTrader(GxaExperimentDao experimentDao,
+    public ExpressionAtlasExperimentTrader(ExperimentDao gxaExperimentDao,
                                            ExperimentDesignParser experimentDesignParser,
                                            IdfParser idfParser,
                                            BaselineExperimentFactory baselineExperimentFactory,
                                            RnaSeqDifferentialExperimentFactory differentialExperimentFactory,
                                            MicroarrayExperimentFactory microarrayExperimentFactory) {
-        super(experimentDao, experimentDesignParser, idfParser);
+        super(gxaExperimentDao, experimentDesignParser, idfParser);
         this.baselineExperimentFactory = baselineExperimentFactory;
         this.differentialExperimentFactory = differentialExperimentFactory;
         this.microarrayExperimentFactory = microarrayExperimentFactory;
