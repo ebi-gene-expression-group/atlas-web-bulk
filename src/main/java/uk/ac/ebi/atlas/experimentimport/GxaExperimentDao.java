@@ -53,7 +53,7 @@ public class GxaExperimentDao extends ExperimentDao {
                 experimentDto.getSpecies(),
                 experimentDto.isPrivate(),
                 accessKeyUuid.toString(),
-                experimentDto.getPubmedIds().stream().collect(Collectors.joining(", ")));
+                String.join(", ", experimentDto.getPubmedIds()));
     }
 
     @Override
