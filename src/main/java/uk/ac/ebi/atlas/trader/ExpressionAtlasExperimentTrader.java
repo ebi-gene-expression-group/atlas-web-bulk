@@ -1,5 +1,6 @@
 package uk.ac.ebi.atlas.trader;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.experimentimport.ExperimentDao;
 import uk.ac.ebi.atlas.experimentimport.ExperimentDto;
@@ -10,6 +11,7 @@ import uk.ac.ebi.atlas.trader.factory.RnaSeqDifferentialExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.MicroarrayExperimentFactory;
 
 @Component
+@NonNullByDefault
 public class ExpressionAtlasExperimentTrader extends ExperimentTrader {
     private final BaselineExperimentFactory baselineExperimentFactory;
     private final RnaSeqDifferentialExperimentFactory differentialExperimentFactory;
