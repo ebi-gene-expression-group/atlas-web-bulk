@@ -4,10 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.experimentimport.ExperimentDao;
 import uk.ac.ebi.atlas.experimentimport.ExperimentDto;
 import uk.ac.ebi.atlas.experimentimport.idf.IdfParser;
-import uk.ac.ebi.atlas.experimentimport.idf.IdfParserOutput;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
-import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
-import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.trader.factory.BaselineExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.RnaSeqDifferentialExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.MicroarrayExperimentFactory;
@@ -31,12 +28,10 @@ public class ExpressionAtlasExperimentTrader extends ExperimentTrader {
     }
 
     @Override
-    public Experiment getExperiment(String experimentAccession, String accessKey) {
-        ExperimentDesign experimentDesign = experimentDesignParser.parse(experimentAccession);
-        IdfParserOutput idfParserOutput = idfParser.parse(experimentAccession);
-        ExperimentDto experimentDto = experimentDao.findExperiment(experimentAccession, accessKey);
-
-        ExperimentType experimentType = experimentDto.getExperimentType();
+    protected Experiment buildExperiment(ExperimentDto experimentDto) {
+        var experimentDesign = experimentDesignParser.parse(experimentDto.getExperimentAccession());
+        var idfParserOutput = idfParser.parse(experimentDto.getExperimentAccession());
+        var experimentType = experimentDto.getExperimentType();
 
         switch (experimentType) {
             case RNASEQ_MRNA_BASELINE:
@@ -49,7 +44,8 @@ public class ExpressionAtlasExperimentTrader extends ExperimentTrader {
             case MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL:
                 return microarrayExperimentFactory.create(experimentDto, experimentDesign, idfParserOutput);
             default:
-                throw new RuntimeException("Unsupported experiment type: " + experimentType);
+                throw new IllegalArgumentException("Unsupported experiment type: " + experimentType);
         }
     }
+
 }
