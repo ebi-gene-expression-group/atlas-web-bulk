@@ -4,10 +4,9 @@ import com.google.common.collect.Sets;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Named
+@Component
 public class GxaExperimentDao extends ExperimentDao {
     // Create
     private static final String INSERT_NEW_EXPERIMENT =
@@ -39,7 +38,6 @@ public class GxaExperimentDao extends ExperimentDao {
     private static final String DELETE_EXPERIMENT = "DELETE FROM experiment WHERE accession=?";
 
 
-    @Inject
     public GxaExperimentDao(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         super(jdbcTemplate, namedParameterJdbcTemplate);
     }
@@ -55,7 +53,7 @@ public class GxaExperimentDao extends ExperimentDao {
                 experimentDto.getSpecies(),
                 experimentDto.isPrivate(),
                 accessKeyUuid.toString(),
-                experimentDto.getPubmedIds().stream().collect(Collectors.joining(", ")));
+                String.join(", ", experimentDto.getPubmedIds()));
     }
 
     @Override
