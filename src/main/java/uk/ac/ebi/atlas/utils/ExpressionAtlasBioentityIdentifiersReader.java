@@ -136,7 +136,7 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
 
     @Override
     public HashSet<String> getBioentityIdsFromExperiment(String experimentAccession) {
-        Experiment experiment = experimentTrader.getExperiment(experimentAccession);
+        Experiment experiment = experimentTrader.getExperimentForAnalyticsIndex(experimentAccession);
 
         HashSet<String> bioentityIdentifiers = new HashSet<>();
 
