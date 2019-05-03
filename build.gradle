@@ -135,10 +135,8 @@ processResources {
                 zkPort: zkPort,
                 solrHost: solrHost,
                 solrPort: solrPort,
-                buildNumber: '',
-                buildBranch: '',
-                buildRevision: '',
-                tomcatHostname: ''
+                catalinaBase: '${catalina.base}',
+                tomcatHostname: '${tomcat.hostname}'
         )
     }
 }
@@ -160,11 +158,7 @@ processTestResources {
                 zkHost: zkHost,
                 zkPort: zkPort,
                 solrHost: solrHost,
-                solrPort: solrPort,
-                buildNumber: '',
-                buildBranch: '',
-                buildRevision: '',
-                tomcatHostname: ''
+                solrPort: solrPort
         )
     }
 }
