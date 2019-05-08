@@ -22,7 +22,7 @@
                 geneQuery: "${geneQuery}",
                 conditionQuery: "${conditionQuery}",
                 species: "${species}"
-            }, "gxaDifferentialTab",);
+            }, "gxaDifferentialTab");
         });
         </c:if>
     })
