@@ -62,7 +62,6 @@ public class BaselineExperimentProfilesDao {
         solrQueryBuilder.addFilterFieldByTerm(EXPERIMENT_ACCESSION, experimentAccession)
                 .addFilterFieldByRangeMin(expressionLevelFieldNames.getLeft(), preferences.getCutoff())
                 .addQueryFieldByTerm(BIOENTITY_IDENTIFIER_SEARCH, geneIds)
-                .addQueryFieldByTerm(ASSAY_GROUP_ID, preferences.getSelectedColumnIds())
                 .setFieldList(
                         ImmutableSet.of(
                             BIOENTITY_IDENTIFIER,
@@ -71,7 +70,9 @@ public class BaselineExperimentProfilesDao {
                             ASSAY_GROUP_ID,
                             asAnalyticsSchemaField(BioentityPropertyName.SYMBOL)))
                 .setRows(maximumNumberOfDocs);
-
+        if (!preferences.getSelectedColumnIds().isEmpty()) {
+            solrQueryBuilder.addQueryFieldByTerm(ASSAY_GROUP_ID, preferences.getSelectedColumnIds());
+        }
         QueryResponse queryResponse = analyticsCollectionProxy.query(solrQueryBuilder);
 
         Map<String, List<SolrDocument>> resultsMap =
