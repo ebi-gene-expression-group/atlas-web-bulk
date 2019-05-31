@@ -25,9 +25,9 @@ import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELIN
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELINE;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.species.AtlasInformationDataType.EFO;
+import static uk.ac.ebi.atlas.species.AtlasInformationDataType.EG;
 import static uk.ac.ebi.atlas.species.AtlasInformationDataType.ENSEMBL;
-import static uk.ac.ebi.atlas.species.AtlasInformationDataType.GENOMES;
-import static uk.ac.ebi.atlas.species.AtlasInformationDataType.PARASITE;
+import static uk.ac.ebi.atlas.species.AtlasInformationDataType.WBPS;
 
 @Controller
 public class HomeController {
@@ -89,11 +89,10 @@ public class HomeController {
                         .sum();
         model.addAttribute("numberOfAssays", numberOfAssays);
 
-        Map<String, String> atlasInformation = atlasInformationDao.fetchAll();
-        model.addAttribute("info", atlasInformation);
+        model.addAttribute("info", atlasInformationDao.atlasInformation.get());
         model.addAttribute("ensembl", ENSEMBL.getId());
-        model.addAttribute("genomes", GENOMES.getId());
-        model.addAttribute("paraSite", PARASITE.getId());
+        model.addAttribute("eg", EG.getId());
+        model.addAttribute("wbps", WBPS.getId());
         model.addAttribute("efo", EFO.getId());
 
         return "home";
