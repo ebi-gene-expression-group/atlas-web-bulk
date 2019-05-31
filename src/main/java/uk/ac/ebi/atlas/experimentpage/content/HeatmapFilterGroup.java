@@ -1,4 +1,4 @@
-package uk.ac.ebi.atlas.experimentpage.columngroups;
+package uk.ac.ebi.atlas.experimentpage.content;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSetMultimap;

@@ -1,7 +1,6 @@
-package uk.ac.ebi.atlas.experimentpage.columngroups;
+package uk.ac.ebi.atlas.experimentpage.content;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -11,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
-import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.model.experiment.sample.Contrast;
 import uk.ac.ebi.atlas.model.experiment.sample.ReportsGeneExpression;
 import uk.ac.ebi.atlas.model.experiment.sdrf.Factor;
@@ -63,7 +61,7 @@ public class HeatmapGroupingsService {
 
         // Multimap since one assay can be part of more than one contrast if it’s part of the reference assay group
         ImmutableSetMultimap<String, String> assayId2AssayGroup =
-                assayIds.stream()
+                assayIds.stream().parallel()
                         .collect(flatteningToImmutableSetMultimap(
                                 Function.identity(),
                                 assayId ->
