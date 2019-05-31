@@ -17,7 +17,8 @@ public class CacheConfig {
                 builder -> builder.name("designElementsByGeneId"),
                 builder -> builder.name("arrayDesignByAccession"),
                 builder -> builder.name("experimentByAccession"),
-                builder -> builder.name("experimentsByType"));
+                builder -> builder.name("experimentsByType"),
+                builder -> builder.name("experimentContent"));
         return cacheManager;
     }
 }
