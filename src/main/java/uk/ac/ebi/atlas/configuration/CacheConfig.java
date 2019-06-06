@@ -18,7 +18,8 @@ public class CacheConfig {
                 builder -> builder.name("arrayDesignByAccession"),
                 builder -> builder.name("experimentByAccession"),
                 builder -> builder.name("experimentsByType"),
-                builder -> builder.name("experimentContent"));
+                builder -> builder.name("experimentContent"),
+                builder -> builder.name("experimentAttributes"));
         return cacheManager;
     }
 }

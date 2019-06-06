@@ -44,7 +44,7 @@ public class ExperimentPageContentService {
 
     @Cacheable("experimentContent")
     public String jsonSerializeContentForExperiment(final Experiment<? extends ReportsGeneExpression> experiment,
-                      final String accessKey) {
+                                                    final String accessKey) {
         return GSON.toJson(experimentPageContentForExperiment(experiment, accessKey));
     }
 
