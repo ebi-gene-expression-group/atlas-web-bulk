@@ -13,7 +13,6 @@ import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.species.Species;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
-import javax.annotation.PostConstruct;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,26 +35,6 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
 
     public PlantExperimentsController(ExperimentTrader experimentTrader) {
         this.experimentTrader = experimentTrader;
-    }
-
-    @RequestMapping(value = "/plant/experiments", produces = "text/html;charset=UTF-8")
-    public String getPlantExperimentsPage(Model model) {
-
-        loadExperimentAccessionsBySpecies();
-
-        model.addAttribute("baselineExperimentAccessionsBySpecies", baselineExperimentAccessionsBySpecies);
-        model.addAttribute("numDifferentialExperimentsBySpecies", numDifferentialExperimentsBySpecies);
-        model.addAttribute("experimentLinks", experimentLinks);
-        model.addAttribute("experimentDisplayNames", experimentDisplayNames);
-        model.addAttribute("numberOfPlantExperiments", numberOfPlantExperiments);
-
-        model.addAttribute("mainTitle", "Plant experiments ");
-
-        return "plants-landing-page";
-    }
-
-    @PostConstruct
-    private void loadExperimentAccessionsBySpecies() {
 
         // Get number of all public plant experiments in Atlas
         numberOfPlantExperiments = 0;
@@ -95,6 +74,19 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
         populateExperimentAccessionToSpecies(ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL);
         populateExperimentAccessionToSpecies(ExperimentType.RNASEQ_MRNA_DIFFERENTIAL);
         LOGGER.info("Differential experiments took: {} ms", System.currentTimeMillis() - start);
+    }
+
+    @RequestMapping(value = "/plant/experiments", produces = "text/html;charset=UTF-8")
+    public String getPlantExperimentsPage(Model model) {
+        model.addAttribute("baselineExperimentAccessionsBySpecies", baselineExperimentAccessionsBySpecies);
+        model.addAttribute("numDifferentialExperimentsBySpecies", numDifferentialExperimentsBySpecies);
+        model.addAttribute("experimentLinks", experimentLinks);
+        model.addAttribute("experimentDisplayNames", experimentDisplayNames);
+        model.addAttribute("numberOfPlantExperiments", numberOfPlantExperiments);
+
+        model.addAttribute("mainTitle", "Plant experiments ");
+
+        return "plants-landing-page";
     }
 
     /**

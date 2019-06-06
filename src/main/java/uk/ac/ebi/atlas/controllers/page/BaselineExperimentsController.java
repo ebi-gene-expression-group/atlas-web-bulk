@@ -12,6 +12,7 @@ import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
+import javax.annotation.PostConstruct;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,18 +20,14 @@ import java.util.Map;
 @Controller
 public class BaselineExperimentsController extends HtmlExceptionHandlingController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaselineExperimentsController.class);
-    private final ExperimentTrader experimentTrader;
+    private final SortedSetMultimap<String, String> experimentAccessionsBySpecies;
+    private final Map<String, String> experimentLinks;
+    private final Map<String, String> experimentDisplayNames;
 
     public BaselineExperimentsController(ExperimentTrader experimentTrader) {
-        this.experimentTrader = experimentTrader;
-    }
+        experimentDisplayNames = new HashMap<>();
 
-    @RequestMapping(value = "/baseline/experiments", produces = "text/html;charset=UTF-8")
-    public String getBaselineExperimentsPage(Model model) {
-
-        Map<String, String> experimentDisplayNames = new HashMap<>();
-
-        for (Experiment experiment : experimentTrader.getPublicExperiments(ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE)) {
+        for (var experiment : experimentTrader.getPublicExperiments(ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE)) {
             String experimentAccession = experiment.getAccession();
             String displayName;
             try {
@@ -68,10 +65,9 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
                 return experimentDisplayNames.get(o1).compareTo(experimentDisplayNames.get(o2));
             }
         };
-        SortedSetMultimap<String, String> experimentAccessionsBySpecies =
-                TreeMultimap.create(keyComparator, valueComparator);
+        experimentAccessionsBySpecies = TreeMultimap.create(keyComparator, valueComparator);
 
-        Map<String, String> experimentLinks = new HashMap<>();
+        experimentLinks = new HashMap<>();
 
         for (Experiment experiment : experimentTrader.getPublicExperiments(ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE)) {
             String experimentAccession = experiment.getAccession();
@@ -86,7 +82,10 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
             }
 
         }
+    }
 
+    @RequestMapping(value = "/baseline/experiments", produces = "text/html;charset=UTF-8")
+    public String getBaselineExperimentsPage(Model model) {
         model.addAttribute("experimentAccessionsBySpecies", experimentAccessionsBySpecies);
         model.addAttribute("experimentLinks", experimentLinks);
         model.addAttribute("experimentDisplayNames", experimentDisplayNames);
