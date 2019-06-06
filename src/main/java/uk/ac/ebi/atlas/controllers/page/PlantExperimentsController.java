@@ -4,7 +4,6 @@ import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,23 +14,17 @@ import uk.ac.ebi.atlas.species.Species;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-// Ideally this shouldn’t be scoped to request but, if singleton, on application startup all experiments are going to
-// be cached making init times way slower than necessary; especially in development. In production, experiments are
-// already cached; the added cost of creating the bean for each HTTP request is a trade-off for a page that doesn’t get
-// a lot of traffic.
 @Controller
-@Scope("request")
 public class PlantExperimentsController extends HtmlExceptionHandlingController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlantExperimentsController.class);
 
-    private ExperimentTrader experimentTrader;
+    private final ExperimentTrader experimentTrader;
 
     private Integer numberOfPlantExperiments;
 
@@ -41,7 +34,6 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
     private Map<String, String> experimentLinks = new HashMap<>();
     private Map<String, String> experimentDisplayNames = new HashMap<>();
 
-    @Inject
     public PlantExperimentsController(ExperimentTrader experimentTrader) {
         this.experimentTrader = experimentTrader;
     }
