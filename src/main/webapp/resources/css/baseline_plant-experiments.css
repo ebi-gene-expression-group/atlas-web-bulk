@@ -1,5 +1,6 @@
 .species_item {min-height: 250px; text-align: center;}
 .species_item h4 {text-align: center;}
+.species_item h4:first-letter {text-transform: capitalize}
 .species_item ul li {text-align: center;}
 .species_item span {font-size: 700%;}
 .species_item span.red:before {color:#d9534f;}   /*animal*/
