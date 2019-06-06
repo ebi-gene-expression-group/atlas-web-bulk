@@ -24,9 +24,10 @@ import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELI
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 import static uk.ac.ebi.atlas.utils.UrlHelpers.getCustomUrl;
-import static uk.ac.ebi.atlas.utils.UrlHelpers.getExperimentSetUrl;
-import static uk.ac.ebi.atlas.utils.UrlHelpers.getExperimentUrl;
+import static uk.ac.ebi.atlas.utils.UrlHelpers.getExperimentLink;
+import static uk.ac.ebi.atlas.utils.UrlHelpers.getExperimentSetLink;
 import static uk.ac.ebi.atlas.utils.UrlHelpers.getExperimentsSummaryImageUrl;
+import static uk.ac.ebi.atlas.utils.UrlHelpers.getLinkWithEmptyLabel;
 
 @RestController
 public class JsonExperimentsSummaryController extends JsonExceptionHandlingController {
@@ -61,22 +62,6 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
     }
 
 
-
-    private static Pair<String, Optional<String>> getExperimentLink(String label, String accession) {
-        return Pair.of(label, Optional.of(getExperimentUrl(accession)));
-    }
-
-    private static Pair<Optional<String>, Optional<String>> getLinkWithEmptyLabel(String link) {
-        return Pair.of(Optional.empty(), Optional.of(link));
-    }
-
-    private static Pair<Optional<String>, Optional<String>> getExperimentLink(String accession) {
-        return getLinkWithEmptyLabel(getExperimentUrl(accession));
-    }
-
-    private static Pair<Optional<String>, Optional<String>> getExperimentSetLink(String keyword) {
-        return getLinkWithEmptyLabel(getExperimentSetUrl(keyword));
-    }
 
     private static ImmutableList<CardModel> featuredExperimentsCards() {
         return ImmutableList.of(
