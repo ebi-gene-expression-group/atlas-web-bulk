@@ -16,7 +16,7 @@
             <div class="row expanded">
                 <div class="small-12 medium-4 large-5 columns">
                     <div class="row column">
-                        <label>Gene / Gene properties</label>
+                        <label for="home-search-gene-query-input">Gene / Gene properties</label>
                         <input id="home-search-gene-query-input" type="text" placeholder="Enter gene query…" name="geneQuery"/>
                     </div>
                     <div class="row column small margin-top-small">
@@ -37,7 +37,7 @@
                 </div>
                 <div id="sample-properties-section" class="small-12 medium-4 large-5 columns">
                     <div class="row column">
-                        <label>Biological conditions</label>
+                        <label for="home-search-condition-query-input">Biological conditions</label>
                         <input id="home-search-condition-query-input" type="text" placeholder="Enter condition query…" name="conditionQuery" />
                     </div>
                     <div class="row column small margin-top-small">
@@ -63,8 +63,8 @@
         <form method="get" action="${pageContext.request.contextPath}/genesetenrichment" id="home-genesetenrichment-atlas-form">
             <div class="row expanded">
                 <div class="small-12 columns">
-                    <label>Provide a set of Ensembl gene identifiers to test enrichment against differentially expressed genes by comparison</label>
-                    <input class="margin-bottom-none" type="text" placeholder="Enter gene IDs…" name="query"/>
+                    <label for="home-search-gse-query">Provide a set of Ensembl gene identifiers to test enrichment against differentially expressed genes by comparison</label>
+                    <input id="home-search-gse-query" class="margin-bottom-none" type="text" placeholder="Enter gene IDs…" name="query"/>
                 </div>
             </div>
 
