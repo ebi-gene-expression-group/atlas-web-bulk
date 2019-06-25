@@ -125,16 +125,21 @@ processResources {
 
     filesMatching(['*.properties', '*.xml']) {
         expand(
+                projectBuildDirectory: buildDir,
+                dataFilesLocation: dataFilesLocation,
                 jdbcUrl: jdbcUrl,
                 jdbcUsername: jdbcUsername,
                 jdbcPassword: jdbcPassword,
-                dataFilesLocation: dataFilesLocation,
-                projectBuildDirectory: buildDir,
-                testLogs: testLogs,
                 zkHost: zkHost,
                 zkPort: zkPort,
                 solrHost: solrHost,
                 solrPort: solrPort,
+                testLogs: testLogs,
+                // Set at compile time with ./gradlew -PbuildNumber={...} ...
+                buildNumber: buildNumber,
+                buildBranch: buildBranch,
+                buildRevision: buildRevision,
+                // Set at runtime by Tomcat
                 catalinaBase: '${catalina.base}',
                 tomcatHostname: '${tomcat.hostname}'
         )
@@ -149,16 +154,21 @@ processTestResources {
 
     filesMatching(['*.properties', '*.xml']) {
         expand(
+                projectBuildDirectory: buildDir,
+                dataFilesLocation: dataFilesLocation,
                 jdbcUrl: jdbcUrl,
                 jdbcUsername: jdbcUsername,
                 jdbcPassword: jdbcPassword,
-                dataFilesLocation: dataFilesLocation,
-                projectBuildDirectory: buildDir,
-                testLogs: testLogs,
                 zkHost: zkHost,
                 zkPort: zkPort,
                 solrHost: solrHost,
-                solrPort: solrPort
+                solrPort: solrPort,
+                testLogs: testLogs,
+                buildNumber: buildNumber,
+                buildBranch: buildBranch,
+                buildRevision: buildRevision,
+                catalinaBase: '${catalina.base}',
+                tomcatHostname: '${tomcat.hostname}'
         )
     }
 }

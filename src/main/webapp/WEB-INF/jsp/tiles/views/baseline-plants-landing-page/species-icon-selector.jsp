@@ -1,5 +1,5 @@
 <%--@elvariable id="species" type="String"--%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <c:choose>
     <c:when test="${species.matches('(?i)anolis carolinensis')}">
         <c:set var="speciesIconCode" value="7"/>

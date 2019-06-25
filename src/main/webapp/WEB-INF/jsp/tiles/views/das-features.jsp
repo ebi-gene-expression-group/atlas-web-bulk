@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="no"?>
-<%@ page contentType="application/xml;charset=UTF-8" %>
+<%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <c:set var="baseURL" value="http://www.ebi.ac.uk${pageContext.request.contextPath}" />
