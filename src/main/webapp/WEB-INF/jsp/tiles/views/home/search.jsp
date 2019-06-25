@@ -1,3 +1,7 @@
+<%--@elvariable id="topSpecies" type="ImmutableMap<String, String>"--%>
+<%--@elvariable id="separator" type="String"--%>
+<%--@elvariable id="species" type="ImmutableMap<String, String>"--%>
+
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
@@ -29,7 +33,7 @@
                 <div class="small-12 medium-4 large-2 columns">
                     <label>Species</label>
                     <form:select id="species" name="species" path="speciesPath">
-                        <form:options items="${topSixByExperimentCount}"/>
+                        <form:options items="${topSpecies}"/>
                         <form:option value="${separator}" disabled="true"/>
                         <form:option value="" label="Any" selected="true"/>
                         <form:options items="${species}" />
