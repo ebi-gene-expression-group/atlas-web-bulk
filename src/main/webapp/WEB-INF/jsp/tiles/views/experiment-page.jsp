@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <%@ include file="experiment-page/experiment-description.jsp" %>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/experiment.css">

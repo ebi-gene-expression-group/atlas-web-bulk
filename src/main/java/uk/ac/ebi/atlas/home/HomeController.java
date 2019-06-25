@@ -15,9 +15,9 @@ import uk.ac.ebi.atlas.species.SpeciesPropertiesTrader;
 import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
 import uk.ac.ebi.atlas.utils.ExperimentInfo;
 
-import java.util.Map;
 import java.util.Random;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
@@ -34,9 +34,17 @@ public class HomeController {
     @Autowired
     protected Environment env;
 
-    private static final String NORMAL_SEPARATOR = "━━━━━━━━━━━━━━━━━";
+    // From e.g. https://www.ebi.ac.uk/s4/identification?term=tpi1
+    private static final ImmutableMap<String, String> S4_SPECIES =
+            ImmutableMap.of(
+                    "homo sapiens", "Homo sapiens",
+                    "mus musculus", "Mus musculus",
+                    "saccharomyces cerevisiae", "Saccharomyces cerevisiae",
+                    "drosophila melanogaster", "Drosophila melanogaster",
+                    "caenorhabditis elegans", "Caenorhabditis elegans");
+    private static final String NORMAL_SEPARATOR = "━━━━━━━━━━━━━━━━";
     private static final String BEST_SEPARATOR = "(╯°□°）╯︵ ┻━┻";
-    private static final double EASTER_EGG_PROBABILITY = 0.001;
+    private static final double EASTER_EGG_PROBABILITY = 0.0001;
     private static final Random RANDOM = new Random();
 
     private final SpeciesPropertiesTrader speciesPropertiesTrader;
@@ -66,24 +74,25 @@ public class HomeController {
         model.addAttribute(
                 "separator", RANDOM.nextDouble() < EASTER_EGG_PROBABILITY ? BEST_SEPARATOR : NORMAL_SEPARATOR);
 
-        ImmutableMap.Builder<String, String> speciesSelectBuilder = ImmutableMap.builder();
-        for (SpeciesProperties speciesProperties : speciesPropertiesTrader.getAll()) {
-            speciesSelectBuilder.put(
-                    speciesProperties.referenceName(), StringUtils.capitalize(speciesProperties.referenceName()));
-        }
+        model.addAttribute("topSpecies", S4_SPECIES);
 
-        model.addAttribute("species", speciesSelectBuilder.build());
+        var allSpecies = speciesPropertiesTrader.getAll().stream()
+                .collect(toImmutableMap(
+                        SpeciesProperties::referenceName,
+                        speciesProperties -> StringUtils.capitalize(speciesProperties.referenceName())));
+        model.addAttribute("species", allSpecies);
         model.addAttribute("speciesPath", ""); // Required by Spring form tag
+
         model.addAttribute("numberOfStudies", experimentInfoListService.listPublicExperiments().size());
 
-        long numberOfSpecies =
+        var numberOfSpecies =
                 experimentInfoListService.listPublicExperiments().stream()
                         .map(ExperimentInfo::getSpecies)
                         .distinct()
                         .count();
         model.addAttribute("numberOfSpecies", numberOfSpecies);
 
-        int numberOfAssays =
+        var numberOfAssays =
                 experimentInfoListService.listPublicExperiments().stream()
                         .mapToInt(ExperimentInfo::getNumberOfAssays)
                         .sum();
