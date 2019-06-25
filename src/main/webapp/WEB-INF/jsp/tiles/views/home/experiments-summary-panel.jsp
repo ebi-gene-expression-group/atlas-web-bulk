@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <div id="experiments-summary-panel"></div>
 
 <script defer src="${pageContext.request.contextPath}/resources/js-bundles/homepageExperimentsSummaryPanel.bundle.js"></script>

@@ -5,7 +5,7 @@
 <%--@elvariable id="species" type="java.lang.String"--%>
 <%--@elvariable id="query" type="java.lang.String"--%>
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <c:set var="thisPage" value="${requestScope['javax.servlet.forward.request_uri']}"/>

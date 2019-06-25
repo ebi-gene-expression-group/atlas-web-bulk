@@ -7,7 +7,7 @@
 <%--@elvariable id="wbps" type="String"--%>
 <%--@elvariable id="efo" type="String"--%>
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <div class="small-12 medium-6 columns text-left">

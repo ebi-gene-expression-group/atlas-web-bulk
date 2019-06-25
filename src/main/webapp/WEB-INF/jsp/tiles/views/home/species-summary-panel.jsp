@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <div id="species-summary-panel"></div>
 
 <div class="row expanded column text-center margin-top-medium">
