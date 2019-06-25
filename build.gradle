@@ -135,7 +135,7 @@ processResources {
                 solrHost: solrHost,
                 solrPort: solrPort,
                 testLogs: testLogs,
-                // Set at compile time by Bamboo
+                // Set at compile time with ./gradlew -PbuildNumber={...} ...
                 buildNumber: buildNumber,
                 buildBranch: buildBranch,
                 buildRevision: buildRevision,
