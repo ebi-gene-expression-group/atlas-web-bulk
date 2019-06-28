@@ -19,7 +19,8 @@ public class CacheConfig {
                 builder -> builder.name("experimentByAccession"),
                 builder -> builder.name("experimentsByType"),
                 builder -> builder.name("experimentContent"),
-                builder -> builder.name("experimentAttributes"));
+                builder -> builder.name("experimentAttributes"),
+                builder -> builder.name("bioentityProperties"));
         return cacheManager;
     }
 }
