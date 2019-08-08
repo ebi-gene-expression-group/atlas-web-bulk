@@ -11,7 +11,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class DownloadController extends HtmlExceptionHandlingController {
@@ -21,77 +22,38 @@ public class DownloadController extends HtmlExceptionHandlingController {
     @RequestMapping(value = "/download", produces = "text/html;charset=UTF-8")
     public String getExperimentsListParameters(Model model) {
 
-        model.addAttribute("fileSize", getFTPFileSize());
-        model.addAttribute("fileName", getFTPFileName());
-        model.addAttribute("fileTimestamp", getFTPFileTimestamp());
+        Map<String, String> fileInfo = getFTPFileInfo();
+
+        model.addAttribute("fileSize", fileInfo.get("fileSize"));
+        model.addAttribute("fileName", fileInfo.get("fileName"));
+        model.addAttribute("fileTimestamp", fileInfo.get("fileTimestamp"));
 
         model.addAttribute("mainTitle", "Download ");
 
         return "download";
     }
 
-    private String getFTPFileSize() {
-        Optional<FTPClient> ftpClient = getFTPClient();
-        String size = "";
-        if (ftpClient.isPresent()) {
-            Optional<FTPFile> file = getFTPFile(ftpClient.get());
-            if (file.isPresent()) {
-                size = format(file.get().getSize(), 1);
-            }
-        }
-        return size;
-    }
-
-    private String getFTPFileName() {
-        Optional<FTPClient> ftpClient = getFTPClient();
-        String name = "";
-        if (ftpClient.isPresent()) {
-            Optional<FTPFile> file = getFTPFile(ftpClient.get());
-            if(file.isPresent()) {
-                name = file.get().getName();
-            }
-        }
-        return name;
-    }
-
-    private String getFTPFileTimestamp() {
-        Optional<FTPClient> ftpClient = getFTPClient();
-        String timestamp = "";
-        if (ftpClient.isPresent()) {
-            Optional<FTPFile> file = getFTPFile(ftpClient.get());
-            if (file.isPresent()) {
-                timestamp = LocalDate.ofInstant(
-                        file.get().getTimestamp().getTime().toInstant(),
-                        ZoneId.systemDefault()).toString();
-            }
-        }
-        return timestamp;
-    }
-
-    private Optional<FTPClient> getFTPClient(){
+    private Map<String, String> getFTPFileInfo() {
+        Map<String, String> fileInfo = new HashMap<>();
         FTPClient ftpClient = new FTPClient();
         try {
             ftpClient.connect("ftp.ebi.ac.uk");
-            ftpClient.login("ftp","anonymous");
-            return Optional.of(ftpClient);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return Optional.empty();
-        }
-    }
-
-    private Optional<FTPFile> getFTPFile(FTPClient ftpClient) {
-        try {
+            ftpClient.login("ftp", "anonymous");
             FTPFile[] file = ftpClient.listFiles(filePath);
-            return Optional.ofNullable(file[0]);
+            fileInfo.put("fileName", file[0].getName());
+            fileInfo.put("fileSize", format(file[0].getSize(), 1));
+            fileInfo.put("fileTimestamp", LocalDate.ofInstant(
+                    file[0].getTimestamp().getTime().toInstant(),
+                    ZoneId.systemDefault()).toString());
+
         } catch (IOException ex) {
             ex.printStackTrace();
-            return Optional.empty();
         }
+        return fileInfo;
     }
 
     private String format(double bytes, int digits) {
-        String[] dictionary = { "bytes", "KB", "MB", "GB", "TB", "PB"};
+        String[] dictionary = {"bytes", "KB", "MB", "GB", "TB", "PB"};
         int index;
         for (index = 0; index < dictionary.length; index++) {
             if (bytes < 1024) {
