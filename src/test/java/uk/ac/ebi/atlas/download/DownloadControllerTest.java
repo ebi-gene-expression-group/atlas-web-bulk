@@ -45,4 +45,12 @@ class DownloadControllerTest {
                 .andExpect(view().name("download"))
                 .andExpect(model().attributeExists("fileName", "fileSize", "fileTimestamp"));
     }
+
+    @Test
+    void downloadModelHaveEmptyFTPFileInfoForInvalidHost() throws Exception {
+        this.mockMvc.perform(get("/download").param("ftpHost","foo"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("download"))
+                .andExpect(model().attributeDoesNotExist("fileName", "fileSize", "fileTimestamp"));
+    }
 }

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 
 import org.apache.commons.net.ftp.FTPClient;
@@ -23,9 +24,10 @@ public class DownloadController extends HtmlExceptionHandlingController {
     private static final String FILEPATH = "/pub/databases/microarray/data/atlas/experiments/atlas-latest-data.tar.gz";
 
     @RequestMapping(value = "/download", produces = "text/html;charset=UTF-8")
-    public String getExperimentsListParameters(Model model) {
+    public String getExperimentsListParameters(@RequestParam(defaultValue = "ftp.ebi.ac.uk", required = false) String ftpHost,
+                                               Model model) {
 
-        Map<String, String> fileInfo = getFTPFileInfo();
+        Map<String, String> fileInfo = getFTPFileInfo(ftpHost);
 
         model.addAttribute("fileSize", fileInfo.get("fileSize"));
         model.addAttribute("fileName", fileInfo.get("fileName"));
@@ -36,11 +38,11 @@ public class DownloadController extends HtmlExceptionHandlingController {
         return "download";
     }
 
-    private Map<String, String> getFTPFileInfo() {
+    private Map<String, String> getFTPFileInfo(String ftpHost) {
         Map<String, String> fileInfo = new HashMap<>();
         FTPClient ftpClient = new FTPClient();
         try {
-            ftpClient.connect("ftp.ebi.ac.uk");
+            ftpClient.connect(ftpHost);
             ftpClient.login("ftp", "anonymous");
             FTPFile[] file = ftpClient.listFiles(FILEPATH);
             fileInfo.put("fileName", file[0].getName());
@@ -55,10 +57,11 @@ public class DownloadController extends HtmlExceptionHandlingController {
     }
 
     private String format(final double bytes, final int digits) {
-        String[] dictionary = {"bytes", "KB", "MB", "GB", "TB", "PB"};
-        final int base = 1024;
-        int index = (int) Math.floor(Math.log(bytes) / Math.log(base));
-        double size = bytes / Math.pow(base, index);
+        String[] dictionary = {"bytes", "KiB", "MiB", "GiB", "TiB", "PiB"};
+        final var base = 1024;
+        Double i = Math.floor(Math.log(bytes) / Math.log(base));
+        var index = i.intValue();
+        var size = bytes / Math.pow(base, index);
         return String.format("%." + digits + "f", size) + " " + dictionary[index];
     }
 }
