@@ -1,3 +1,7 @@
+<%--@elvariable id="fileName" type="java.lang.String"--%>
+<%--@elvariable id="fileTimestamp" type="java.lang.String"--%>
+<%--@elvariable id="fileSize" type="java.lang.String"--%>
+
 <%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 

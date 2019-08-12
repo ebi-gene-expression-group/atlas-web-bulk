@@ -1,6 +1,8 @@
 package uk.ac.ebi.atlas.download;
 
 import org.apache.commons.net.ftp.FTPFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +19,8 @@ import java.util.Map;
 @Controller
 public class DownloadController extends HtmlExceptionHandlingController {
 
-    private static final String filePath = "/pub/databases/microarray/data/atlas/experiments/atlas-latest-data.tar.gz";
+    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadController.class);
+    private static final String FILEPATH = "/pub/databases/microarray/data/atlas/experiments/atlas-latest-data.tar.gz";
 
     @RequestMapping(value = "/download", produces = "text/html;charset=UTF-8")
     public String getExperimentsListParameters(Model model) {
@@ -39,28 +42,23 @@ public class DownloadController extends HtmlExceptionHandlingController {
         try {
             ftpClient.connect("ftp.ebi.ac.uk");
             ftpClient.login("ftp", "anonymous");
-            FTPFile[] file = ftpClient.listFiles(filePath);
+            FTPFile[] file = ftpClient.listFiles(FILEPATH);
             fileInfo.put("fileName", file[0].getName());
             fileInfo.put("fileSize", format(file[0].getSize(), 1));
             fileInfo.put("fileTimestamp", LocalDate.ofInstant(
                     file[0].getTimestamp().getTime().toInstant(),
                     ZoneId.systemDefault()).toString());
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
         }
         return fileInfo;
     }
 
-    private String format(double bytes, int digits) {
+    private String format(final double bytes, final int digits) {
         String[] dictionary = {"bytes", "KB", "MB", "GB", "TB", "PB"};
-        int index;
-        for (index = 0; index < dictionary.length; index++) {
-            if (bytes < 1024) {
-                break;
-            }
-            bytes = bytes / 1024;
-        }
-        return String.format("%." + digits + "f", bytes) + " " + dictionary[index];
+        final int base = 1024;
+        int index = (int) Math.floor(Math.log(bytes) / Math.log(base));
+        double size = bytes / Math.pow(base, index);
+        return String.format("%." + digits + "f", size) + " " + dictionary[index];
     }
 }
