@@ -27,7 +27,7 @@
                 <ul id="local-nav" class="dropdown menu float-left" data-description="navigational">
                     <li id="local-nav-home"><a href="${pageContext.request.contextPath}/home"><i class="icon icon-generic padding-right-medium" data-icon="H"></i>Home</a></li>
                     <li id="local-nav-experiments"><a href="${pageContext.request.contextPath}/experiments"><i class="icon icon-functional padding-right-medium" data-icon="C"></i>Browse experiments</a></li>
-                    <li id="local-nav-download"><a href="${pageContext.request.contextPath}/download.html"><i class="icon icon-functional padding-right-medium" data-icon="="></i>Download</a></li>
+                    <li id="local-nav-download"><a href="${pageContext.request.contextPath}/download"><i class="icon icon-functional padding-right-medium" data-icon="="></i>Download</a></li>
                     <li id="local-nav-release-notes"><a href="${pageContext.request.contextPath}/release-notes.html"><i class="icon icon-generic padding-right-medium" data-icon=";"></i>Release notes</a></li>
                     <li id="local-nav-faq"><a href="${pageContext.request.contextPath}/FAQ.html"><i class="icon icon-generic padding-right-medium" data-icon="G"></i>FAQ</a></li>
                     <li id="local-nav-help"><a href="${pageContext.request.contextPath}/help/index.html"><i class="icon icon-generic padding-right-medium" data-icon="?"></i>Help</a></li>
