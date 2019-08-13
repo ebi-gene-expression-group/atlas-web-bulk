@@ -39,7 +39,7 @@ class DownloadControllerTest {
     }
 
     @Test
-    void downloadModelHaveFTPFileInfo() throws Exception {
+    void downloadModelHaveFtpFileInfo() throws Exception {
         this.mockMvc.perform(get("/download"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("download"))
@@ -47,7 +47,7 @@ class DownloadControllerTest {
     }
 
     @Test
-    void downloadModelHaveEmptyFTPFileInfoForInvalidHost() throws Exception {
+    void downloadModelHaveEmptyFtpFileInfoForInvalidHost() throws Exception {
         this.mockMvc.perform(get("/download").param("ftpHost","foo"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("download"))

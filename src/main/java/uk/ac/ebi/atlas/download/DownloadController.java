@@ -26,8 +26,7 @@ public class DownloadController extends HtmlExceptionHandlingController {
     @RequestMapping(value = "/download", produces = "text/html;charset=UTF-8")
     public String getExperimentsListParameters(@RequestParam(defaultValue = "ftp.ebi.ac.uk", required = false) String ftpHost,
                                                Model model) {
-
-        Map<String, String> fileInfo = getFTPFileInfo(ftpHost);
+        Map<String, String> fileInfo = getFtpFileInfo(ftpHost);
 
         model.addAttribute("fileSize", fileInfo.get("fileSize"));
         model.addAttribute("fileName", fileInfo.get("fileName"));
@@ -38,7 +37,7 @@ public class DownloadController extends HtmlExceptionHandlingController {
         return "download";
     }
 
-    private Map<String, String> getFTPFileInfo(String ftpHost) {
+    private Map<String, String> getFtpFileInfo(String ftpHost) {
         Map<String, String> fileInfo = new HashMap<>();
         FTPClient ftpClient = new FTPClient();
         try {
@@ -59,9 +58,8 @@ public class DownloadController extends HtmlExceptionHandlingController {
     private String format(final double bytes, final int digits) {
         String[] dictionary = {"bytes", "KiB", "MiB", "GiB", "TiB", "PiB"};
         final var base = 1024;
-        Double i = Math.floor(Math.log(bytes) / Math.log(base));
-        var index = i.intValue();
+        Double index = Math.floor(Math.log(bytes) / Math.log(base));
         var size = bytes / Math.pow(base, index);
-        return String.format("%." + digits + "f", size) + " " + dictionary[index];
+        return String.format("%." + digits + "f", size) + " " + dictionary[index.intValue()];
     }
 }

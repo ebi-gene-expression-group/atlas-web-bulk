@@ -9,6 +9,7 @@
     <div class="12 columns">
         <h2>Download</h2>
 
+        <c:if test="${!empty fileName}">
         <h3>Via FTP</h3>
         <table style="border: 1px #cdd4d2 solid;">
             <thead>
@@ -28,6 +29,7 @@
             </tr>
             </tbody>
         </table>
+        </c:if>
 
         <h3>From experiment pages</h3>
         <p>
