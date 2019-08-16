@@ -26,14 +26,15 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
     public BaselineExperimentsController(ExperimentTrader experimentTrader) {
         experimentDisplayNames = new HashMap<>();
 
-        for (var experiment : experimentTrader.getPublicExperiments(ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE)) {
+        for (var experiment :
+                experimentTrader.getPublicExperiments(
+                        ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE)) {
             String experimentAccession = experiment.getAccession();
             String displayName;
             try {
                 displayName = experimentTrader.getPublicExperiment(experimentAccession).getDisplayName();
             } catch (RuntimeException e) {
-                // we don't want the entire application to crash just because one condensedSdrf file may be offline
-                // because a curator is modifying it
+                // We don't want the entire application to crash just because one condensed SDRF file may is missing
                 LOGGER.error(e.getMessage(), e);
                 displayName = experimentAccession;
             }
@@ -68,7 +69,9 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
 
         experimentLinks = new HashMap<>();
 
-        for (Experiment experiment : experimentTrader.getPublicExperiments(ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE)) {
+        for (Experiment experiment :
+                experimentTrader.getPublicExperiments(
+                        ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE)) {
             String experimentAccession = experiment.getAccession();
 
             try {
@@ -79,7 +82,6 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
                 // because a curator is modifying it
                 LOGGER.error(e.getMessage(), e);
             }
-
         }
     }
 
