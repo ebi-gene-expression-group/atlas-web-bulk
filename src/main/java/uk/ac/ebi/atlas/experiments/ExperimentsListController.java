@@ -27,9 +27,9 @@ public class ExperimentsListController {
     private ExperimentInfoListService experimentInfoListService;
 
     @Inject
-    public ExperimentsListController(ExperimentTrader expressionAtlasExperimentTrader) {
+    public ExperimentsListController(ExperimentTrader experimentTrader) {
         this.experimentInfoListService =
-                new ExperimentInfoListService(expressionAtlasExperimentTrader, ImmutableList.of(
+                new ExperimentInfoListService(experimentTrader, ImmutableList.of(
                         RNASEQ_MRNA_BASELINE,
                         PROTEOMICS_BASELINE,
                         RNASEQ_MRNA_DIFFERENTIAL,

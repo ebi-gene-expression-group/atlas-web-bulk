@@ -26,7 +26,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 @Named
 public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
-
     private final DataFileHub dataFileHub;
     private final ConfigurationTrader configurationTrader;
 

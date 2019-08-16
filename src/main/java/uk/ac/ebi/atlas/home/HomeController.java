@@ -12,7 +12,7 @@ import uk.ac.ebi.atlas.experiments.ExperimentInfoListService;
 import uk.ac.ebi.atlas.species.AtlasInformationDao;
 import uk.ac.ebi.atlas.species.SpeciesProperties;
 import uk.ac.ebi.atlas.species.SpeciesPropertiesTrader;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.utils.ExperimentInfo;
 
 import java.util.Random;
@@ -52,7 +52,7 @@ public class HomeController {
     private final ExperimentInfoListService experimentInfoListService;
 
     public HomeController(SpeciesPropertiesTrader speciesPropertiesTrader,
-                          ExpressionAtlasExperimentTrader experimentTrader,
+                          ExperimentTrader experimentTrader,
                           AtlasInformationDao atlasInformationDao) {
         this.speciesPropertiesTrader = speciesPropertiesTrader;
         this.atlasInformationDao = atlasInformationDao;

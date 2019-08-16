@@ -15,7 +15,7 @@ import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
 import uk.ac.ebi.atlas.resource.DataFileHub;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -41,7 +41,7 @@ class MicroarrayQCFilesIT {
     JdbcUtils jdbcUtils;
 
     @Inject
-    private ExpressionAtlasExperimentTrader expressionAtlasExperimentTrader;
+    private ExperimentTrader experimentTrader;
 
     @Inject
     private DataFileHub dataFileHub;
@@ -64,7 +64,7 @@ class MicroarrayQCFilesIT {
     @MethodSource("microarrayExperimentAccessionProvider")
     void testExperiment(String accession) {
         MicroarrayExperiment experiment =
-                (MicroarrayExperiment) expressionAtlasExperimentTrader.getPublicExperiment(accession);
+                (MicroarrayExperiment) experimentTrader.getPublicExperiment(accession);
         MicroarrayQcFiles microarrayQCFiles =
                 new MicroarrayQcFiles(dataFileHub.getExperimentFiles(accession).qcFolder);
 
@@ -76,7 +76,7 @@ class MicroarrayQCFilesIT {
 
     private Stream<String> microarrayExperimentAccessionProvider() {
         return Stream.of(
-                jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(
+                jdbcUtils.fetchRandomExperimentAccession(
                         MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
                         MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
                         MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL));
