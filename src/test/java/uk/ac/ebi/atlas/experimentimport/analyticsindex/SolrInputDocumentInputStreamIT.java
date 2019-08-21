@@ -194,6 +194,6 @@ class SolrInputDocumentInputStreamIT {
     }
 
     private Stream<String> randomExperimentAccessionProvider() {
-        return Stream.of(jdbcUtils.fetchRandomPublicExpressionAtlasExperimentAccession());
+        return Stream.of(jdbcUtils.fetchRandomExperimentAccession());
     }
 }

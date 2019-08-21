@@ -202,6 +202,6 @@ class MicroarrayProfilesHeatMapIT {
 
         Collections.shuffle(microarrayExperimentTypes);
 
-        return Stream.of(jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(microarrayExperimentTypes.get(0)));
+        return Stream.of(jdbcUtils.fetchRandomExperimentAccession(microarrayExperimentTypes.get(0)));
     }
 }
