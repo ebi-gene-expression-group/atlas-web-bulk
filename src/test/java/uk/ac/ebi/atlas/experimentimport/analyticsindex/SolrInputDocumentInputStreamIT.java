@@ -95,7 +95,7 @@ class SolrInputDocumentInputStreamIT {
     @ParameterizedTest
     @MethodSource("randomExperimentAccessionProvider")
     void assertThatExperimentInformationIsTransformedIntoSolrInputDocuments(String accession) throws Exception {
-        Experiment experiment = experimentTrader.getPublicExperiment(accession);
+        Experiment experiment = experimentTrader.getExperimentForAnalyticsIndex(accession);
         Iterable<SolrInputDocument> result = getResults(experiment);
 
         int count = 0;
@@ -118,7 +118,7 @@ class SolrInputDocumentInputStreamIT {
     @MethodSource("randomExperimentAccessionProvider")
     void generatedDocumentsAreCompatibleWithIndexContent(String experimentAccession) throws Exception {
         Collection<SolrInputDocument> results =
-                ImmutableList.copyOf(getResults(experimentTrader.getPublicExperiment(experimentAccession)));
+                ImmutableList.copyOf(getResults(experimentTrader.getExperimentForAnalyticsIndex(experimentAccession)));
 
         assertThatIdentifiersInGeneratedDocumentsMatchCurrentIndexContent(experimentAccession, results);
         assertThatDocumentsReturnContent(experimentAccession, results);
@@ -176,7 +176,7 @@ class SolrInputDocumentInputStreamIT {
         assertThat(species.size(), is(1));
 
         assertThat(species.iterator().next(),
-                is(experimentTrader.getPublicExperiment(accession).getSpecies().getReferenceName()));
+                is(experimentTrader.getExperimentForAnalyticsIndex(accession).getSpecies().getReferenceName()));
     }
 
     private void assertThatIndexReturnsDataFor(String accession, SemanticQuery identifierSearch) {
