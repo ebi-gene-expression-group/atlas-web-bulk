@@ -22,7 +22,7 @@ import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
-import uk.ac.ebi.atlas.trader.GxaExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -50,7 +50,7 @@ class ContrastImageControllerIT {
     private ContrastImageTrader subject;
 
     @Inject
-    private GxaExperimentTrader experimentTrader;
+    private ExperimentTrader experimentTrader;
 
     @Autowired
     private WebApplicationContext wac;

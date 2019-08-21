@@ -76,7 +76,7 @@ class HistogramServiceIT {
     @BeforeEach
     void setUp() {
         var accession= jdbcUtils.fetchRandomExperimentAccession(ExperimentType.RNASEQ_MRNA_BASELINE);
-        experiment = (BaselineExperiment) experimentTrader.getExperiment(accession, "");
+        experiment = (BaselineExperiment) experimentTrader.getPublicExperiment(accession);
         rnaSeqBaselineProfileStreamFactory = Mockito.spy(new RnaSeqBaselineProfileStreamFactory(dataFileHub));
         subject = new HistogramService<>(rnaSeqBaselineProfileStreamFactory, experimentTrader, cutoffScale.get());
     }
