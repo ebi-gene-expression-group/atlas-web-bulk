@@ -1,8 +1,6 @@
 package uk.ac.ebi.atlas.experimentimport;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.experimentimport.condensedSdrf.CondensedSdrfParser;
 import uk.ac.ebi.atlas.experimentimport.condensedSdrf.CondensedSdrfParserOutput;
@@ -14,88 +12,73 @@ import uk.ac.ebi.atlas.trader.ConfigurationTrader;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 @Component
 public class GxaExperimentCrud extends ExperimentCrud {
     private final ConfigurationTrader configurationTrader;
+    private final ExperimentChecker experimentChecker;
+    private final CondensedSdrfParser condensedSdrfParser;
 
-    public GxaExperimentCrud(GxaExperimentDao gxaExperimentDao,
-                              ExperimentChecker experimentChecker,
-                              CondensedSdrfParser condensedSdrfParser,
-                              IdfParser idfParser,
-                              ExperimentDesignFileWriterService experimentDesignFileWriterService,
-                              ConfigurationTrader configurationTrader) {
-        super(gxaExperimentDao, experimentChecker, condensedSdrfParser, idfParser, experimentDesignFileWriterService);
+    private final IdfParser idfParser;
+
+    public GxaExperimentCrud(ExperimentCrudDao experimentCrudDao,
+                             ExperimentDesignFileWriterService experimentDesignFileWriterService,
+                             ConfigurationTrader configurationTrader,
+                             ExperimentChecker experimentChecker,
+                             CondensedSdrfParser condensedSdrfParser,
+                             IdfParser idfParser) {
+        super(experimentCrudDao, experimentDesignFileWriterService);
+        this.experimentChecker = experimentChecker;
+        this.condensedSdrfParser = condensedSdrfParser;
         this.configurationTrader = configurationTrader;
+        this.idfParser = idfParser;
     }
 
-
     @Override
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "experimentByAccession", key = "#experimentAccession"),
-            @CacheEvict(cacheNames = "experimentsByType", allEntries = true) })
-    public UUID importExperiment(String experimentAccession, boolean isPrivate) {
-        checkNotNull(experimentAccession);
-
+    public UUID createExperiment(String experimentAccession, boolean isPrivate) {
         var files = loadAndValidateFiles(experimentAccession);
         var experimentConfiguration = files.getLeft();
         var condensedSdrfParserOutput = files.getRight();
         var idfParserOutput = idfParser.parse(experimentAccession);
-        var accessKey = fetchExperimentAccessKey(experimentAccession);
+        var accessKey = readExperiment(experimentAccession).map(ExperimentDto::getAccessKey);
 
-        var experimentDTO = ExperimentDto.create(
-                condensedSdrfParserOutput,
-                idfParserOutput,
+        var experimentDto = new ExperimentDto(
+                condensedSdrfParserOutput.getExperimentAccession(),
+                condensedSdrfParserOutput.getExperimentType(),
                 condensedSdrfParserOutput
                         .getExperimentDesign()
                         .getSpeciesForAssays(
                                 experimentConfiguration.getAssayGroups().stream()
                                         .flatMap(assayGroup -> assayGroup.getAssayIds().stream())
                                         .collect(Collectors.toSet())),
-                isPrivate);
+                idfParserOutput.getPubmedIds(),
+                idfParserOutput.getDois(),
+                isPrivate,
+                accessKey.orElseGet(() -> UUID.randomUUID().toString()));
 
         if (accessKey.isPresent()) {
-            deleteExperiment(experimentAccession);
+            experimentCrudDao.updateExperiment(experimentDto);
+        } else {
+            experimentCrudDao.createExperiment(experimentDto);
+            updateExperimentDesign(condensedSdrfParserOutput.getExperimentDesign(), experimentDto);
         }
-
-        var accessKeyUuid = accessKey.map(UUID::fromString).orElseGet(UUID::randomUUID);
-        experimentDao.addExperiment(experimentDTO, accessKeyUuid);
-
-        updateWithNewExperimentDesign(condensedSdrfParserOutput.getExperimentDesign(), experimentDTO);
-
-        return accessKeyUuid;
+        return UUID.fromString(experimentDto.getAccessKey());
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "experimentByAccession", key = "#experimentAccession"),
-            @CacheEvict(cacheNames = "experimentsByType", allEntries = true) })
     public void updateExperimentDesign(String experimentAccession) {
-        updateWithNewExperimentDesign(
-                loadAndValidateFiles(experimentAccession).getRight().getExperimentDesign(),
-                experimentDao.getExperimentAsAdmin(experimentAccession));
-    }
-
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "experimentByAccession", allEntries = true),
-            @CacheEvict(cacheNames = "experimentsByType", allEntries = true) })
-    public void makeExperimentPrivate(String experimentAccession) {
-        super.makeExperimentPrivate(experimentAccession);
-    }
-
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "experimentByAccession", key = "#experimentAccession"),
-            @CacheEvict(cacheNames = "experimentsByType", allEntries = true) })
-    public void makeExperimentPublic(String experimentAccession) {
-        super.makeExperimentPublic(experimentAccession);
+        readExperiment(experimentAccession)
+                .ifPresent(experimentDto ->
+                        updateExperimentDesign(
+                                loadAndValidateFiles(experimentAccession).getRight().getExperimentDesign(),
+                                experimentDto));
     }
 
     private Pair<ExperimentConfiguration, CondensedSdrfParserOutput> loadAndValidateFiles(String experimentAccession) {
         var experimentConfiguration = configurationTrader.getExperimentConfiguration(experimentAccession);
         experimentChecker.checkAllFiles(experimentAccession, experimentConfiguration.getExperimentType());
 
-        var condensedSdrfParserOutput = condensedSdrfParser.parse(experimentAccession, experimentConfiguration.getExperimentType());
+        var condensedSdrfParserOutput =
+                condensedSdrfParser.parse(experimentAccession, experimentConfiguration.getExperimentType());
 
         new ExperimentFilesCrossValidator(experimentConfiguration, condensedSdrfParserOutput.getExperimentDesign())
                 .validate();
