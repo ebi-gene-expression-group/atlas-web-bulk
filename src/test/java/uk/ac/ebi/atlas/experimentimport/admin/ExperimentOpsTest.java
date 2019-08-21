@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -91,16 +92,13 @@ public class ExperimentOpsTest {
                                 baselineCoexpressionProfileLoader,
                                 analyticsIndexerManager));
 
-        when(experimentAttributesService.getAttributes(any())).thenReturn(new HashMap<>());
-        when(experimentTrader.getExperiment(anyString(), anyString())).thenReturn(experimentMock);
-
         Mockito.doAnswer(invocationOnMock -> {
             String accession1 = (String) invocationOnMock.getArguments()[0];
 
             ExperimentType experimentType = ExperimentType.values()
                     [new Random().nextInt(ExperimentType.values().length)];
 
-            return mockDTO(accession1, experimentType);
+            return Optional.of(mockDTO(accession1, experimentType));
         }).when(experimentCrudMock).readExperiment(anyString());
 
     }
