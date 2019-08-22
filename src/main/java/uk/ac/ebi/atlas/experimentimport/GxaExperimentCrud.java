@@ -2,6 +2,7 @@ package uk.ac.ebi.atlas.experimentimport;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
+import uk.ac.ebi.atlas.controllers.ResourceNotFoundException;
 import uk.ac.ebi.atlas.experimentimport.condensedSdrf.CondensedSdrfParser;
 import uk.ac.ebi.atlas.experimentimport.condensedSdrf.CondensedSdrfParserOutput;
 import uk.ac.ebi.atlas.experimentimport.experimentdesign.ExperimentDesignFileWriterService;
@@ -10,7 +11,6 @@ import uk.ac.ebi.atlas.model.experiment.ExperimentConfiguration;
 import uk.ac.ebi.atlas.trader.ConfigurationTrader;
 
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
 public class GxaExperimentCrud extends ExperimentCrud {
@@ -36,7 +36,6 @@ public class GxaExperimentCrud extends ExperimentCrud {
     @Override
     public UUID createExperiment(String experimentAccession, boolean isPrivate) {
         var files = loadAndValidateFiles(experimentAccession);
-        var experimentConfiguration = files.getLeft();
         var condensedSdrfParserOutput = files.getRight();
         var idfParserOutput = idfParser.parse(experimentAccession);
         var accessKey = readExperiment(experimentAccession).map(ExperimentDto::getAccessKey);
@@ -61,11 +60,15 @@ public class GxaExperimentCrud extends ExperimentCrud {
 
     @Override
     public void updateExperimentDesign(String experimentAccession) {
-        readExperiment(experimentAccession)
-                .ifPresent(experimentDto ->
-                        updateExperimentDesign(
-                                loadAndValidateFiles(experimentAccession).getRight().getExperimentDesign(),
-                                experimentDto));
+        var experimentDto =
+                readExperiment(experimentAccession)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Experiment " + experimentAccession + " could not be found"));
+
+        updateExperimentDesign(
+                loadAndValidateFiles(experimentAccession).getRight().getExperimentDesign(),
+                experimentDto);
     }
 
     private Pair<ExperimentConfiguration, CondensedSdrfParserOutput> loadAndValidateFiles(String experimentAccession) {

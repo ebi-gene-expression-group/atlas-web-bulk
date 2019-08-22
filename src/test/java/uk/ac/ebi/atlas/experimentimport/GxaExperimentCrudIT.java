@@ -8,6 +8,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.atlas.configuration.TestConfig;
+import uk.ac.ebi.atlas.controllers.ResourceNotFoundException;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
 
 import javax.inject.Inject;
@@ -70,8 +71,9 @@ class GxaExperimentCrudIT {
     }
 
     @Test
-    void ifExperimentDoesNotExistUpdateExperimentDesignWillNotComplain() {
-        subject.updateExperimentDesign(generateRandomExperimentAccession());
+    void throwIfExperimentDoesNotExistUpdateExperimentDesign() {
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> subject.updateExperimentDesign(generateRandomExperimentAccession()));
     }
 
     @Test
