@@ -44,12 +44,7 @@ public class GxaExperimentCrud extends ExperimentCrud {
         var experimentDto = new ExperimentDto(
                 condensedSdrfParserOutput.getExperimentAccession(),
                 condensedSdrfParserOutput.getExperimentType(),
-                condensedSdrfParserOutput
-                        .getExperimentDesign()
-                        .getSpeciesForAssays(
-                                experimentConfiguration.getAssayGroups().stream()
-                                        .flatMap(assayGroup -> assayGroup.getAssayIds().stream())
-                                        .collect(Collectors.toSet())),
+                condensedSdrfParserOutput.getSpecies(),
                 idfParserOutput.getPubmedIds(),
                 idfParserOutput.getDois(),
                 isPrivate,
