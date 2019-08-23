@@ -36,10 +36,10 @@ import static uk.ac.ebi.atlas.testutils.RandomDataTestUtils.generateRandomExperi
 @Sql("/fixtures/experiment-fixture.sql")
 class GxaExperimentRepositoryIT {
     @Inject
-    JdbcUtils jdbcUtils;
+    private JdbcUtils jdbcUtils;
 
     @Inject
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @Inject
     private GxaExperimentRepository subject;
