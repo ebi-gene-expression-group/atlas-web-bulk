@@ -2,6 +2,7 @@ package uk.ac.ebi.atlas.experimentimport;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.controllers.ResourceNotFoundException;
 import uk.ac.ebi.atlas.experimentimport.condensedSdrf.CondensedSdrfParser;
@@ -35,7 +36,10 @@ public class GxaExperimentCrud extends ExperimentCrud {
     }
 
     @Override
-    @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}" )
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
     public UUID createExperiment(String experimentAccession, boolean isPrivate) {
         var files = loadAndValidateFiles(experimentAccession);
         var condensedSdrfParserOutput = files.getRight();
@@ -60,18 +64,27 @@ public class GxaExperimentCrud extends ExperimentCrud {
         return UUID.fromString(experimentDto.getAccessKey());
     }
 
-    @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}" )
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
     public void updateExperimentPrivate(String experimentAccession, boolean isPrivate) {
         super.updateExperimentPrivate(experimentAccession, isPrivate);
     }
 
-    @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}" )
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
     public void deleteExperiment(String experimentAccession) {
         super.deleteExperiment(experimentAccession);
     }
 
     @Override
-    @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}" )
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
     public void updateExperimentDesign(String experimentAccession) {
         var experimentDto =
                 readExperiment(experimentAccession)
