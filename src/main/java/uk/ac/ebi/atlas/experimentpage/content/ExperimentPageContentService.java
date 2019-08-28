@@ -42,7 +42,7 @@ public class ExperimentPageContentService {
         this.dataFileHub = dataFileHub;
     }
 
-    @Cacheable("experimentContent")
+    @Cacheable(cacheNames = "experimentContent", key = "#experiment.getAccession()")
     public String jsonSerializeContentForExperiment(final Experiment<? extends ReportsGeneExpression> experiment,
                                                     final String accessKey) {
         return GSON.toJson(experimentPageContentForExperiment(experiment, accessKey));

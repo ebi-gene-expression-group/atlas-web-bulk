@@ -22,7 +22,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExpres
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayProfile;
 import uk.ac.ebi.atlas.profiles.stream.MicroarrayProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.DataFileHub;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.MicroarrayRequestPreferences;
 
 import javax.inject.Inject;
@@ -42,7 +42,7 @@ class EvidenceServiceIT {
     private DataSource dataSource;
 
     @Inject
-    private ExpressionAtlasExperimentTrader experimentTrader;
+    private ExperimentTrader experimentTrader;
 
     @Inject
     private MicroarrayProfileStreamFactory microarrayProfileStreamFactory;

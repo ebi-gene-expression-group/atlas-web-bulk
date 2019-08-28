@@ -10,6 +10,8 @@ import uk.ac.ebi.atlas.experimentimport.ExperimentDto;
 import uk.ac.ebi.atlas.experimentimport.analyticsindex.AnalyticsIndexerManager;
 import uk.ac.ebi.atlas.experimentimport.coexpression.BaselineCoexpressionProfileLoader;
 
+import java.util.Optional;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,13 +29,13 @@ public class ExperimentOpsExecutionServiceTest {
     private AnalyticsIndexerManager analyticsIndexerManager;
 
     @Mock
-    private ExperimentDto experimentDTO;
+    private ExperimentDto experimentDto;
 
     private ExperimentOpsExecutionService subject;
 
     @Before
     public void setUp() {
-        when(experimentCrudMock.findExperiment(ACCESSION)).thenReturn(experimentDTO);
+        when(experimentCrudMock.readExperiment(ACCESSION)).thenReturn(Optional.of(experimentDto));
         subject =
                 new ExpressionAtlasExperimentOpsExecutionService(
                         experimentCrudMock,

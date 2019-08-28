@@ -22,7 +22,7 @@ import uk.ac.ebi.atlas.profiles.baseline.BaselineProfileStreamOptions;
 import uk.ac.ebi.atlas.profiles.stream.RnaSeqBaselineProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.DataFileHub;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.RnaSeqBaselineRequestPreferences;
 
 import javax.inject.Inject;
@@ -45,7 +45,7 @@ class HistogramServiceIT {
     private JdbcUtils jdbcUtils;
 
     @Inject
-    private ExpressionAtlasExperimentTrader experimentTrader;
+    private ExperimentTrader experimentTrader;
 
     @Inject
     private RnaSeqBaselineProfileStreamFactory rnaSeqBaselineProfileStreamFactory;
@@ -75,8 +75,8 @@ class HistogramServiceIT {
 
     @BeforeEach
     void setUp() {
-        var accession= jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(ExperimentType.RNASEQ_MRNA_BASELINE);
-        experiment = (BaselineExperiment) experimentTrader.getExperiment(accession, "");
+        var accession= jdbcUtils.fetchRandomExperimentAccession(ExperimentType.RNASEQ_MRNA_BASELINE);
+        experiment = (BaselineExperiment) experimentTrader.getPublicExperiment(accession);
         rnaSeqBaselineProfileStreamFactory = Mockito.spy(new RnaSeqBaselineProfileStreamFactory(dataFileHub));
         subject = new HistogramService<>(rnaSeqBaselineProfileStreamFactory, experimentTrader, cutoffScale.get());
     }

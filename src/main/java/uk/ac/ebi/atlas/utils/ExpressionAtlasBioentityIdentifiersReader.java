@@ -20,19 +20,23 @@ import javax.inject.Named;
 import java.io.IOException;
 import java.util.HashSet;
 
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
+
 // TODO this code could be much shorter. Make the DifferentialAnalytics and BaselineAnalytics inherit from
 // TODO Analytics, with has a method getGeneId(), make the analytics input streams inherit from a common parent, and
 // TODO write one method that gets all gene ids for an experiment accession.
 @Named
 public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifiersReader {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionAtlasBioentityIdentifiersReader.class);
 
-    private ExperimentTrader experimentTrader;
+    private final ExperimentTrader experimentTrader;
 
-    private BaselineAnalyticsInputStreamFactory baselineAnalyticsInputStreamFactory;
-    private MicroarrayDifferentialAnalyticsInputStreamFactory microarrayDifferentialAnalyticsInputStreamFactory;
-    private RnaSeqDifferentialAnalyticsInputStreamFactory rnaSeqDifferentialAnalyticsInputStreamFactory;
+    private final BaselineAnalyticsInputStreamFactory baselineAnalyticsInputStreamFactory;
+    private final MicroarrayDifferentialAnalyticsInputStreamFactory microarrayDifferentialAnalyticsInputStreamFactory;
+    private final RnaSeqDifferentialAnalyticsInputStreamFactory rnaSeqDifferentialAnalyticsInputStreamFactory;
 
     @Inject
     public ExpressionAtlasBioentityIdentifiersReader(ExperimentTrader experimentTrader,
@@ -59,7 +63,6 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
             } else {
                 return addBioentityIdentifiersFromRnaSeqDifferentialExperiments(bioentityIdentifiers);
             }
-
         }
     }
 
@@ -88,9 +91,11 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
     private int addBioentityIdentifiersFromMicroarrayExperiments(HashSet<String> bioentityIdentifiers) {
         int bioentityIdentifiersSizeWithoutNewElements = bioentityIdentifiers.size();
 
-        for (Experiment experiment : experimentTrader.getPublicExperiments(ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
-                                                                           ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
-                                                                           ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL)) {
+        for (Experiment experiment :
+                experimentTrader.getPublicExperiments(
+                        MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
+                        MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
+                        MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL)) {
             String experimentAccession = experiment.getAccession();
             LOGGER.debug("Reading bioentity identifiers in {}", experimentAccession);
 
@@ -115,7 +120,7 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
     private int addBioentityIdentifiersFromRnaSeqDifferentialExperiments(HashSet<String> bioentityIdentifiers) {
         int bioentityIdentifiersSizeWithoutNewElements = bioentityIdentifiers.size();
 
-        for (Experiment experiment : experimentTrader.getPublicExperiments(ExperimentType.RNASEQ_MRNA_DIFFERENTIAL)) {
+        for (Experiment experiment : experimentTrader.getPublicExperiments(RNASEQ_MRNA_DIFFERENTIAL)) {
             String experimentAccession = experiment.getAccession();
             LOGGER.debug("Reading bioentity identifiers in {}", experimentAccession);
 

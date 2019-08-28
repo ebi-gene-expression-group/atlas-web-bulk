@@ -1,56 +1,30 @@
 package uk.ac.ebi.atlas.experiments;
 
-import com.google.common.collect.ImmutableList;
-import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import uk.ac.ebi.atlas.trader.ExperimentTrader;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Inject;
-
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELINE;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 
-@Controller
-@Scope("request")
+@RestController
 public class ExperimentsListController {
     private ExperimentInfoListService experimentInfoListService;
 
-    @Inject
-    public ExperimentsListController(ExperimentTrader expressionAtlasExperimentTrader) {
-        this.experimentInfoListService =
-                new ExperimentInfoListService(expressionAtlasExperimentTrader, ImmutableList.of(
-                        RNASEQ_MRNA_BASELINE,
-                        PROTEOMICS_BASELINE,
-                        RNASEQ_MRNA_DIFFERENTIAL,
-                        MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
-                        MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
-                        MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL));
+    public ExperimentsListController(ExperimentInfoListService experimentInfoListService) {
+        this.experimentInfoListService = experimentInfoListService;
     }
 
     //Used by experiments table page
-    @RequestMapping(value = "/json/experiments",
-                    produces = "application/json;charset=UTF-8")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
+    @GetMapping(value = "/json/experiments",
+                produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getExperimentsList() {
         return GSON.toJson(experimentInfoListService.getExperimentsJson());
     }
 
-    @RequestMapping(value = "/json/experiments/{experimentAccession}/info",
-                    produces = "application/json;charset=UTF-8")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
+    @GetMapping(value = "/json/experiments/{experimentAccession}/info",
+                produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getExperimentInfo(@PathVariable String experimentAccession,
                                     @RequestParam(defaultValue = "") String accessKey) {
         return experimentInfoListService.getExperimentJson(experimentAccession, accessKey);

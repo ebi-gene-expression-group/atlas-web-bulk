@@ -2,7 +2,10 @@ package uk.ac.ebi.atlas.resource;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,7 +22,7 @@ import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -47,7 +50,7 @@ class ContrastImageControllerIT {
     private ContrastImageTrader subject;
 
     @Inject
-    private ExpressionAtlasExperimentTrader experimentTrader;
+    private ExperimentTrader experimentTrader;
 
     @Autowired
     private WebApplicationContext wac;
@@ -102,13 +105,13 @@ class ContrastImageControllerIT {
 
     private Stream<String> microarrayExperimentAccessionProvider() {
         return Stream.of(
-                jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(
+                jdbcUtils.fetchRandomExperimentAccession(
                         MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL,
                         MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
                         MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL));
     }
 
     private Stream<String> rnaSeqDifferentialExperimentAccessionProvider() {
-        return Stream.of(jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(RNASEQ_MRNA_DIFFERENTIAL));
+        return Stream.of(jdbcUtils.fetchRandomExperimentAccession(RNASEQ_MRNA_DIFFERENTIAL));
     }
 }

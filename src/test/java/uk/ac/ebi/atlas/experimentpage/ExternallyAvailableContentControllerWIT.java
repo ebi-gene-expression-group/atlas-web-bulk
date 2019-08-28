@@ -1,5 +1,6 @@
 package uk.ac.ebi.atlas.experimentpage;
 
+import com.google.common.collect.ImmutableSet;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.model.download.ExternallyAvailableContent;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
-import uk.ac.ebi.atlas.model.experiment.ExperimentType;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.inject.Inject;
 import java.text.MessageFormat;
@@ -40,7 +40,7 @@ class ExternallyAvailableContentControllerWIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternallyAvailableContentControllerWIT.class);
 
     @Inject
-    private ExpressionAtlasExperimentTrader experimentTrader;
+    private ExperimentTrader experimentTrader;
 
     @Autowired
     private WebApplicationContext wac;
@@ -80,19 +80,18 @@ class ExternallyAvailableContentControllerWIT {
     @Test
     void shouldReturnSomeResourcesForEachExperiment() throws Exception {
         for (Experiment experiment : experimentTrader.getPublicExperiments()) {
-
             testAllResourcesAreNonemptyAndContainValidLinks(
                     experiment.getAccession(), ExternallyAvailableContent.ContentType.DATA, true);
             testAllResourcesAreNonemptyAndContainValidLinks(
                     experiment.getAccession(), ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION, true);
-
         }
 
-        for (Experiment experiment : experimentTrader.getPublicExperiments(
-                RNASEQ_MRNA_DIFFERENTIAL,
-                MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
-                MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
-                MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL)) {
+        for (Experiment experiment :
+                experimentTrader.getPublicExperiments(
+                                RNASEQ_MRNA_DIFFERENTIAL,
+                                MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
+                                MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
+                                MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL)) {
             testAllResourcesAreNonemptyAndContainValidLinks(
                     experiment.getAccession(), ExternallyAvailableContent.ContentType.PLOTS, false);
         }

@@ -24,7 +24,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperi
 import uk.ac.ebi.atlas.resource.DataFileHub;
 import uk.ac.ebi.atlas.search.SemanticQuery;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
 import uk.ac.ebi.atlas.web.MicroarrayRequestPreferences;
 import uk.ac.ebi.atlas.web.ProteomicsBaselineRequestPreferences;
@@ -65,7 +65,7 @@ class ExperimentDownloadControllerIT {
     private DataSource dataSource;
 
     @Inject
-    private ExpressionAtlasExperimentTrader experimentTrader;
+    private ExperimentTrader experimentTrader;
 
     @Inject
     private DataFileHub dataFileHub;
@@ -489,21 +489,21 @@ class ExperimentDownloadControllerIT {
 
     private Stream<String> microarrayExperimentAccessionProvider() {
         return Stream.of(
-                jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(
+                jdbcUtils.fetchRandomExperimentAccession(
                         MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
                         MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
                         MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL));
     }
 
     private Stream<String> rnaSeqDifferentialExperimentAccessionProvider() {
-        return Stream.of(jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(RNASEQ_MRNA_DIFFERENTIAL));
+        return Stream.of(jdbcUtils.fetchRandomExperimentAccession(RNASEQ_MRNA_DIFFERENTIAL));
     }
 
     private Stream<String> rnaSeqBaselineExperimentAccessionProvider() {
-        return Stream.of(jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(RNASEQ_MRNA_BASELINE));
+        return Stream.of(jdbcUtils.fetchRandomExperimentAccession(RNASEQ_MRNA_BASELINE));
     }
 
     private Stream<String> proteomicsBaselineExperimentAccessionProvider() {
-        return Stream.of(jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(PROTEOMICS_BASELINE));
+        return Stream.of(jdbcUtils.fetchRandomExperimentAccession(PROTEOMICS_BASELINE));
     }
 }

@@ -182,6 +182,6 @@ class RnaSeqProfilesHeatMapIT {
     }
 
     private Stream<String> rnaSeqDifferentialExperimentAccessionProvider() {
-        return Stream.of(jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(RNASEQ_MRNA_DIFFERENTIAL));
+        return Stream.of(jdbcUtils.fetchRandomExperimentAccession(RNASEQ_MRNA_DIFFERENTIAL));
     }
 }

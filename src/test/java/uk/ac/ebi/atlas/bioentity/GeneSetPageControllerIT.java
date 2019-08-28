@@ -25,7 +25,7 @@ class GeneSetPageControllerIT {
     private GeneSetPageController subject;
 
     @ParameterizedTest
-    @ValueSource(strings = {"GO:0016746", "R-HSA-73887", "PO:0005052"})
+    @ValueSource(strings = {"GO:0016746", "PO:0005052"})
     void bioentityProperties(String bioentityIdentifier) {
         Model model = new BindingAwareModelMap();
         subject.showGeneSetPage(bioentityIdentifier, "", model);

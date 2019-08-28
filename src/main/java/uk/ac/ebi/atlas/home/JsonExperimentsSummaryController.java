@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.atlas.controllers.JsonExceptionHandlingController;
 import uk.ac.ebi.atlas.model.card.CardModel;
 import uk.ac.ebi.atlas.model.card.CardModelAdapter;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.util.Optional;
 
@@ -34,7 +34,7 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
     private final LatestExperimentsService latestExperimentsService;
 
     public JsonExperimentsSummaryController(LatestExperimentsDao latestExperimentsDao,
-                                            ExpressionAtlasExperimentTrader experimentTrader) {
+                                            ExperimentTrader experimentTrader) {
         this.latestExperimentsService =
                 new LatestExperimentsService(
                         latestExperimentsDao,

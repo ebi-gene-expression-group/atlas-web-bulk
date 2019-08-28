@@ -116,7 +116,7 @@ class ExperimentPageJsonWIT {
                 .map(
                         experimentType ->
                                 Arguments.of(
-                                        jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(experimentType),
+                                        jdbcUtils.fetchRandomExperimentAccession(experimentType),
                                         experimentType));
     }
 }

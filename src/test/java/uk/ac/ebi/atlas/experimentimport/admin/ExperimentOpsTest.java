@@ -23,6 +23,7 @@ import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -90,17 +92,14 @@ public class ExperimentOpsTest {
                                 baselineCoexpressionProfileLoader,
                                 analyticsIndexerManager));
 
-        when(experimentAttributesService.getAttributes(any())).thenReturn(new HashMap<>());
-        when(experimentTrader.getExperiment(anyString(), anyString())).thenReturn(experimentMock);
-
         Mockito.doAnswer(invocationOnMock -> {
             String accession1 = (String) invocationOnMock.getArguments()[0];
 
             ExperimentType experimentType = ExperimentType.values()
                     [new Random().nextInt(ExperimentType.values().length)];
 
-            return mockDTO(accession1, experimentType);
-        }).when(experimentCrudMock).findExperiment(anyString());
+            return Optional.of(mockDTO(accession1, experimentType));
+        }).when(experimentCrudMock).readExperiment(anyString());
 
     }
 
@@ -229,7 +228,7 @@ public class ExperimentOpsTest {
 
         new ExperimentAdminController(subject).doOp(ACCESSION, "LOAD_PUBLIC", new MockHttpServletResponse());
 
-        verify(experimentCrudMock).importExperiment(ACCESSION, false);
+        verify(experimentCrudMock).createExperiment(ACCESSION, false);
         verify(baselineCoexpressionProfileLoader).deleteCoexpressionsProfile(ACCESSION);
         verify(baselineCoexpressionProfileLoader).loadBaselineCoexpressionsProfile(ACCESSION);
         verify(analyticsIndexerManager).addToAnalyticsIndex(ACCESSION);
@@ -242,11 +241,11 @@ public class ExperimentOpsTest {
     public void loadingExperimentsCanFailAndThenTheRestOfMethodsIsNotCalled1() throws Exception {
         doThrow(new UncheckedIOException(new IOException("The files are bad!")))
                 .when(experimentCrudMock)
-                .importExperiment(ACCESSION, false);
+                .createExperiment(ACCESSION, false);
 
         new ExperimentAdminController(subject).doOp(ACCESSION, "LOAD_PUBLIC", new MockHttpServletResponse());
 
-        verify(experimentCrudMock).importExperiment(ACCESSION, false);
+        verify(experimentCrudMock).createExperiment(ACCESSION, false);
 
         verifyNoMoreInteractions(
                 experimentCrudMock, experimentCrudMock, analyticsIndexerManager, baselineCoexpressionProfileLoader);
@@ -260,7 +259,7 @@ public class ExperimentOpsTest {
 
         new ExperimentAdminController(subject).doOp(ACCESSION, "LOAD_PUBLIC", new MockHttpServletResponse());
 
-        verify(experimentCrudMock).importExperiment(ACCESSION, false);
+        verify(experimentCrudMock).createExperiment(ACCESSION, false);
         verify(baselineCoexpressionProfileLoader).deleteCoexpressionsProfile(ACCESSION);
         verify(baselineCoexpressionProfileLoader).loadBaselineCoexpressionsProfile(ACCESSION);
 
@@ -277,7 +276,7 @@ public class ExperimentOpsTest {
         MockHttpServletResponse responseObject = new MockHttpServletResponse();
         new ExperimentAdminController(subject).doOp(ACCESSION, "LOAD_PUBLIC", responseObject);
 
-        verify(experimentCrudMock).importExperiment(ACCESSION, false);
+        verify(experimentCrudMock).createExperiment(ACCESSION, false);
         verify(baselineCoexpressionProfileLoader).deleteCoexpressionsProfile(ACCESSION);
         verify(baselineCoexpressionProfileLoader).loadBaselineCoexpressionsProfile(ACCESSION);
 
@@ -335,7 +334,8 @@ public class ExperimentOpsTest {
                 "Homo sapiens",
                 new HashSet<>(),
                 new HashSet<>(),
-                new Date(),
+                new Timestamp(new Date().getTime()),
+                new Timestamp(new Date().getTime()),
                 false,
                 UUID.randomUUID().toString());
     }

@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static uk.ac.ebi.atlas.experimentimport.admin.Op.LIST;
 
 public class ExpressionAtlasExperimentOpsExecutionService implements ExperimentOpsExecutionService {
     private final ExperimentCrud experimentCrud;
@@ -38,18 +39,15 @@ public class ExpressionAtlasExperimentOpsExecutionService implements ExperimentO
 
     @Override
     public Optional<JsonElement> attemptExecuteOneStatelessOp(String accession, Op op) {
-        switch (op) {
-            case LIST:
-                return Optional.of(experimentCrud.findExperiment(accession).toJson());
-            default:
-                return Optional.empty();
-        }
+        return (op.equals(LIST))
+                ? experimentCrud.readExperiment(accession).map(ExperimentDto::toJson)
+                : Optional.empty();
     }
 
     @Override
     public Optional<? extends List<Pair<String, ? extends JsonElement>>>
            attemptExecuteForAllAccessions(Collection<Op> ops) {
-        if (ops.equals(Collections.singleton(Op.LIST))) {
+        if (ops.equals(Collections.singleton(LIST))) {
             return Optional.of(list());
         } else {
             return Optional.empty();
@@ -58,7 +56,7 @@ public class ExpressionAtlasExperimentOpsExecutionService implements ExperimentO
 
     @Override
     public Optional<? extends List<Pair<String, ? extends JsonElement>>> attemptExecuteForAllAccessions(Op op) {
-        if (op.equals(Op.LIST)) {
+        if (op.equals(LIST)) {
             return Optional.of(list());
         } else {
             return Optional.empty();
@@ -66,7 +64,7 @@ public class ExpressionAtlasExperimentOpsExecutionService implements ExperimentO
     }
 
     private Stream<ExperimentDto> allDtos() {
-        return experimentCrud.findAllExperiments().stream();
+        return experimentCrud.readExperiments().stream();
     }
 
     private List<Pair<String, ? extends JsonElement>> list() {
@@ -85,10 +83,10 @@ public class ExpressionAtlasExperimentOpsExecutionService implements ExperimentO
         switch (op) {
             case UPDATE_PRIVATE:
                 analyticsIndexerManager.deleteFromAnalyticsIndex(accession);
-                experimentCrud.makeExperimentPrivate(accession);
+                experimentCrud.updateExperimentPrivate(accession, true);
                 break;
             case UPDATE_PUBLIC:
-                experimentCrud.makeExperimentPublic(accession);
+                experimentCrud.updateExperimentPrivate(accession, false);
                 break;
             case UPDATE_DESIGN:
                 experimentCrud.updateExperimentDesign(accession);
@@ -96,7 +94,7 @@ public class ExpressionAtlasExperimentOpsExecutionService implements ExperimentO
             case IMPORT_PUBLIC:
                 isPrivate = false;
             case IMPORT:
-                UUID accessKeyUUID = experimentCrud.importExperiment(accession, isPrivate);
+                UUID accessKeyUUID = experimentCrud.createExperiment(accession, isPrivate);
                 resultOfTheOp = new JsonPrimitive("Success, access key UUID: " + accessKeyUUID);
                 break;
             case DELETE:

@@ -18,7 +18,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
 import uk.ac.ebi.atlas.model.resource.ResourceType;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
-import uk.ac.ebi.atlas.trader.ExpressionAtlasExperimentTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -47,7 +47,7 @@ class  ContrastImageTraderIT {
     private ContrastImageTrader subject;
 
     @Inject
-    private ExpressionAtlasExperimentTrader experimentTrader;
+    private ExperimentTrader experimentTrader;
 
     @BeforeAll
     void populateDatabaseTables() {
@@ -99,13 +99,13 @@ class  ContrastImageTraderIT {
 
     private Stream<String> microarrayExperimentAccessionProvider() {
         return Stream.of(
-                jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(
+                jdbcUtils.fetchRandomExperimentAccession(
                         MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
                         MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
                         MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL));
     }
 
     private Stream<String> rnaSeqDifferentialExperimentAccessionProvider() {
-        return Stream.of(jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(RNASEQ_MRNA_DIFFERENTIAL));
+        return Stream.of(jdbcUtils.fetchRandomExperimentAccession(RNASEQ_MRNA_DIFFERENTIAL));
     }
 }

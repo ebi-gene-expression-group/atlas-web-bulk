@@ -107,7 +107,7 @@ class ExperimentGroupingsForHeatmapIT {
         Set<String> baselineExperimentAccessions = new HashSet<>(NUMBER_OF_EXPERIMENTS_TO_TEST);
 
         while (baselineExperimentAccessions.size() < NUMBER_OF_EXPERIMENTS_TO_TEST) {
-            baselineExperimentAccessions.add(jdbcUtils.fetchRandomExpressionAtlasExperimentAccession(RNASEQ_MRNA_BASELINE));
+            baselineExperimentAccessions.add(jdbcUtils.fetchRandomExperimentAccession(RNASEQ_MRNA_BASELINE));
         }
 
         return baselineExperimentAccessions;
