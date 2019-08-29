@@ -13,6 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 
+import static uk.ac.ebi.atlas.sitemaps.SitemapWriter.writeGenes;
+import static uk.ac.ebi.atlas.sitemaps.SitemapWriter.writeSitemapIndex;
+
 @Controller
 public class SitemapController {
     private final AnalyticsSearchService solr;
@@ -30,18 +33,17 @@ public class SitemapController {
     @GetMapping(value = "/sitemap.xml")
     public void mainSitemap(HttpServletResponse response) throws IOException, XMLStreamException {
         response.setContentType(MediaType.TEXT_XML_VALUE);
-        new SitemapWriter().writeSitemapIndex(response.getOutputStream(), speciesPropertiesTrader.getAll());
+        writeSitemapIndex(response.getOutputStream(), speciesPropertiesTrader.getAll());
     }
 
     @GetMapping(value = "/species/{species}/sitemap.xml")
     public void sitemapForSpecies(@PathVariable String species,
                                   HttpServletResponse response) throws IOException, XMLStreamException {
         response.setContentType(MediaType.TEXT_XML_VALUE);
-        new SitemapWriter()
-                .writeGenes(
-                        response.getOutputStream(),
-                        ImmutableList.of("/experiments", "/plant/experiments"),
-                        solr.getBioentityIdentifiersForSpecies(speciesFactory.create(species).getReferenceName()));
+        writeGenes(
+                response.getOutputStream(),
+                ImmutableList.of("/experiments", "/plant/experiments"),
+                solr.getBioentityIdentifiersForSpecies(speciesFactory.create(species).getReferenceName()));
     }
 
 }
