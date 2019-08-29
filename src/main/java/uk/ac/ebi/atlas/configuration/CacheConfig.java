@@ -21,7 +21,8 @@ public class CacheConfig {
                 builder -> builder.name("experiment"),
                 builder -> builder.name("experimentAttributes"),
 
-                builder -> builder.name("experimentContent"));
+                builder -> builder.name("experimentContent"),
+                builder -> builder.name("bioentityIdentifiers"));   // Used for sitemap.xml files
         return cacheManager;
     }
 }
