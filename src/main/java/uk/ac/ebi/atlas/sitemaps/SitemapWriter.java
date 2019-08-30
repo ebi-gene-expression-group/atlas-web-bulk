@@ -47,19 +47,29 @@ class SitemapWriter {
                 ImmutableMap.of());
     }
 
-    static void writeGenes(OutputStream outputStream, Collection<String> endpoints, Collection<String> genes)
-            throws XMLStreamException {
+    static void writeExperimentsSitemap(OutputStream outputStream) throws XMLStreamException {
+        writeDocument(
+                outputStream,
+                Stream.of("/experiments", "/baseline/experiments", "/plant/experiments")
+                        .map(endpoint ->
+                                ServletUriComponentsBuilder.fromCurrentContextPath()
+                                        .path(endpoint)
+                                        .build())
+                .map(UriComponents::encode)
+                .map(UriComponents::toUriString),
+                "urlset",
+                "url",
+                ImmutableMap.of("changefreq", "monthly"));
+    }
+
+    static void writeBioentityIdentifiersSitemap(OutputStream outputStream,
+                                                 Collection<String> genes,
+                                                 boolean allEntries) throws XMLStreamException {
         var urls =
-                Stream.concat(
-                        endpoints.stream()
-                                .map(endpoint ->
-                                        ServletUriComponentsBuilder.fromCurrentContextPath()
-                                                .path("{endpoint}")
-                                                .buildAndExpand(endpoint)),
-                        genes.stream()
-                                .map(gene -> ServletUriComponentsBuilder.fromCurrentContextPath()
-                                        .path("/genes/{gene}")
-                                        .buildAndExpand(gene)))
+                genes.stream()
+                        .map(gene -> ServletUriComponentsBuilder.fromCurrentContextPath()
+                                .path("/genes/{gene}")
+                                .buildAndExpand(gene))
                         .map(UriComponents::encode)
                         .map(UriComponents::toUriString);
 
