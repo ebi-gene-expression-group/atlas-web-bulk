@@ -5,8 +5,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.solr.cloud.SolrCloudCollectionProxyFactory;
 import uk.ac.ebi.atlas.solr.cloud.TupleStreamer;
-import uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy;
-import uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.AnalyticsSchemaField;
+import uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy;
+import uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.AnalyticsSchemaField;
 import uk.ac.ebi.atlas.solr.cloud.fullanalytics.ExperimentRequestPreferencesSolrQueryFactory;
 import uk.ac.ebi.atlas.solr.cloud.search.SolrQueryBuilder;
 import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.TupleStreamBuilder;
@@ -20,30 +20,30 @@ import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 import static uk.ac.ebi.atlas.experimentpage.differential.topgenes.DifferentialExperimentTopGenesService.AVERAGE_EXPRESSION_KEY;
 import static uk.ac.ebi.atlas.experimentpage.differential.topgenes.DifferentialExperimentTopGenesService.GENE_KEY;
 import static uk.ac.ebi.atlas.experimentpage.differential.topgenes.DifferentialExperimentTopGenesService.SPECIFICITY_KEY;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.BIOENTITY_IDENTIFIER;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.EXPERIMENT_ACCESSION;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.BIOENTITY_IDENTIFIER;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.EXPERIMENT_ACCESSION;
 
 // Produces streams of Solr tuples which contain gene IDs that match the search criteria in the experiment page
 // sidebar. They include average expression over selected assay groups and specificity (counts) if specific is checked.
 
 @Component
 public class BaselineExperimentTopGenesDao {
-    private final AnalyticsCollectionProxy analyticsCollectionProxy;
+    private final BulkAnalyticsCollectionProxy bulkAnalyticsCollectionProxy;
 
     public BaselineExperimentTopGenesDao(SolrCloudCollectionProxyFactory collectionProxyFactory) {
-        analyticsCollectionProxy = collectionProxyFactory.create(AnalyticsCollectionProxy.class);
+        bulkAnalyticsCollectionProxy = collectionProxyFactory.create(BulkAnalyticsCollectionProxy.class);
     }
 
     public TupleStreamer aggregateGeneIdsAndSortByAverageExpression(String experimentAccession,
                                                                     BaselineRequestPreferences<?> preferences) {
         AnalyticsSchemaField expressionLevelField =
-                AnalyticsCollectionProxy.getExpressionLevelFieldNames(preferences.getUnit()).getLeft();
+                BulkAnalyticsCollectionProxy.getExpressionLevelFieldNames(preferences.getUnit()).getLeft();
 
         SolrQuery solrQuery =
                 ExperimentRequestPreferencesSolrQueryFactory.createSolrQuery(experimentAccession, preferences);
 
-        FacetStreamBuilder<AnalyticsCollectionProxy> facetStreamBuilder =
-                new FacetStreamBuilder<>(analyticsCollectionProxy, BIOENTITY_IDENTIFIER)
+        FacetStreamBuilder<BulkAnalyticsCollectionProxy> facetStreamBuilder =
+                new FacetStreamBuilder<>(bulkAnalyticsCollectionProxy, BIOENTITY_IDENTIFIER)
                         .withQuery(solrQuery)
                         .sortByAbsoluteAverageDescending(expressionLevelField);
 
@@ -58,17 +58,17 @@ public class BaselineExperimentTopGenesDao {
     public TupleStreamer aggregateGeneIdsAndSortBySpecificity(String experimentAccession,
                                                               BaselineRequestPreferences<?> preferences) {
         AnalyticsSchemaField expressionLevelField =
-                AnalyticsCollectionProxy.getExpressionLevelFieldNames(preferences.getUnit()).getLeft();
+                BulkAnalyticsCollectionProxy.getExpressionLevelFieldNames(preferences.getUnit()).getLeft();
 
         // Get all experiment gene IDs, applying cutoff, with global specificity
         SolrQuery experimentFilter =
-                new SolrQueryBuilder<AnalyticsCollectionProxy>()
+                new SolrQueryBuilder<BulkAnalyticsCollectionProxy>()
                         .addFilterFieldByTerm(EXPERIMENT_ACCESSION, experimentAccession)
                         .addFilterFieldByRangeMin(expressionLevelField, preferences.getCutoff())
                         .build();
 
-        FacetStreamBuilder<AnalyticsCollectionProxy> blahFacetStreamBuilder =
-                new FacetStreamBuilder<>(analyticsCollectionProxy, BIOENTITY_IDENTIFIER)
+        FacetStreamBuilder<BulkAnalyticsCollectionProxy> blahFacetStreamBuilder =
+                new FacetStreamBuilder<>(bulkAnalyticsCollectionProxy, BIOENTITY_IDENTIFIER)
                         .withQuery(experimentFilter)
                         .withCounts()
                         .sortByAscending(BIOENTITY_IDENTIFIER);
@@ -77,8 +77,8 @@ public class BaselineExperimentTopGenesDao {
         SolrQuery solrQuery =
                 ExperimentRequestPreferencesSolrQueryFactory.createSolrQuery(experimentAccession, preferences);
 
-        FacetStreamBuilder<AnalyticsCollectionProxy> facetStreamBuilder =
-                new FacetStreamBuilder<>(analyticsCollectionProxy, BIOENTITY_IDENTIFIER)
+        FacetStreamBuilder<BulkAnalyticsCollectionProxy> facetStreamBuilder =
+                new FacetStreamBuilder<>(bulkAnalyticsCollectionProxy, BIOENTITY_IDENTIFIER)
                         .withQuery(solrQuery)
                         .sortByAscending(BIOENTITY_IDENTIFIER)
                         .withAbsoluteAverageOf(expressionLevelField);
