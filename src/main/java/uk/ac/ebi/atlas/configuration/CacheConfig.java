@@ -22,7 +22,10 @@ public class CacheConfig {
                 builder -> builder.name("experimentAttributes"),
 
                 builder -> builder.name("experimentContent"),
-                builder -> builder.name("bioentityIdentifiers"));   // Used for sitemap.xml files
+
+                // Used for sitemap.xml files
+                builder -> builder.name("publicBioentityIdentifiers"),
+                builder -> builder.name("publicSpecies"));
         return cacheManager;
     }
 }
