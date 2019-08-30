@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
-import uk.ac.ebi.atlas.species.SpeciesProperties;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -18,27 +17,31 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
 class SitemapWriter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SitemapWriter.class);
+    // Google imposes a limit of 50k entries in a sitemap file:
+    // https://support.google.com/webmasters/answer/183668?hl=en
+    static final int SITEMAP_URL_MAX_COUNT = 50000;
 
-    public SitemapWriter() {
+    SitemapWriter() {
         throw new UnsupportedOperationException();
     }
 
     static void writeSitemapIndex(OutputStream outputStream,
-                                  Collection<SpeciesProperties> speciesProperties) throws XMLStreamException {
+                                  Collection<String> ensemblSpecies) throws XMLStreamException {
         writeDocument(
                 outputStream,
-                speciesProperties.stream()
-                        .map(_speciesProperties ->
-                            ServletUriComponentsBuilder.fromCurrentContextPath()
-                                    .path("/species/{speciesEnsemblName}/sitemap.xml")
-                                    .buildAndExpand(_speciesProperties.ensemblName()))
+                Stream.concat(
+                        ensemblSpecies.stream()
+                                .map(_ensemblSpecies ->
+                                        ServletUriComponentsBuilder.fromCurrentContextPath()
+                                                .path("/species/{speciesEnsemblName}/sitemap.xml")
+                                                .buildAndExpand(_ensemblSpecies)),
+                        Stream.of(ServletUriComponentsBuilder.fromCurrentContextPath()
+                                .path("/experiments/sitemap.xml")
+                                .build()))
                         .map(UriComponents::encode)
-                        .map(UriComponents::toUriString)
-                        .collect(toImmutableList()),
+                        .map(UriComponents::toUriString),
                 "sitemapindex",
                 "sitemap",
                 ImmutableMap.of());
@@ -58,14 +61,18 @@ class SitemapWriter {
                                         .path("/genes/{gene}")
                                         .buildAndExpand(gene)))
                         .map(UriComponents::encode)
-                        .map(UriComponents::toUriString)
-                        .collect(toImmutableList());
+                        .map(UriComponents::toUriString);
 
-        writeDocument(outputStream, urls, "urlset", "url", ImmutableMap.of("changefreq", "monthly"));
+        writeDocument(
+                outputStream,
+                allEntries ? urls : urls.limit(SITEMAP_URL_MAX_COUNT),
+                "urlset",
+                "url",
+                ImmutableMap.of("changefreq", "monthly"));
     }
 
     private static void writeDocument(OutputStream outputStream,
-                                      Collection<String> urls,
+                                      Stream<String> urls,
                                       String rootName,
                                       String childName,
                                       Map<String, String> parametersForChildren) throws XMLStreamException {
