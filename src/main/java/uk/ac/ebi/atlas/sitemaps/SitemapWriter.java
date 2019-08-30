@@ -11,7 +11,9 @@ import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -76,9 +78,7 @@ class SitemapWriter {
             writer.add(eventFactory.createStartElement("", "", rootName));
             writer.add(eventFactory.createAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9"));
 
-            for (String url : urls) {
-                writeChild(writer, eventFactory, url, childName, parametersForChildren);
-            }
+            urls.forEachOrdered(url -> writeChild(writer, eventFactory, url, childName, parametersForChildren));
 
             writer.add(eventFactory.createEndElement("", "", rootName));
             writer.add(eventFactory.createEndDocument());
@@ -93,18 +93,22 @@ class SitemapWriter {
                                    XMLEventFactory eventFactory,
                                    String url,
                                    String childName,
-                                   Map<String, String> parameters) throws XMLStreamException {
-        writer.add(eventFactory.createStartElement("", "", childName));
-        writer.add(eventFactory.createStartElement("", "", "loc"));
-        writer.add(eventFactory.createCharacters(url));
-        writer.add(eventFactory.createEndElement("", "", "loc"));
+                                   Map<String, String> parameters) {
+        try {
+            writer.add(eventFactory.createStartElement("", "", childName));
+            writer.add(eventFactory.createStartElement("", "", "loc"));
+            writer.add(eventFactory.createCharacters(url));
+            writer.add(eventFactory.createEndElement("", "", "loc"));
 
-        for (var e : parameters.entrySet()) {
-            writer.add(eventFactory.createStartElement("", "", e.getKey()));
-            writer.add(eventFactory.createCharacters(e.getValue()));
-            writer.add(eventFactory.createEndElement("", "", e.getKey()));
+            for (var e : parameters.entrySet()) {
+                writer.add(eventFactory.createStartElement("", "", e.getKey()));
+                writer.add(eventFactory.createCharacters(e.getValue()));
+                writer.add(eventFactory.createEndElement("", "", e.getKey()));
+            }
+
+            writer.add(eventFactory.createEndElement("", "", childName));
+        } catch (XMLStreamException e) {
+            throw new UncheckedIOException(new IOException(e));
         }
-
-        writer.add(eventFactory.createEndElement("", "", childName));
     }
 }
