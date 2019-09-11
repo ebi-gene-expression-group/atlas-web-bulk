@@ -39,6 +39,7 @@ public class GxaExperimentCrud extends ExperimentCrud {
     @Caching(evict = {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
             @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
     public UUID createExperiment(String experimentAccession, boolean isPrivate) {
         var files = loadAndValidateFiles(experimentAccession);
@@ -67,6 +68,7 @@ public class GxaExperimentCrud extends ExperimentCrud {
     @Caching(evict = {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
             @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
     public void updateExperimentPrivate(String experimentAccession, boolean isPrivate) {
         super.updateExperimentPrivate(experimentAccession, isPrivate);
@@ -75,6 +77,7 @@ public class GxaExperimentCrud extends ExperimentCrud {
     @Caching(evict = {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
             @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
     public void deleteExperiment(String experimentAccession) {
         super.deleteExperiment(experimentAccession);
