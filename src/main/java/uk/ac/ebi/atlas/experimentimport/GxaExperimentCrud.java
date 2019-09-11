@@ -2,7 +2,6 @@ package uk.ac.ebi.atlas.experimentimport;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.controllers.ResourceNotFoundException;
