@@ -1,4 +1,4 @@
-package uk.ac.ebi.atlas.home;
+package uk.ac.ebi.atlas.home.species;
 
 import com.google.common.collect.ImmutableSet;
 import com.jayway.jsonpath.JsonPath;
