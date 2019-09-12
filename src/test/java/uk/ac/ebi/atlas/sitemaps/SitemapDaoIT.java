@@ -72,7 +72,7 @@ class SitemapDaoIT {
     }
 
     @Test
-    void unknownSpeciesReturnsEmpty() {
+    void unknownOrBlankSpeciesReturnsEmpty() {
         assertThat(subject.getBioentityIdentifiersInPublicExperiments(generateRandomSpecies().getReferenceName()))
                 .isEqualTo(subject.getBioentityIdentifiersInPublicExperiments(generateBlankString()))
                 .isEmpty();
