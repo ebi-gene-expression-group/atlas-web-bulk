@@ -15,8 +15,6 @@ import uk.ac.ebi.atlas.species.SpeciesPropertiesTrader;
 import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.nio.charset.Charset;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
@@ -41,15 +39,6 @@ class SitemapWriterIT {
         assertThatExceptionOfType(UnsupportedOperationException.class)
                 .isThrownBy(SitemapWriter::new);
     }
-
-//    @Test
-//    void testWriteOneGene() throws Exception {
-//        var baos = new ByteArrayOutputStream();
-//        SitemapWriter.writeBioentityIdentifiersSitemap(baos, ImmutableList.of("ASPM"), true);
-//
-//        assertThat(baos.toString(Charset.defaultCharset()))
-//                .containsPattern("<url><loc>http://.+/genes/ASPM</loc><changefreq>monthly</changefreq></url>");
-//    }
 
     @Test
     void producesValidXmlForMainSitemapOfSitemaps() throws Exception {
