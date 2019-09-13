@@ -1,88 +1,131 @@
 package uk.ac.ebi.atlas.sitemaps;
 
 import com.google.common.collect.ImmutableMap;
-import uk.ac.ebi.atlas.species.SpeciesProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.io.UncheckedIOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
+class SitemapWriter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SitemapWriter.class);
+    // Google imposes a limit of 50k entries in a sitemap file:
+    // https://support.google.com/webmasters/answer/183668?hl=en
+    static final int SITEMAP_URL_MAX_COUNT = 50000;
 
-public class SitemapWriter {
+    SitemapWriter() {
+        throw new UnsupportedOperationException();
+    }
 
-    private XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-    private XMLEventFactory eventFactory = XMLEventFactory.newInstance();
+    static void writeSitemapIndex(OutputStream outputStream,
+                                  Collection<String> ensemblSpecies) throws XMLStreamException {
+        writeDocument(
+                outputStream,
+                Stream.concat(
+                        ensemblSpecies.stream()
+                                .map(_ensemblSpecies ->
+                                        ServletUriComponentsBuilder.fromCurrentContextPath()
+                                                .path("/species/{speciesEnsemblName}/sitemap.xml")
+                                                .buildAndExpand(_ensemblSpecies)),
+                        Stream.of(ServletUriComponentsBuilder.fromCurrentContextPath()
+                                .path("/experiments/sitemap.xml")
+                                .build()))
+                        .map(UriComponents::encode)
+                        .map(UriComponents::toUriString),
+                "sitemapindex",
+                "sitemap",
+                ImmutableMap.of());
+    }
 
-    // TODO Build URL with ServletUriComponentsBuilder.fromCurrentContextPath()
-    private static final String OUR_ADDRESS = "http://www.ebi.ac.uk/gxa";
+    static void writeExperimentsSitemap(OutputStream outputStream) throws XMLStreamException {
+        writeDocument(
+                outputStream,
+                Stream.of("/experiments", "/baseline/experiments", "/plant/experiments")
+                        .map(endpoint ->
+                                ServletUriComponentsBuilder.fromCurrentContextPath()
+                                        .path(endpoint)
+                                        .build())
+                .map(UriComponents::encode)
+                .map(UriComponents::toUriString),
+                "urlset",
+                "url",
+                ImmutableMap.of("changefreq", "monthly"));
+    }
 
-    public void writeSitemapIndex(OutputStream outputStream,
-                                  Collection<SpeciesProperties> speciesProperties) throws XMLStreamException {
+    static void writeBioentityIdentifiersSitemap(OutputStream outputStream,
+                                                 Collection<String> genes,
+                                                 boolean allEntries) throws XMLStreamException {
+        var urls =
+                genes.stream()
+                        .map(gene -> ServletUriComponentsBuilder.fromCurrentContextPath()
+                                .path("/genes/{gene}")
+                                .buildAndExpand(gene))
+                        .map(UriComponents::encode)
+                        .map(UriComponents::toUriString);
 
         writeDocument(
                 outputStream,
-                speciesProperties.stream()
-                        .map(s -> OUR_ADDRESS + "/species/" + s.ensemblName() + "/sitemap.xml")
-                        .collect(toImmutableList()),
-                "sitemapindex", "sitemap", ImmutableMap.of());
+                allEntries ? urls : urls.limit(SITEMAP_URL_MAX_COUNT),
+                "urlset",
+                "url",
+                ImmutableMap.of("changefreq", "monthly"));
     }
 
-    public void writeGenes(OutputStream outputStream, Collection<String> various, Collection<String> genes)
-            throws
-            XMLStreamException {
-        List<String> urls = new ArrayList<>();
-        urls.addAll(various.stream().map(s -> OUR_ADDRESS + s).collect(toImmutableList()));
-        urls.addAll(genes.stream().map(s -> OUR_ADDRESS + "/genes/" + s).collect(toImmutableList()));
-        writeDocument(outputStream, urls, "urlset", "url", ImmutableMap.of("changefreq", "monthly"));
-    }
+    private static void writeDocument(OutputStream outputStream,
+                                      Stream<String> urls,
+                                      String rootName,
+                                      String childName,
+                                      Map<String, String> parametersForChildren) throws XMLStreamException {
+        var outputFactory = XMLOutputFactory.newInstance();
+        var eventFactory = XMLEventFactory.newInstance();
+        var writer = outputFactory.createXMLEventWriter(outputStream);
 
+        try {
+            writer.add(eventFactory.createStartDocument());
+            writer.add(eventFactory.createStartElement("", "", rootName));
+            writer.add(eventFactory.createAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9"));
 
-    protected void writeDocument(OutputStream outputStream,
-                                 Collection<String> urls,
-                                 String rootName,
-                                 String childName,
-                                 Map<String, String> parametersForChildren) throws XMLStreamException {
+            urls.forEachOrdered(url -> writeChild(writer, eventFactory, url, childName, parametersForChildren));
 
-        XMLEventWriter writer = outputFactory.createXMLEventWriter(outputStream);
-
-        writer.add(eventFactory.createStartDocument());
-
-        writer.add(eventFactory.createStartElement("", "", rootName));
-        writer.add(eventFactory.createAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9"));
-
-        for (String url: urls) {
-            writeChild(writer, url, childName, parametersForChildren);
+            writer.add(eventFactory.createEndElement("", "", rootName));
+            writer.add(eventFactory.createEndDocument());
+        } catch (XMLStreamException e) {
+            LOGGER.error(e.getMessage());
+        } finally {
+            writer.close();
         }
-
-        writer.add(eventFactory.createEndElement("", "", rootName));
-        writer.add(eventFactory.createEndDocument());
-        writer.close();
     }
 
+    private static void writeChild(XMLEventWriter writer,
+                                   XMLEventFactory eventFactory,
+                                   String url,
+                                   String childName,
+                                   Map<String, String> parameters) {
+        try {
+            writer.add(eventFactory.createStartElement("", "", childName));
+            writer.add(eventFactory.createStartElement("", "", "loc"));
+            writer.add(eventFactory.createCharacters(url));
+            writer.add(eventFactory.createEndElement("", "", "loc"));
 
-    private void writeChild(XMLEventWriter writer,
-                            String url,
-                            String childName,
-                            Map<String, String> parameters) throws XMLStreamException {
-        writer.add(eventFactory.createStartElement("", "", childName));
-        writer.add(eventFactory.createStartElement("", "", "loc"));
-        writer.add(eventFactory.createCharacters(url));
-        writer.add(eventFactory.createEndElement("", "", "loc"));
+            for (var e : parameters.entrySet()) {
+                writer.add(eventFactory.createStartElement("", "", e.getKey()));
+                writer.add(eventFactory.createCharacters(e.getValue()));
+                writer.add(eventFactory.createEndElement("", "", e.getKey()));
+            }
 
-        for (Map.Entry<String, String> e: parameters.entrySet()) {
-            writer.add(eventFactory.createStartElement("", "", e.getKey()));
-            writer.add(eventFactory.createCharacters(e.getValue()));
-            writer.add(eventFactory.createEndElement("", "", e.getKey()));
+            writer.add(eventFactory.createEndElement("", "", childName));
+        } catch (XMLStreamException e) {
+            throw new UncheckedIOException(new IOException(e));
         }
-
-        writer.add(eventFactory.createEndElement("", "", childName));
-
     }
 }

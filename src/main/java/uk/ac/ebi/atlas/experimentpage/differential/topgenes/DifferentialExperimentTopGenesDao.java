@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.solr.cloud.SolrCloudCollectionProxyFactory;
 import uk.ac.ebi.atlas.solr.cloud.TupleStreamer;
-import uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy;
+import uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy;
 import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.decorator.SelectStreamBuilder;
 import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.decorator.TopStreamBuilder;
 import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.source.FacetStreamBuilder;
@@ -13,15 +13,15 @@ import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
 import static uk.ac.ebi.atlas.experimentpage.differential.topgenes.DifferentialExperimentTopGenesService.AVERAGE_EXPRESSION_KEY;
 import static uk.ac.ebi.atlas.experimentpage.differential.topgenes.DifferentialExperimentTopGenesService.GENE_KEY;
 import static uk.ac.ebi.atlas.experimentpage.differential.topgenes.DifferentialExperimentTopGenesService.SPECIFICITY_KEY;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.BIOENTITY_IDENTIFIER;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.LOG_2_FOLD_CHANGE;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.BIOENTITY_IDENTIFIER;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.LOG_2_FOLD_CHANGE;
 
 @Component
 public class DifferentialExperimentTopGenesDao {
-    private final AnalyticsCollectionProxy analyticsCollectionProxy;
+    private final BulkAnalyticsCollectionProxy bulkAnalyticsCollectionProxy;
 
     public DifferentialExperimentTopGenesDao(SolrCloudCollectionProxyFactory collectionProxyFactory) {
-        analyticsCollectionProxy = collectionProxyFactory.create(AnalyticsCollectionProxy.class);
+        bulkAnalyticsCollectionProxy = collectionProxyFactory.create(BulkAnalyticsCollectionProxy.class);
     }
 
     public TupleStreamer createForDifferentialNonSpecific(String experimentAccession,
@@ -32,8 +32,8 @@ public class DifferentialExperimentTopGenesDao {
 //                        experimentAccession, preferences);
 
 
-        FacetStreamBuilder<AnalyticsCollectionProxy> facetStreamBuilder =
-                new FacetStreamBuilder<>(analyticsCollectionProxy, BIOENTITY_IDENTIFIER)
+        FacetStreamBuilder<BulkAnalyticsCollectionProxy> facetStreamBuilder =
+                new FacetStreamBuilder<>(bulkAnalyticsCollectionProxy, BIOENTITY_IDENTIFIER)
 //                        .withQuery(solrQuery)
                         .sortByCountsAscending()
                         .withAbsoluteAverageOf(LOG_2_FOLD_CHANGE);
@@ -59,8 +59,8 @@ public class DifferentialExperimentTopGenesDao {
 //                        experimentAccession, preferences);
 
 
-        FacetStreamBuilder<AnalyticsCollectionProxy> facetStreamBuilder =
-                new FacetStreamBuilder<>(analyticsCollectionProxy, BIOENTITY_IDENTIFIER)
+        FacetStreamBuilder<BulkAnalyticsCollectionProxy> facetStreamBuilder =
+                new FacetStreamBuilder<>(bulkAnalyticsCollectionProxy, BIOENTITY_IDENTIFIER)
 //                        .withQuery(solrQuery)
                         .sortByCountsAscending()
                         .withAbsoluteAverageOf(LOG_2_FOLD_CHANGE);
