@@ -7,7 +7,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 import uk.ac.ebi.atlas.experiments.ExperimentInfoListService;
-import uk.ac.ebi.atlas.species.AtlasInformationDao;
 import uk.ac.ebi.atlas.species.SpeciesProperties;
 import uk.ac.ebi.atlas.species.SpeciesPropertiesTrader;
 import uk.ac.ebi.atlas.utils.ExperimentInfo;
@@ -15,10 +14,10 @@ import uk.ac.ebi.atlas.utils.ExperimentInfo;
 import java.util.Random;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
-import static uk.ac.ebi.atlas.species.AtlasInformationDataType.EFO;
-import static uk.ac.ebi.atlas.species.AtlasInformationDataType.EG;
-import static uk.ac.ebi.atlas.species.AtlasInformationDataType.ENSEMBL;
-import static uk.ac.ebi.atlas.species.AtlasInformationDataType.WBPS;
+import static uk.ac.ebi.atlas.home.AtlasInformationDataType.EFO;
+import static uk.ac.ebi.atlas.home.AtlasInformationDataType.EG;
+import static uk.ac.ebi.atlas.home.AtlasInformationDataType.ENSEMBL;
+import static uk.ac.ebi.atlas.home.AtlasInformationDataType.WBPS;
 
 @Controller
 public class HomeController extends HtmlExceptionHandlingController {

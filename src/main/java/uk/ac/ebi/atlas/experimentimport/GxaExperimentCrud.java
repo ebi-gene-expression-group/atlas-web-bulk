@@ -39,11 +39,11 @@ public class GxaExperimentCrud extends ExperimentCrud {
     // bioentityIdentifiers (we’d need a lot of ad-hoc replicated code in a static context that can get a species
     // Ensembl name from the experiment accession). However, bioentityIdentifiers will perform well in public/fallback
     // as they are read-only environements.
-
     @Override
     @Caching(evict = {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
             @CacheEvict(cacheNames = "experimentContent", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "publicBioentityIdentifiers", allEntries = true),
             @CacheEvict(cacheNames = "publicSpecies", allEntries = true) })
@@ -74,6 +74,7 @@ public class GxaExperimentCrud extends ExperimentCrud {
     @Caching(evict = {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
             @CacheEvict(cacheNames = "experimentContent", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "publicBioentityIdentifiers", allEntries = true),
             @CacheEvict(cacheNames = "publicSpecies", allEntries = true) })
@@ -84,6 +85,7 @@ public class GxaExperimentCrud extends ExperimentCrud {
     @Caching(evict = {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
             @CacheEvict(cacheNames = "experimentContent", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "publicBioentityIdentifiers", allEntries = true),
             @CacheEvict(cacheNames = "publicSpecies", allEntries = true) })

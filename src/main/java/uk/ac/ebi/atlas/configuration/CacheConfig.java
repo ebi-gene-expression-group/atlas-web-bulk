@@ -20,6 +20,7 @@ public class CacheConfig {
 
                 builder -> builder.name("experiment"),
                 builder -> builder.name("experimentAttributes"),
+                builder -> builder.name("speciesSummary"),
 
                 builder -> builder.name("experimentContent"),
 
