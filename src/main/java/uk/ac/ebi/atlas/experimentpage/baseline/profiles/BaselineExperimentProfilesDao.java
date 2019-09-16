@@ -12,8 +12,8 @@ import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExpression;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.solr.BioentityPropertyName;
 import uk.ac.ebi.atlas.solr.cloud.SolrCloudCollectionProxyFactory;
-import uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy;
-import uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.AnalyticsSchemaField;
+import uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy;
+import uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.AnalyticsSchemaField;
 import uk.ac.ebi.atlas.solr.cloud.fullanalytics.ExperimentRequestPreferencesSolrQueryFactory;
 import uk.ac.ebi.atlas.solr.cloud.search.SolrQueryBuilder;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
@@ -24,25 +24,25 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.ASSAY_GROUP_ID;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.BIOENTITY_IDENTIFIER;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.BIOENTITY_IDENTIFIER_SEARCH;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.EXPERIMENT_ACCESSION;
-import static uk.ac.ebi.atlas.solr.cloud.collections.AnalyticsCollectionProxy.asAnalyticsSchemaField;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.ASSAY_GROUP_ID;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.BIOENTITY_IDENTIFIER;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.BIOENTITY_IDENTIFIER_SEARCH;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.EXPERIMENT_ACCESSION;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.asAnalyticsSchemaField;
 
 @Component
 public class BaselineExperimentProfilesDao {
-    private final AnalyticsCollectionProxy analyticsCollectionProxy;
+    private final BulkAnalyticsCollectionProxy bulkAnalyticsCollectionProxy;
 
     public BaselineExperimentProfilesDao(SolrCloudCollectionProxyFactory collectionProxyFactory) {
-        analyticsCollectionProxy = collectionProxyFactory.create(AnalyticsCollectionProxy.class);
+        bulkAnalyticsCollectionProxy = collectionProxyFactory.create(BulkAnalyticsCollectionProxy.class);
     }
 
     public long fetchCount(String experimentAccession, BaselineRequestPreferences<?> preferences) {
         SolrQuery solrQuery =
                 ExperimentRequestPreferencesSolrQueryFactory.createSolrQuery(experimentAccession, preferences);
 
-        return analyticsCollectionProxy.fieldStats(BIOENTITY_IDENTIFIER, solrQuery).getCountDistinct();
+        return bulkAnalyticsCollectionProxy.fieldStats(BIOENTITY_IDENTIFIER, solrQuery).getCountDistinct();
     }
 
     public GeneProfilesList<BaselineProfile> fetchProfiles(List<String> geneIds,
@@ -56,9 +56,9 @@ public class BaselineExperimentProfilesDao {
                         preferences.getSelectedColumnIds().size());
 
         Pair<AnalyticsSchemaField, AnalyticsSchemaField> expressionLevelFieldNames =
-                AnalyticsCollectionProxy.getExpressionLevelFieldNames(preferences.getUnit());
+                BulkAnalyticsCollectionProxy.getExpressionLevelFieldNames(preferences.getUnit());
 
-        SolrQueryBuilder<AnalyticsCollectionProxy> solrQueryBuilder = new SolrQueryBuilder<>();
+        SolrQueryBuilder<BulkAnalyticsCollectionProxy> solrQueryBuilder = new SolrQueryBuilder<>();
         solrQueryBuilder.addFilterFieldByTerm(EXPERIMENT_ACCESSION, experimentAccession)
                 .addFilterFieldByRangeMin(expressionLevelFieldNames.getLeft(), preferences.getCutoff())
                 .addQueryFieldByTerm(BIOENTITY_IDENTIFIER_SEARCH, geneIds)
@@ -73,7 +73,7 @@ public class BaselineExperimentProfilesDao {
         if (!preferences.getSelectedColumnIds().isEmpty()) {
             solrQueryBuilder.addQueryFieldByTerm(ASSAY_GROUP_ID, preferences.getSelectedColumnIds());
         }
-        QueryResponse queryResponse = analyticsCollectionProxy.query(solrQueryBuilder);
+        QueryResponse queryResponse = bulkAnalyticsCollectionProxy.query(solrQueryBuilder);
 
         Map<String, List<SolrDocument>> resultsMap =
                 queryResponse.getResults().stream()

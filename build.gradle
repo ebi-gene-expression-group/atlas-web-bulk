@@ -118,7 +118,7 @@ test {
         showStandardStreams = true
     }
     useJUnitPlatform()
-    maxHeapSize = '4096m'
+    maxHeapSize = '2048m'
 }
 
 if (!hasProperty('buildProfile')) ext.buildProfile = 'dev'

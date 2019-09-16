@@ -35,12 +35,18 @@ public class GxaExperimentCrud extends ExperimentCrud {
         this.idfParser = idfParser;
     }
 
+    // Unfortunately, it’d be very convoluted to create a static method to act as a key generator for
+    // bioentityIdentifiers (we’d need a lot of ad-hoc replicated code in a static context that can get a species
+    // Ensembl name from the experiment accession). However, bioentityIdentifiers will perform well in public/fallback
+    // as they are read-only environements.
     @Override
     @Caching(evict = {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
-            @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
+            @CacheEvict(cacheNames = "experimentContent", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "publicBioentityIdentifiers", allEntries = true),
+            @CacheEvict(cacheNames = "publicSpecies", allEntries = true) })
     public UUID createExperiment(String experimentAccession, boolean isPrivate) {
         var files = loadAndValidateFiles(experimentAccession);
         var condensedSdrfParserOutput = files.getRight();
@@ -69,7 +75,9 @@ public class GxaExperimentCrud extends ExperimentCrud {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
-            @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
+            @CacheEvict(cacheNames = "experimentContent", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "publicBioentityIdentifiers", allEntries = true),
+            @CacheEvict(cacheNames = "publicSpecies", allEntries = true) })
     public void updateExperimentPrivate(String experimentAccession, boolean isPrivate) {
         super.updateExperimentPrivate(experimentAccession, isPrivate);
     }
@@ -78,7 +86,9 @@ public class GxaExperimentCrud extends ExperimentCrud {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
-            @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
+            @CacheEvict(cacheNames = "experimentContent", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "publicBioentityIdentifiers", allEntries = true),
+            @CacheEvict(cacheNames = "publicSpecies", allEntries = true) })
     public void deleteExperiment(String experimentAccession) {
         super.deleteExperiment(experimentAccession);
     }
@@ -87,7 +97,9 @@ public class GxaExperimentCrud extends ExperimentCrud {
     @Caching(evict = {
             @CacheEvict(cacheNames = "experiment", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "experimentAttributes", key = "#experimentAccession"),
-            @CacheEvict(cacheNames = "experimentContent", key = "{#experimentAccession}") })
+            @CacheEvict(cacheNames = "experimentContent", key = "#experimentAccession"),
+            @CacheEvict(cacheNames = "publicBioentityIdentifiers", allEntries = true),
+            @CacheEvict(cacheNames = "publicSpecies", allEntries = true) })
     public void updateExperimentDesign(String experimentAccession) {
         var experimentDto =
                 readExperiment(experimentAccession)
