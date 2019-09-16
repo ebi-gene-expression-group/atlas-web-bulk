@@ -18,7 +18,7 @@ public class CacheConfig {
                 builder -> builder.name("arrayDesignByAccession"),
                 builder -> builder.name("bioentityProperties"),
 
-                builder -> builder.name("experiment"),
+                builder -> builder.name("experiment").eternal(true).entryCapacity(4000),
                 builder -> builder.name("experimentAttributes"),
                 builder -> builder.name("speciesSummary"),
 
