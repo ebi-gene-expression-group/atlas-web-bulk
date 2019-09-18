@@ -13,7 +13,8 @@ module.exports = {
     expressionAtlasDifferentialExpression: `./bundles/differential-expression`,
     feedbackForm: `atlas-feedback-form`,
     homepageSpeciesSummaryPanel: `./bundles/homepage-species-summary-panel`,
-    homepageExperimentsSummaryPanel: `./bundles/homepage-experiments-summary-panel`
+    homepageExperimentsSummaryPanel: `./bundles/homepage-experiments-summary-panel`,
+    experimentTable: `./bundles/experiment-table`
   },
 
   plugins: [
