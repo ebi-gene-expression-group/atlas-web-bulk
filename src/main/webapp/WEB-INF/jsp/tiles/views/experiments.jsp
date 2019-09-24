@@ -10,38 +10,32 @@
         experimentTable.render({
             host: '${pageContext.request.contextPath}/',
             resource: 'json/experiments',
-            downloadTooltip: '<ul>' +
-                    '<li>Raw filtered count matrix after quantification</li>' +
-                    '<li>Normalised filtered count matrix after quantification</li>' +
-                    '<li>Experiment design file with experimental metadata</li>' +
-                    '</ul>',
-
             tableHeader:
                     [
                         {type: `sort`, title: `Type`, width: 50, dataParam: `experimentType`,
                             image: {
                                 MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL: {
-                                    src: "http://localhost:8080/gxa/resources/images/experiments-table/differential.png",
+                                    src: "${pageContext.request.contextPath}/resources/images/experiments-table/differential.png",
                                     alt: "Microarray 1-colour miRNA"
                                 },
                                 PROTEOMICS_BASELINE: {
-                                    src: "http://localhost:8080/gxa/resources/images/experiments-table/baseline.png",
+                                    src: "${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png",
                                     alt: "Proteomics baseline"
                                 },
                                 RNASEQ_MRNA_BASELINE: {
-                                    src: "http://localhost:8080/gxa/resources/images/experiments-table/baseline.png",
+                                    src: "h${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png",
                                     alt: "RNA-Seq mRNA baseline"
                                 },
                                 MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL: {
-                                    src: "http://localhost:8080/gxa/resources/images/experiments-table/differential.png",
+                                    src: "${pageContext.request.contextPath}/resources/images/experiments-table/differential.png",
                                     alt: "Microarray 2-colour mRNA"
                                 },
                                 MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL: {
-                                    src: "http://localhost:8080/gxa/resources/images/experiments-table/differential.png",
+                                    src: "${pageContext.request.contextPath}/resources/images/experiments-table/differential.png",
                                     alt: "Microarray 1-colour mRNA"
                                 },
                                 RNASEQ_MRNA_DIFFERENTIAL: {
-                                    src: "http://localhost:8080/gxa/resources/images/experiments-table/differential.png",
+                                    src: "${pageContext.request.contextPath}/resources/images/experiments-table/differential.png",
                                     alt: "RNA-Seq mRNA differential"
                                 }
                             }
@@ -56,7 +50,7 @@
                             link: `experimentAccession`, resource: `experiments`, endpoint: `Experiment%20Design`},
                         {type: `search`, title: `experiment factors`, width: 200, dataParam: `experimentalFactors`},
                         {type: `search`, title: `array designs`, width: 220, dataParam: `arrayDesignNames`,
-                            link: `arrayDesigns`, resource: `arrayexpress/arrays`, endpoint: ``}
+                            link: `arrayDesigns`, resource: `https://www.ebi.ac.uk/arrayexpress`, endpoint: `arrays`}
                     ],
             species: '${species}',
             enableDownload: false
