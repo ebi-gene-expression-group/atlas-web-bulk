@@ -23,7 +23,7 @@
                                     alt: "Proteomics baseline"
                                 },
                                 RNASEQ_MRNA_BASELINE: {
-                                    src: "h${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png",
+                                    src: "${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png",
                                     alt: "RNA-Seq mRNA baseline"
                                 },
                                 MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL: {
@@ -50,7 +50,7 @@
                             link: `experimentAccession`, resource: `experiments`, endpoint: `Experiment%20Design`},
                         {type: `search`, title: `experiment factors`, width: 200, dataParam: `experimentalFactors`},
                         {type: `search`, title: `array designs`, width: 220, dataParam: `arrayDesignNames`,
-                            link: `arrayDesigns`, resource: `https://www.ebi.ac.uk/arrayexpress`, endpoint: `arrays`}
+                            link: `arrayDesigns`, resource: `https://www.ebi.ac.uk/arrayexpress/arrays`, endpoint: ``}
                     ],
             species: '${species}',
             enableDownload: false
