@@ -1,12 +1,19 @@
 package uk.ac.ebi.atlas.experimentpage;
 
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
@@ -20,7 +27,13 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static uk.ac.ebi.atlas.experimentpage.ExperimentDispatcherUtils.alreadyForwardedButNoOtherControllerHandledTheRequest;
 import static uk.ac.ebi.atlas.experimentpage.ExperimentDispatcherUtils.buildForwardURL;
@@ -33,6 +46,8 @@ public class ExperimentDownloadController {
     private final ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.RnaSeqDifferential rnaSeqDifferentialExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier;
+    private final ExperimentFileLocationService experimentFileLocationService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExperimentDownloadController.class);
 
     @Inject
     public ExperimentDownloadController(ExperimentTrader experimentTrader,
@@ -43,12 +58,15 @@ public class ExperimentDownloadController {
                                         ExperimentDownloadSupplier.RnaSeqDifferential
                                                     rnaSeqDifferentialExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.Microarray
-                                                    microarrayExperimentDownloadSupplier) {
+                                                    microarrayExperimentDownloadSupplier,
+                                        ExperimentFileLocationService
+                                                    experimentFileLocationService) {
         this.experimentTrader = experimentTrader;
         this.proteomicsExperimentDownloadSupplier = proteomicsExperimentDownloadSupplier;
         this.rnaSeqBaselineExperimentDownloadSupplier = rnaSeqBaselineExperimentDownloadSupplier;
         this.rnaSeqDifferentialExperimentDownloadSupplier = rnaSeqDifferentialExperimentDownloadSupplier;
         this.microarrayExperimentDownloadSupplier = microarrayExperimentDownloadSupplier;
+        this.experimentFileLocationService = experimentFileLocationService;
     }
 
     /*
@@ -157,5 +175,55 @@ public class ExperimentDownloadController {
                                                 @Valid MicroarrayRequestPreferences preferences,
                                                 HttpServletResponse response) {
         microarrayExperimentDownload(experimentAccession, accessKey, preferences, response);
+    }
+
+    @RequestMapping(value = "experiments/download/zip",
+            method = RequestMethod.GET,
+            produces = "application/zip")
+    public void
+    downloadMultipleExperimentsArchive(HttpServletResponse response,
+                                       @RequestParam(value = "accession", defaultValue = "") List<String> accessions)
+            throws IOException {
+
+        var experiments = new ArrayList<Experiment>();
+        for (var accession : accessions) {
+            try {
+                experiments.add(experimentTrader.getPublicExperiment(accession));
+            } catch (Exception e) {
+                LOGGER.debug("Invalid experiment accession: {}", accession);
+            }
+        }
+
+        if (!experiments.isEmpty()) {
+            var archiveName = experiments.size() + "-experiment-files.zip";
+            response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + archiveName);
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/zip");
+            var zipOutputStream = new ZipOutputStream(response.getOutputStream());
+
+            for (var experiment : experiments) {
+                var paths = ImmutableList.<Path>builder()
+                        .addAll(experimentFileLocationService.getFilePathsForArchive(
+                                experiment.getAccession(), ExperimentFileType.QUANTIFICATION_RAW))
+                        .addAll(experimentFileLocationService.getFilePathsForArchive(
+                                experiment.getAccession(), ExperimentFileType.NORMALISED))
+                        .add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.EXPERIMENT_DESIGN))
+                        .build();
+
+                for (var path : paths) {
+                    var file = path.toFile();
+                    if (file.exists()) {
+                        zipOutputStream.putNextEntry(new ZipEntry(experiment.getAccession() + "/" + file.getName()));
+                        FileInputStream fileInputStream = new FileInputStream(file);
+
+                        IOUtils.copy(fileInputStream, zipOutputStream);
+                        fileInputStream.close();
+                        zipOutputStream.closeEntry();
+                    }
+                }
+            }
+            zipOutputStream.close();
+        }
     }
 }
