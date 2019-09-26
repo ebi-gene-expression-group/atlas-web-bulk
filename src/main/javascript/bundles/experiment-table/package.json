@@ -10,7 +10,7 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "atlas-experiment-table": "^1.2.0",
+    "atlas-experiment-table": "^1.2.1",
     "atlas-react-fetch-loader": "^1.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
