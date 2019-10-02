@@ -54,19 +54,19 @@ public class GxaExperimentRepository implements ExperimentRepository {
         LOGGER.info("Building experiment {}...", experimentAccession);
 
         var experimentDesign = experimentDesignParser.parse(experimentDto.getExperimentAccession());
-        var idfParserOutpout = idfParser.parse(experimentDto.getExperimentAccession());
+        var idfParserOutput = idfParser.parse(experimentDto.getExperimentAccession());
         switch (experimentDto.getExperimentType()) {
             case PROTEOMICS_BASELINE:
             case RNASEQ_MRNA_BASELINE:
-                return baselineExperimentFactory.create(experimentDto, experimentDesign, idfParserOutpout,
+                return baselineExperimentFactory.create(experimentDto, experimentDesign, idfParserOutput,
                         sdrfParser.parseSingleCellTechnologyType(experimentAccession));
             case RNASEQ_MRNA_DIFFERENTIAL:
-                return rnaSeqDifferentialExperimentFactory.create(experimentDto, experimentDesign, idfParserOutpout,
+                return rnaSeqDifferentialExperimentFactory.create(experimentDto, experimentDesign, idfParserOutput,
                         sdrfParser.parseSingleCellTechnologyType(experimentAccession));
             case MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL:
             case MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL:
             case MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL:
-                return microarrayExperimentFactory.create(experimentDto, experimentDesign, idfParserOutpout,
+                return microarrayExperimentFactory.create(experimentDto, experimentDesign, idfParserOutput,
                         sdrfParser.parseSingleCellTechnologyType(experimentAccession));
             default:
                 throw new IllegalArgumentException(
