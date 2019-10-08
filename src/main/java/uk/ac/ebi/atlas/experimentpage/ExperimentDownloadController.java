@@ -189,14 +189,15 @@ public class ExperimentDownloadController {
                                        @RequestParam(value = "accession", defaultValue = "") List<String> accessions)
             throws IOException {
 
-        var experiments = new ArrayList<Experiment>();
-        for (var accession : accessions) {
+        List<Experiment> experiments = new ArrayList<>();
+
+        accessions.stream().forEach(accession -> {
             try {
                 experiments.add(experimentTrader.getPublicExperiment(accession));
             } catch (Exception e) {
                 LOGGER.debug("Invalid experiment accession: {}", accession);
             }
-        }
+        });
 
         if (!experiments.isEmpty()) {
             var archiveName = experiments.size() + "-experiment-files.zip";
