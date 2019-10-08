@@ -6,24 +6,22 @@ import java.util.Arrays;
 
 public enum ExperimentFileType {
     // Could include icon name (similar to Description class in ExternallyAvailableContent)
-    EXPERIMENT_DESIGN(
-            "experiment-design", "Experiment design file (TSV format)", IconType.EXPERIMENT_DESIGN, false),
-    SDRF(
-            "sdrf", "SDRF file (.txt)", IconType.TSV, false),
+    CONFIGURATION(
+            "configuration", "Experiment configuration file (XML format)", IconType.EXPERIMENT_DESIGN, false),
     IDF(
-            "idf", "IDF file (.txt)", IconType.TSV, false),
-    CLUSTERING(
-            "cluster", "Clustering file (TSV format)", IconType.TSV, false),
-    QUANTIFICATION_RAW(
-            "quantification-raw", "Raw quantification files (MatrixMarket archive)", IconType.TSV, true),
-    QUANTIFICATION_FILTERED(
-            "quantification-filtered", "Filtered quantification files (MatrixMarket archive)", IconType.TSV, true),
-    NORMALISED(
-            "normalised", "Normalised counts files (MatrixMarket archive)", IconType.TSV, true),
-    MARKER_GENES(
-            "marker-genes", "Marker gene files (TSV files archive)", IconType.TSV, true),
-    EXPERIMENT_METADATA(
-            "experiment-metadata", "Experiment metadata (SDRF and IDF files archive)", IconType.TSV, true);
+            "idf", "IDF file (TSV format)", IconType.TSV, false),
+    CONDENSE_SDRF(
+            "condensed-sdrf", "Condensed SDRF file (TSV format)", IconType.TSV, false),
+    BASELINE_FACTORS(
+            "factors", "Experiment configuration file (XML format)", IconType.EXPERIMENT_DESIGN, false),
+    PROTEOMICS_B_MAIN(
+            "main", "Experiment file (TSV format)", IconType.TSV, false),
+    RNASEQ_B_TPM(
+            "tpm", "TPM file (TSV format)", IconType.TSV, false),
+    RNASEQ_D_ANALYTICS(
+            "rnaseq-analytics", "RNASeq analytics files (TSV format)", IconType.TSV, false),
+    MICROARRAY_D_ANALYTICS(
+            "microarray-analytics", "Microarray analytics files (TSV format)", IconType.TSV, true);
 
     // IDs should be used when generating URLs
     private final String id;

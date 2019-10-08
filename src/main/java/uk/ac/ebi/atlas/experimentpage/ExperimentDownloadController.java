@@ -47,6 +47,8 @@ public class ExperimentDownloadController {
     private final ExperimentDownloadSupplier.RnaSeqDifferential rnaSeqDifferentialExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier;
     private final ExperimentFileLocationService experimentFileLocationService;
+    private final ExpressionAtlasContentService expressionAtlasContentService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperimentDownloadController.class);
 
     @Inject
@@ -54,19 +56,21 @@ public class ExperimentDownloadController {
                                         ExperimentDownloadSupplier.Proteomics
                                                 proteomicsExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.RnaSeqBaseline
-                                                    rnaSeqBaselineExperimentDownloadSupplier,
+                                                rnaSeqBaselineExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.RnaSeqDifferential
-                                                    rnaSeqDifferentialExperimentDownloadSupplier,
+                                                rnaSeqDifferentialExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.Microarray
-                                                    microarrayExperimentDownloadSupplier,
+                                                microarrayExperimentDownloadSupplier,
                                         ExperimentFileLocationService
-                                                    experimentFileLocationService) {
+                                                experimentFileLocationService,
+                                        ExpressionAtlasContentService expressionAtlasContentService) {
         this.experimentTrader = experimentTrader;
         this.proteomicsExperimentDownloadSupplier = proteomicsExperimentDownloadSupplier;
         this.rnaSeqBaselineExperimentDownloadSupplier = rnaSeqBaselineExperimentDownloadSupplier;
         this.rnaSeqDifferentialExperimentDownloadSupplier = rnaSeqDifferentialExperimentDownloadSupplier;
         this.microarrayExperimentDownloadSupplier = microarrayExperimentDownloadSupplier;
         this.experimentFileLocationService = experimentFileLocationService;
+        this.expressionAtlasContentService = expressionAtlasContentService;
     }
 
     /*
@@ -138,9 +142,9 @@ public class ExperimentDownloadController {
     }
 
     void microarrayExperimentDownload(String experimentAccession,
-                                    String accessKey,
-                                    MicroarrayRequestPreferences preferences,
-                                    HttpServletResponse response) {
+                                      String accessKey,
+                                      MicroarrayRequestPreferences preferences,
+                                      HttpServletResponse response) {
         MicroarrayExperiment experiment =
                 (MicroarrayExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
 
@@ -202,16 +206,59 @@ public class ExperimentDownloadController {
             var zipOutputStream = new ZipOutputStream(response.getOutputStream());
 
             for (var experiment : experiments) {
-                var paths = ImmutableList.<Path>builder()
-                        .addAll(experimentFileLocationService.getFilePathsForArchive(
-                                experiment.getAccession(), ExperimentFileType.QUANTIFICATION_RAW))
-                        .addAll(experimentFileLocationService.getFilePathsForArchive(
-                                experiment.getAccession(), ExperimentFileType.NORMALISED))
-                        .add(experimentFileLocationService.getFilePath(
-                                experiment.getAccession(), ExperimentFileType.EXPERIMENT_DESIGN))
-                        .build();
+                var experimentType = experiment.getType();
+                var paths = ImmutableList.<Path>builder();
+                switch (experimentType) {
+                    case PROTEOMICS_BASELINE:
+                        paths.add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.CONFIGURATION))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.BASELINE_FACTORS))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.IDF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.PROTEOMICS_B_MAIN));
+                        break;
 
-                for (var path : paths) {
+                    case RNASEQ_MRNA_DIFFERENTIAL:
+                        paths.add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.CONFIGURATION))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.IDF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.RNASEQ_D_ANALYTICS));
+                        break;
+
+                    case RNASEQ_MRNA_BASELINE:
+                        paths.add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.CONFIGURATION)).
+                                add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.IDF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.BASELINE_FACTORS))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.RNASEQ_B_TPM));
+                        break;
+                    //MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL, MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL, MICROARRAY_2COLOUR_MICRORNA_DIFFERENTIAL
+                    default:
+                        paths.addAll(experimentFileLocationService.getFilePathsForArchive(
+                                experiment, ExperimentFileType.MICROARRAY_D_ANALYTICS))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.CONFIGURATION))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.IDF));
+                        break;
+                }
+
+                for (var path : paths.build()) {
                     var file = path.toFile();
                     if (file.exists()) {
                         zipOutputStream.putNextEntry(new ZipEntry(experiment.getAccession() + "/" + file.getName()));
