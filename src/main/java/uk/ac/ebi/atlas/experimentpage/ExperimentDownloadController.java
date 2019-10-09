@@ -7,13 +7,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
+import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
@@ -31,12 +34,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static uk.ac.ebi.atlas.experimentpage.ExperimentDispatcherUtils.alreadyForwardedButNoOtherControllerHandledTheRequest;
 import static uk.ac.ebi.atlas.experimentpage.ExperimentDispatcherUtils.buildForwardURL;
+import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 
 @Controller
 public class ExperimentDownloadController {
@@ -47,7 +57,6 @@ public class ExperimentDownloadController {
     private final ExperimentDownloadSupplier.RnaSeqDifferential rnaSeqDifferentialExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier;
     private final ExperimentFileLocationService experimentFileLocationService;
-    private final ExpressionAtlasContentService expressionAtlasContentService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperimentDownloadController.class);
 
@@ -62,15 +71,13 @@ public class ExperimentDownloadController {
                                         ExperimentDownloadSupplier.Microarray
                                                 microarrayExperimentDownloadSupplier,
                                         ExperimentFileLocationService
-                                                experimentFileLocationService,
-                                        ExpressionAtlasContentService expressionAtlasContentService) {
+                                                experimentFileLocationService) {
         this.experimentTrader = experimentTrader;
         this.proteomicsExperimentDownloadSupplier = proteomicsExperimentDownloadSupplier;
         this.rnaSeqBaselineExperimentDownloadSupplier = rnaSeqBaselineExperimentDownloadSupplier;
         this.rnaSeqDifferentialExperimentDownloadSupplier = rnaSeqDifferentialExperimentDownloadSupplier;
         this.microarrayExperimentDownloadSupplier = microarrayExperimentDownloadSupplier;
         this.experimentFileLocationService = experimentFileLocationService;
-        this.expressionAtlasContentService = expressionAtlasContentService;
     }
 
     /*
@@ -273,5 +280,89 @@ public class ExperimentDownloadController {
             }
             zipOutputStream.close();
         }
+    }
+
+    @GetMapping(value = "json/experiments/download/zip/check",
+            produces = "application/json;charset=UTF-8")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String
+    checkMultipleExperimentsFileValid(@RequestParam(value = "accession", defaultValue = "") List<String> accessions) {
+        List<Experiment> experiments = new ArrayList<>();
+
+        accessions.stream().forEach(accession -> {
+            try {
+                experiments.add(experimentTrader.getPublicExperiment(accession));
+            } catch (Exception e) {
+                LOGGER.debug("Invalid experiment accession: {}", accession);
+            }
+        });
+
+        Map<ExperimentType, ImmutableList<ExperimentFileType>> fileTypeCheckList =  new HashMap<>() {{
+            put(ExperimentType.PROTEOMICS_BASELINE, ImmutableList.of(
+                    ExperimentFileType.CONDENSE_SDRF,
+                    ExperimentFileType.CONFIGURATION,
+                    ExperimentFileType.BASELINE_FACTORS,
+                    ExperimentFileType.IDF,
+                    ExperimentFileType.PROTEOMICS_B_MAIN));
+            put(ExperimentType.RNASEQ_MRNA_DIFFERENTIAL, ImmutableList.of(
+                    ExperimentFileType.CONDENSE_SDRF,
+                    ExperimentFileType.CONFIGURATION,
+                    ExperimentFileType.RNASEQ_D_ANALYTICS,
+                    ExperimentFileType.IDF));
+            put(ExperimentType.RNASEQ_MRNA_BASELINE, ImmutableList.of(
+                    ExperimentFileType.CONDENSE_SDRF,
+                    ExperimentFileType.CONFIGURATION,
+                    ExperimentFileType.BASELINE_FACTORS,
+                    ExperimentFileType.RNASEQ_B_TPM,
+                    ExperimentFileType.IDF));
+            put(ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL, ImmutableList.of(
+                    ExperimentFileType.CONDENSE_SDRF,
+                    ExperimentFileType.CONFIGURATION,
+                    ExperimentFileType.MICROARRAY_D_ANALYTICS,
+                    ExperimentFileType.IDF));
+            put(ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL, ImmutableList.of(
+                    ExperimentFileType.CONDENSE_SDRF,
+                    ExperimentFileType.CONFIGURATION,
+                    ExperimentFileType.MICROARRAY_D_ANALYTICS,
+                    ExperimentFileType.IDF));
+            put(ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL, ImmutableList.of(
+                    ExperimentFileType.CONDENSE_SDRF,
+                    ExperimentFileType.CONFIGURATION,
+                    ExperimentFileType.MICROARRAY_D_ANALYTICS,
+                    ExperimentFileType.IDF));
+        }};
+
+        var filePaths = experiments.stream().map(experiment ->
+                        Map.entry(experiment.getAccession(),
+                                fileTypeCheckList.get(experiment.getType()).stream()
+                                        .map(fileType -> fileType != ExperimentFileType.MICROARRAY_D_ANALYTICS ?
+                                                ImmutableList.of(experimentFileLocationService
+                                                        .getFilePath(experiment.getAccession(), fileType)) :
+                                                experimentFileLocationService
+                                                        .getFilePathsForArchive(experiment, fileType))
+                                        .collect(ImmutableList.toImmutableList())
+
+                        ))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        var invalidFilesList = filePaths.keySet().stream()
+                .map(experiment ->
+                        Map.entry(experiment, filePaths.get(experiment).stream()
+                                .map(fileType -> fileType.stream()
+                                        .filter(path -> !path.toFile().exists())
+                                        .map(path -> path.getFileName().toString())
+                                        .collect(toImmutableList())
+                                )
+                                .flatMap(Collection::stream)
+                                .collect(toImmutableList())
+                        )
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        if (!invalidFilesList.isEmpty()) {
+            LOGGER.debug("Invalid experiment files: {}", invalidFilesList);
+        }
+        return GSON.toJson(Collections.singletonMap("invalidFiles", invalidFilesList));
     }
 }
