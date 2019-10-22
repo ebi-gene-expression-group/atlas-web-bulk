@@ -17,18 +17,32 @@
             ontology terms, checked for high quality and re-analysed using standardised methods.
         </p>
 
-
-        <h3 id="exptChosen">How are experiments chosen to be in Expression Atlas?</h3>
+        <h3 id="exptEligibility">What experiments can be included in Expression Atlas?</h3>
         <p>
-            Experiments in Expression Atlas are selected from
-            <a href="https://www.ebi.ac.uk/arrayexpress">ArrayExpress</a> that is an archive of functional genomics
-            data. Different criteria are used for including experiments in Baseline Atlas or in Differential Atlas.
-            All experiments in <b>Baseline Atlas</b> are RNA-seq data with good quality raw files and a broad
-            coverage across conditions (e.g. tissues, cell types, developmental stages). A good quality reference
-            genome build available is also required for RNA-seq data. All experiments in <b>Differential
-            Atlas</b> have enough number of replicates to allow robust statistical analysis. Apart from that,
-            microarray data must be gene expression data (rather than ChiP-chip or CGH for example) and it should be
-            possible to re-annotate the array design against <a href="https://www.ensembl.org/index.html">Ensembl</a>.
+            To be included in Expression Atlas each experiment must meet all of the following criteria:
+            <ul>
+              <li>Experiment measures gene or protein expression</li>
+              <li>Raw data are available</li>
+              <li>All samples within the dataset belong to a single species</li>
+              <li>Samples come from non-bacterial species</li>
+              <li>The species genome is available through <a href="http://www.ensembl.org/index.html">Ensembl</a></li>
+              <li>Annotations for microarray probes are available</li>
+              <li>Sufficient sample annotation is provided</li>
+            </ul>
+        </p>
+        <p>
+            Additionally, we employ several “softer” guidelines to determine whether or not an experiment is eligible for inclusion into Expression Atlas:
+            <ul>
+            <li>(differential): The experiment should have at least 2 experimental groups, with 3 biological replicates each and also have a clear control/reference group</li>
+            <li>(baseline): The experiment design does not involve any perturbations and the dataset should have at least 3 experimental groups with 3 biological replicates each</li>
+            <li>The experiment addresses a relevant biological question (is not technical or proof of principle study)</li>
+            <li>Experimental metadata are of high quality and confidence</li>
+            <li>The experimental design is not too complex (e.g. not too many factors) and allows for straightforward one-to-one comparisons</li>
+            </ul>
+        </p>
+        <p>
+        If an experiment is judged to be of particular interest and its inclusion in Expression Atlas is highly valuable for the community, we may decide to include it even if it fails some of the above guidelines. We also actively collaborate with several specialized initiatives such as the <a href="http://www.gramene.org/">Gramene</a> consortium and <a href="https://www.opentargets.org/">OpenTargets</a> and prioritize experiments that are of special interest to our partners.
+        Please do not hesitate to <a href= "https://www.ebi.ac.uk/support/gxa">contact our team</a> if you have any questions about how we select experiments for Expression Atlas or you wish to recommend a dataset(s) that you feel should be ingested and displayed in this resource.
         </p>
 
         <h3 id="getOrigData">How can I obtain the original data for an experiment?</h3>
@@ -665,4 +679,3 @@
         document.getElementById("local-nav-faq").className += ' active';
     });
 </script>
-
