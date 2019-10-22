@@ -52,6 +52,10 @@
                         {type: 'search', title: 'array designs', width: 220, dataParam: 'arrayDesignNames',
                             link: 'arrayDesigns', resource: 'https://www.ebi.ac.uk/arrayexpress/arrays', endpoint: ''}
                     ],
+            tableFilters : [
+                {label: `Kingdom`, dataParam: `kingdom`},
+                {label: `Experiment Type`, dataParam: `experimentType`}
+            ],
             species: '${species}',
             enableDownload: false
         }, 'experiments');
