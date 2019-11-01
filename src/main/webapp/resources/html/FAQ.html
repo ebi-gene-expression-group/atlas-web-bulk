@@ -10,9 +10,10 @@
             conditions and to visualise down-stream analysis results to explore co-expression. Queries can be either in
             a <b>baseline context</b>, e.g.
             <a href="/gxa/search?organism=macaca%20mulatta&conditionQuery=%5B%7B%22value%22%3A%22brain%22%7D%5D">find
-            genes expressed in the macaque brain</a>, or in a <b>differential context</b>, e.g.
+                genes expressed in the macaque brain</a>, or in a <b>differential context</b>, e.g.
             <a href="/gxa/search?geneQuery=%5B%5D&organism=Arabidopsis%20thaliana&conditionQuery=%5B%7B%22value%22%3A%22auxin%22%7D%5D&ds=%7B%22kingdom%22%3A%5B%22plants%22%5D%7D#differential">
-            find genes that are up or downregulated in response to auxin in Arabidopsis</a>. Expression Atlas contains
+                find genes that are up or downregulated in response to auxin in Arabidopsis</a>. Expression Atlas
+            contains
             thousands of selected microarray and RNA-sequencing data that are manually curated and annotated with
             ontology terms, checked for high quality and re-analysed using standardised methods.
         </p>
@@ -20,29 +21,45 @@
         <h3 id="exptEligibility">What experiments can be included in Expression Atlas?</h3>
         <p>
             To be included in Expression Atlas each experiment must meet all of the following criteria:
-            <ul>
-              <li>Experiment measures gene or protein expression</li>
-              <li>Raw data are available</li>
-              <li>All samples within the dataset belong to a single species</li>
-              <li>Samples come from non-bacterial species</li>
-              <li>The species genome is available through <a href="http://www.ensembl.org/index.html">Ensembl</a></li>
-              <li>Annotations for microarray probes are available</li>
-              <li>Sufficient sample annotation is provided</li>
-            </ul>
         </p>
+        <ul>
+            <li>Experiment measures gene or protein expression</li>
+            <li>Raw data are available</li>
+            <li>All samples within the dataset belong to a single species</li>
+            <li>Samples come from non-bacterial species</li>
+            <li>The species genome is available through <a href="http://www.ensembl.org/index.html">Ensembl</a></li>
+            <li>Annotations for microarray probes are available</li>
+            <li>Sufficient sample annotation is provided</li>
+        </ul>
+
         <p>
-            Additionally, we employ several “softer” guidelines to determine whether or not an experiment is eligible for inclusion into Expression Atlas:
-            <ul>
-            <li>(differential): The experiment should have at least 2 experimental groups, with 3 biological replicates each and also have a clear control/reference group</li>
-            <li>(baseline): The experiment design does not involve any perturbations and the dataset should have at least 3 experimental groups with 3 biological replicates each</li>
-            <li>The experiment addresses a relevant biological question (is not technical or proof of principle study)</li>
+            Additionally, we employ several “softer” guidelines to determine whether or not an experiment is eligible
+            for inclusion into Expression Atlas:
+        </p>
+        <ul>
+            <li>(differential): The experiment should have at least 2 experimental groups, with 3 biological replicates
+                each and also have a clear control/reference group
+            </li>
+            <li>(baseline): The experiment design does not involve any perturbations and the dataset should have at
+                least 3 experimental groups with 3 biological replicates each
+            </li>
+            <li>The experiment addresses a relevant biological question (is not technical or proof of principle study)
+            </li>
             <li>Experimental metadata are of high quality and confidence</li>
-            <li>The experimental design is not too complex (e.g. not too many factors) and allows for straightforward one-to-one comparisons</li>
-            </ul>
-        </p>
+            <li>The experimental design is not too complex (e.g. not too many factors) and allows for straightforward
+                one-to-one comparisons
+            </li>
+        </ul>
+
         <p>
-        If an experiment is judged to be of particular interest and its inclusion in Expression Atlas is highly valuable for the community, we may decide to include it even if it fails some of the above guidelines. We also actively collaborate with several specialized initiatives such as the <a href="http://www.gramene.org/">Gramene</a> consortium and <a href="https://www.opentargets.org/">OpenTargets</a> and prioritize experiments that are of special interest to our partners.
-        Please do not hesitate to <a href= "https://www.ebi.ac.uk/support/gxa">contact our team</a> if you have any questions about how we select experiments for Expression Atlas or you wish to recommend a dataset(s) that you feel should be ingested and displayed in this resource.
+            If an experiment is judged to be of particular interest and its inclusion in Expression Atlas is highly
+            valuable for the community, we may decide to include it even if it fails some of the above guidelines. We
+            also actively collaborate with several specialized initiatives such as the <a
+                href="http://www.gramene.org/">Gramene</a> consortium and <a href="https://www.opentargets.org/">OpenTargets</a>
+            and prioritize experiments that are of special interest to our partners.
+            Please do not hesitate to <a href="https://www.ebi.ac.uk/support/gxa">contact our team</a> if you have any
+            questions about how we select experiments for Expression Atlas or you wish to recommend a dataset(s) that
+            you feel should be ingested and displayed in this resource.
         </p>
 
         <h3 id="getOrigData">How can I obtain the original data for an experiment?</h3>
@@ -51,16 +68,18 @@
             experiment in <a href="https://www.ebi.ac.uk/arrayexpress">ArrayExpress</a>. On any <b>Experiment
             page</b>, e.g. <a href="/gxa/experiments/E-MTAB-2770">RNA-seq of 934 human cancer cell lines from the
             Cancer Cell Line Encyclopedia</a> click on the
-            <img alt="array express button" src="/gxa/resources/images/faq/ae-logo.png" align="bottom" class="icon"> button in the
+            <img alt="array express button" src="/gxa/resources/images/faq/ae-logo.png" class="icon">
+            button in the
             <b>Resources</b> tab to view the experiment in ArrayExpress. The original submitted data files
             can be downloaded as zip archives, and sample annotation is available in MAGE-TAB format text files. See
             the online tutorial
             <a href="https://www.ebi.ac.uk/training/online/course/arrayexpress-discover-functional-genomics-data-qui/files-and-download">
-            ArrayExpress: Discover functional genomics data quickly and easily</a> for further information.
+                ArrayExpress: Discover functional genomics data quickly and easily</a> for further information.
         </p>
 
 
-        <h3 id="wholeExpt">It doesn't look like the whole of the original experiment is in Expression Atlas, why not?</h3>
+        <h3 id="wholeExpt">It doesn't look like the whole of the original experiment is in Expression Atlas, why
+            not?</h3>
         <p>
             We sometimes only include part of an experiment in Expression Atlas because (1) there are not sufficient
             replicates of all the sample groups within an experiment, or (2) the hybridization or sequencing was not of
@@ -73,11 +92,12 @@
         <p>
             Microarray data quality is assessed using the
             <a href="https://www.bioconductor.org/packages/release/bioc/html/arrayQualityMetrics.html">
-            arrayQualityMetrics</a> package in <a href="https://www.r-project.org/">R</a>. Outlier arrays are detected
+                arrayQualityMetrics</a> package in <a href="https://www.r-project.org/">R</a>. Outlier arrays are
+            detected
             using distance measures, boxplots, and MA plots. If an array is classed as an outlier by all three methods,
             it is excluded from further analysis. Please see the arrayQualityMetrics
             <a href="https://www.bioconductor.org/packages/release/bioc/vignettes/arrayQualityMetrics/inst/doc/arrayQualityMetrics.pdf">
-            documentation</a> for more details on the methods used.
+                documentation</a> for more details on the methods used.
         </p>
 
 
@@ -132,29 +152,31 @@
         </p>
         <ol>
             <li>The number of reads from a gene depends on its length. One expects more reads to be produced from
-                longer genes.</li>
+                longer genes.
+            </li>
             <li>The number of reads from a gene depends on the sequencing depth that is the total number of reads you
                 sequenced. One expects more reads to be produced from the sample that has been sequenced to a greater
-                depth.</li>
+                depth.
+            </li>
         </ol>
         <p>
             FPKM (introduced by <a href="http://www.nature.com/nbt/journal/v28/n5/full/nbt.1621.html">Trapnell et al,
             2010</a>) are calculated with the following formula:
         </p>
         <p style="text-align:center;">
-            <img  alt="fpkm formula" src="/gxa/resources/images/faq/fpkm.png">
+            <img alt="fpkm formula" src="/gxa/resources/images/faq/fpkm.png">
         </p>
         <p>
             where <i>q<sub>i</sub></i> are raw counts (number of reads that mapped for each gene), <i>l<sub>i</sub></i>
             is gene length and
-            <img alt="total number mapped reads" src="/gxa/resources/images/faq/total-number-mapped-reads.png" align="bottom">
+            <img alt="total number mapped reads" src="/gxa/resources/images/faq/total-number-mapped-reads.png">
             is the total number of mapped reads. The interpretation of FPKM is that if you sequence your RNA sample
             again, you expect to see for gene <i>i</i>, <i>FPKM<sub>i</sub></i> reads divided by gene <i>i</i> length
             over a thousand and divided by the total number of reads mapped over a million.
         </p>
         <p>
             <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-323">
-            Li and Dewey, 2011</a> introduced the unit TPM and
+                Li and Dewey, 2011</a> introduced the unit TPM and
             <a href="https://arxiv.org/abs/1104.3889">Pachter, 2011</a> established the relationship between both
             units. It is possible to compute TPM from FPKM as follows:
         </p>
@@ -195,7 +217,6 @@
             like to use them, all we ask is that you attribute <a href="/gxa">Expression Atlas</a> when you do.</p>
 
 
-
         <h2 id="searching">Searching</h2>
 
         <h3 id="conditionSearch">How do I find out what genes are expressed in a particular condition (e.g. in my
@@ -216,7 +237,7 @@
             <a href="/gxa/experiments/E-MTAB-5214">GTEx</a>) to see the results in that particular
             experiment. Use the <i>Select</i> button under <b>Organism parts</b> on the left sidebar to find
             <a href="/gxa/experiments/E-MTAB-5214/Results?specific=true&geneQuery=%255B%255D&filterFactors=%257B%2522ORGANISM_PART%2522%253A%255B%2522cortex%2520of%2520kidney%2522%255D%257D&cutoff=%257B%2522value%2522%253A0.5%257D&unit=%2522TPM%2522">
-            what genes are expressed in kidney in GTEx</a>.
+                what genes are expressed in kidney in GTEx</a>.
         </p>
 
 
@@ -225,10 +246,10 @@
             Use the <b>Condition query</b> search box on the <a href="/gxa">home page</a> to search for as
             many conditions as you want. You will need to type each condition, click enter and when you are done, just
             search. For example, searching with
-            <img alt="liver and heart" src="/gxa/resources/images/faq/liver-heart.png" align="bottom"> will find
+            <img alt="liver and heart" src="/gxa/resources/images/faq/liver-heart.png"> will find
             <a href="/gxa/search?conditionQuery=%5B%7B%22value%22%3A%22liver%22%7D%2C%7B%22value%22%3A%22heart%22%7D%5D">
-            all experiments in which both liver and heart are studied as well as the ones analysing either liver or
-            heart</a>.
+                all experiments in which both liver and heart are studied as well as the ones analysing either liver or
+                heart</a>.
         </p>
 
 
@@ -237,7 +258,7 @@
             Use the <b>Gene query</b> search box on the <a href="/gxa">home page</a> to search for your
             favourite gene (e.g.
             <a href="/gxa/search?geneQuery=%5B%7B%22value%22%3A%22SFTPC%22%2C%22category%22%3A%22symbol%22%7D%5D">
-            SFTPC</a>). Click on <b>Show anatomogram</b> in the top left corner if you want to see the
+                SFTPC</a>). Click on <b>Show anatomogram</b> in the top left corner if you want to see the
             corresponding anatomogram for each of the species displayed. You will see <b>Baseline
             expression</b> results in different conditions (e.g. organism part, cell line, cell type,
             developmental stage) and <b>Differential expression</b> results for biologically meaningful
@@ -248,7 +269,7 @@
             <a href="/gxa/experiments/E-MTAB-5214">GTEx</a>) to see the results in that particular
             experiment. Use the <b>Gene query</b> box (e.g. SFTPC in our example) to find
             <a href="/gxa/experiments/E-MTAB-5214/Results?specific=true&geneQuery=%255B%257B%2522value%2522%253A%2522SFTPC%2522%252C%2522category%2522%253A%2522symbol%2522%257D%255D&filterFactors=%257B%257D&cutoff=%257B%2522value%2522%253A0.5%257D&unit=%2522TPM%2522">
-            in which tissues from GTEx gene SFTPC is expressed</a>.
+                in which tissues from GTEx gene SFTPC is expressed</a>.
         </p>
 
 
@@ -285,7 +306,7 @@
             <li>
                 <a href="http://www.geneontology.org/">Gene Ontology</a> term, e.g.
                 <a href='/gxa/search?geneQuery=[{"value":"respiratory gaseous exchange"}]'>respiratory gaseous
-                exchange</a></li>
+                    exchange</a></li>
         </ul>
 
 
@@ -300,7 +321,7 @@
         <p>
             If you know the <a href="https://www.ebi.ac.uk/arrayexpress">ArrayExpress</a> accession of the experiment
             you want to see (e.g. <a href="https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-4202/">E-MTAB-4202
-            </a>), you can link to the experiment in Expression Atlas using the following format:
+        </a>), you can link to the experiment in Expression Atlas using the following format:
             <code>https://www.ebi.ac.uk/gxa/experiments/<b>&lt;ArrayExpress accession&gt;</b></code>
         </p>
         <p>e.g. <a href="/gxa/experiments/E-MTAB-4202">https://www.ebi.ac.uk/gxa/experiments/E-MTAB-4202</a></p>
@@ -333,12 +354,15 @@
                 <td>https://www.ebi.ac.uk/gxa/search?conditionQuery=[{"value":"cancer"}]#differential</td>
             </tr>
             <tr>
-                <td>Show me comparisons where <a href="https://www.ebi.ac.uk/interpro/entry/IPR007087">zinc finger</a> genes are differentially expressed in mice.</td>
-                <td>https://www.ebi.ac.uk/gxa/search?geneQuery=[{"value":"zinc finger"}]&organism=Mus musculus#differential</td>
+                <td>Show me comparisons where <a href="https://www.ebi.ac.uk/interpro/entry/IPR007087">zinc finger</a>
+                    genes are differentially expressed in mice.
+                </td>
+                <td>https://www.ebi.ac.uk/gxa/search?geneQuery=[{"value":"zinc finger"}]&organism=Mus
+                    musculus#differential
+                </td>
             </tr>
             </tbody>
         </table>
-
 
 
         <h2 ID="results">Results</h2>
@@ -352,9 +376,9 @@
         <p>
             By default, we display expression data for different tissues, e.g
             <a href='/gxa/search?geneQuery=[{"value":"CFHR2", "category":"symbol"}]'>in which tissues is CFHR2
-            expressed?</a> but you can also use the filters to find gene expression in other conditions, such as
+                expressed?</a> but you can also use the filters to find gene expression in other conditions, such as
             <a href="/gxa/genes/ENSMUSG00000033898?bs=%7B%22mus%20musculus%22%3A%5B%22CELL_TYPE%22%5D%7D&ds=%7B%22kingdom%22%3A%5B%22animals%22%5D%7D#baseline">
-            in which mouse cell types is CFHR2 expressed?</a>
+                in which mouse cell types is CFHR2 expressed?</a>
         </p>
         <p>
             If you search for a particular condition (e. g.
@@ -392,18 +416,19 @@
         <p>
             Each Baseline expression experiment in Expression Atlas has its own <b>Experiment page</b>, e.g.
             <a href="/gxa/experiments/E-MTAB-4344">Strand-specific RNA-seq of 13 human tissues from Michael Snyder's
-            lab for the ENCODE project</a> where you can see a heatmap showing the 50 most specifically expressed genes
+                lab for the ENCODE project</a> where you can see a heatmap showing the 50 most specifically expressed
+            genes
             across all conditions studied.
         </p>
         <p>
             You can further refine the query by narrowing the search to a particular gene (e.g.
             <a href="/gxa/experiments/E-MTAB-4344/Results?specific=true&geneQuery=%255B%257B%2522value%2522%253A%2522Ctrb1%2522%252C%2522category%2522%253A%2522symbol%2522%257D%255D&filterFactors=%257B%257D&cutoff=%257B%2522value%2522%253A0.5%257D&unit=%2522TPM%2522">
-            CTRB1</a>), or gene sets (e.g.
+                CTRB1</a>), or gene sets (e.g.
             <a href="/gxa/experiments/E-MTAB-4344/Results?specific=true&geneQuery=%255B%257B%2522value%2522%253A%2522CELA3A%2522%252C%2522category%2522%253A%2522symbol%2522%257D%252C%257B%2522value%2522%253A%2522CELA3B%2522%252C%2522category%2522%253A%2522symbol%2522%257D%252C%257B%2522value%2522%253A%2522CTRB1%2522%252C%2522category%2522%253A%2522symbol%2522%257D%252C%257B%2522value%2522%253A%2522CTRB2%2522%252C%2522category%2522%253A%2522symbol%2522%257D%252C%257B%2522value%2522%253A%2522PRSS1%2522%252C%2522category%2522%253A%2522symbol%2522%257D%252C%257B%2522value%2522%253A%2522PRSS2%2522%252C%2522category%2522%253A%2522symbol%2522%257D%255D&filterFactors=%257B%257D&cutoff=%257B%2522value%2522%253A0.5%257D&unit=%2522TPM%2522">
-            CELA3A, CELA3B, CTRB1, CTRB2, PRSS1, PRSS2</a>), or by limiting which organism parts are searched over
+                CELA3A, CELA3B, CTRB1, CTRB2, PRSS1, PRSS2</a>), or by limiting which organism parts are searched over
             (e.g.
             <a href="/gxa/experiments/E-MTAB-4344/Results?specific=true&geneQuery=%255B%255D&filterFactors=%257B%2522ORGANISM_PART%2522%253A%255B%2522pancreas%2522%255D%257D&cutoff=%257B%2522value%2522%253A0.5%257D&unit=%2522TPM%2522">
-            genes specifically expressed in pancreas</a>).
+                genes specifically expressed in pancreas</a>).
         </p>
 
 
@@ -424,12 +449,12 @@
         <h3 id="blDownloadAnalytics">Can I download the baseline expression results?</h3>
         <p>
             Yes, click on the
-            <img alt="Download All Results button" src="/gxa/resources/images/faq/download-all-results-button.png" align="bottom">
+            <img alt="Download All Results button" src="/gxa/resources/images/faq/download-all-results-button.png">
             button above the heatmap to download the data corresponding to your query. For example, if you select
             'flower' in the <b>Organism part</b> box, use the <b>Download all results</b> button to
             download expression data for the
             <a href="/gxa/experiments/E-MTAB-552/Results?specific=true&geneQuery=%255B%255D&filterFactors=%257B%2522ORGANISM_PART%2522%253A%255B%2522flower%2522%252C%2522stamen%2522%255D%257D&cutoff=%257B%2522value%2522%253A0.5%257D&unit=%2522TPM%2522">
-            subset of genes specifically expressed in flower</a> in tab-delimited format with no ordering.
+                subset of genes specifically expressed in flower</a> in tab-delimited format with no ordering.
         </p>
         <p>
             On the other hand, by clicking on the <i>Downloads tab</i> of the experiment page you will download
@@ -442,27 +467,27 @@
             expression from transcriptional profiling of zebrafish developmental stages</a> just select a gene (e.g.
             <b>SNORD61</b>) and a condition, developmental stage in that particular experiment (e.g.
             <b>gastrula 50%-epiboly</b>) and click on the
-            <img alt="Ensembl Genome Browser" src="/gxa/resources/images/faq/ensembl-genome-browser-button.png" align="bottom">
+            <img alt="Ensembl Genome Browser" src="/gxa/resources/images/faq/ensembl-genome-browser-button.png">
             button in the left of the heatmap. You will see
             <a href="https://www.ensembl.org/Danio_rerio/Location/View?g=ENSDARG00000083171;r=14:31520436-31520513;t=ENSDART00000116362;text=;time=1504707519">
-            gene expression value for gene SNORD61 in developmental stage gastrula 50%-epiboly in the context of the
-            genomic location of SNORD61</a>.
+                gene expression value for gene SNORD61 in developmental stage gastrula 50%-epiboly in the context of the
+                genomic location of SNORD61</a>.
         </p>
         <p>
             For plant experiments, e.g. <a href="/gxa/experiments/E-GEOD-55482">Transcriptomes for hybrids (F1s)
             between 18 Arabidopsis thaliana parents of the Multiparent Advanced Generation Inter-Cross (MAGIC) genetic
             mapping resource</a> you can also use the
-            <img alt="Gramene Genome Browser" src="/gxa/resources/images/faq/gramene-genome-browser-button.png" align="bottom">
+            <img alt="Gramene Genome Browser" src="/gxa/resources/images/faq/gramene-genome-browser-button.png">
             button to see, for example,
             <a href="http://ensembl.gramene.org/Arabidopsis_thaliana/Location/View?g=AT2G27380;r=2:11713411-11715774;t=AT2G27380.1;time=1484746364">
-            gene expression value for gene EPR1 in ecotype Sf-2 x Can-0 in the context of the genomic location of
-            EPR1</a>.
+                gene expression value for gene EPR1 in ecotype Sf-2 x Can-0 in the context of the genomic location of
+                EPR1</a>.
         </p>
         <p>
             For experiments performed in <i>Caenorhabditis elegans</i> or in <i>Schistosoma mansoni</i> such as
             <a href="/gxa/experiments/E-MTAB-451">RNA-Seq of Schistosoma mansoni (flatworms) larva and adult
-            individuals at different life-stages</a> you can see the results using the
-            <img alt="WormBase Genome Browser" src="/gxa/resources/images/faq/wormbase-genome-browser-button.png" align="bottom">
+                individuals at different life-stages</a> you can see the results using the
+            <img alt="WormBase Genome Browser" src="/gxa/resources/images/faq/wormbase-genome-browser-button.png">
             button.
         </p>
 
@@ -507,13 +532,14 @@
         <p>
             Click on the Comparison name (e.g.
             <a href="/gxa/experiments/E-MTAB-2445?geneQuery=ENSMUSG00000026839&queryFactorValues=g1_g5&specific=false">
-            'CCl4; 1.6 gram per kilogram' at '24 hour' vs 'none' at '0 hour'</a>) to find out more information about a
+                'CCl4; 1.6 gram per kilogram' at '24 hour' vs 'none' at '0 hour'</a>) to find out more information about
+            a
             particular gene-comparison combination. In microarray experiments, some genes may be targeted by more than
             one probe set. The table in the <b>Differential expression</b> results shows the values for the
             probe set with the largest absolute log<sub>2</sub> fold-change. You can see details of all probe sets for
             a given gene on the Experiment page. For example,
             <a href="/gxa/experiments/E-MTAB-2445/Results?specific=true&geneQuery=%255B%257B%2522value%2522%253A%2522Car3%2522%252C%2522category%2522%253A%2522symbol%2522%257D%255D&filterFactors=%257B%257D&cutoff=%257B%2522foldChange%2522%253A1%252C%2522pValue%2522%253A0.05%257D&regulation=%2522UP_DOWN%2522">
-            gene Car3 is represented by 4 probe sets</a> in the experiment
+                gene Car3 is represented by 4 probe sets</a> in the experiment
             <a href="/gxa/experiments/E-MTAB-2445">Transcriptional responses in liver upon acute CCl4 intoxication</a>.
         </p>
 
@@ -543,7 +569,7 @@
         <p>
             Let's search for the condition
             <a href="/gxa/search?conditionQuery=%5B%7B%22value%22%3A%22breast%20cancer%22%7D%5D#differential">breast
-            cancer in a differential context</a>. A red box indicates that the gene is <b>up-regulated</b> in
+                cancer in a differential context</a>. A red box indicates that the gene is <b>up-regulated</b> in
             the test condition while a blue box means that the gene is <b>down-regulated</b> in the test
             condition. The colour intensity of filled boxes in the table represents how large the log<sub>2</sub>
             fold-change is for each gene. The larger the log<sub>2</sub> fold-change, the more intense the red or blue
@@ -556,10 +582,11 @@
         </p>
 
 
-        <h3 id="displayLogFoldChanges">How do I see the actual log<sub>2</sub> fold-changes in the Differential expression results table?</h3>
+        <h3 id="displayLogFoldChanges">How do I see the actual log<sub>2</sub> fold-changes in the Differential
+            expression results table?</h3>
         <p>
             Click on the
-            <img alt="Display Log2 Fold-Change button" src="/gxa/resources/images/faq/display-log2-fc.png" align="bottom">
+            <img alt="Display Log2 Fold-Change button" src="/gxa/resources/images/faq/display-log2-fc.png">
             button to the top left corner of the table to see the numerical values of the log<sub>2</sub> fold-change
             per each gene in each comparison.
         </p>
@@ -596,7 +623,7 @@
             <a href="http://www.geneontology.org/">GO</a>, <a href="https://www.ebi.ac.uk/interpro/">InterPro</a>, and
             <a href="http://www.reactome.org/">Reactome</a> is tested for within the set of differentially expressed
             genes, using a variation on <a href="https://en.wikipedia.org/wiki/Fisher%27s_exact_test">Fisher's exact
-            test</a>.  Gene set enrichment plots are only shown when statistically significant enrichment of terms was
+            test</a>. Gene set enrichment plots are only shown when statistically significant enrichment of terms was
             detected. This means that for some experiments, the menu will not display plots for all three of the
             aforementioned resources.
         </p>
@@ -605,14 +632,15 @@
         <h3 id="deDownloadAnalytics">Can I download the differential expression results?</h3>
         <p>
             Yes, click on the
-            <img alt="Download All Results button" src="/gxa/resources/images/faq/download-all-results-button.png" align="bottom">
+            <img alt="Download All Results button" src="/gxa/resources/images/faq/download-all-results-button.png">
             button above the heatmap to download the data corresponding to your query. For example, in
             <a href="/gxa/experiments/E-GEOD-73131">Transcription profiling by array of pancreatic islets from Sgpp2
-            knockout mice after high fat diet</a> if you select just one comparison, e.g. 'high fat diet' vs 'normal'
+                knockout mice after high fat diet</a> if you select just one comparison, e.g. 'high fat diet' vs
+            'normal'
             in 'Sgpp2 knockout' from the <b>Comparison</b> box and click Apply, by clicking on the
             <b>Download all results</b> button you will download
             <a href="/gxa/experiments/E-GEOD-73131/Results?specific=true&geneQuery=%255B%255D&filterFactors=%257B%2522COMPARISON_NAME%2522%253A%255B%2522%27high%2520fat%2520diet%27%2520vs%2520%27normal%27%2520in%2520%27Sgpp2%2520knockout%27%2522%255D%257D&cutoff=%257B%2522foldChange%2522%253A1%252C%2522pValue%2522%253A0.05%257D&regulation=%2522UP_DOWN%2522">
-            expression data for the subset of genes differentially expressed in that particular comparison</a> in
+                expression data for the subset of genes differentially expressed in that particular comparison</a> in
             tab-delimited format with no ordering.
         </p>
         <p>
@@ -628,9 +656,10 @@
         <h5><a href="FAQ.html#general">General</a></h5>
         <ul class="menu vertical">
             <li><a href="FAQ.html#whatIsAtlas">What is Expression Atlas</a></li>
-            <li><a href="FAQ.html#exptChosen">How are experiments chosen to be in Expression Atlas?</a></li>
+            <li><a href="FAQ.html#exptEligibility">How are experiments chosen to be in Expression Atlas?</a></li>
             <li><a href="FAQ.html#getOrigData">How can I obtain the original data for an experiment?</a></li>
-            <li><a href="FAQ.html#wholeExpt">It doesn't look like the whole of the original experiment is in Expression Atlas, why not?</a></li>
+            <li><a href="FAQ.html#wholeExpt">It doesn't look like the whole of the original experiment is in Expression
+                Atlas, why not?</a></li>
             <li><a href="FAQ.html#arrayQuality">How is microarray data quality controlled?</a></li>
             <li><a href="FAQ.html#rnaseqQuality">How is RNA-seq data quality controlled?</a></li>
             <li><a href="FAQ.html#microarrayAnalysis">How is microarray data analysed?</a></li>
@@ -644,9 +673,11 @@
         </ul>
         <h5><a href="FAQ.html#searching">Searching</a></h5>
         <ul class="menu vertical">
-            <li><a href="FAQ.html#conditionSearch">How do I find out what genes are expressed in a particular condition (e.g. in my favourite tissue, cell line, developmental stage)?</a></li>
+            <li><a href="FAQ.html#conditionSearch">How do I find out what genes are expressed in a particular condition
+                (e.g. in my favourite tissue, cell line, developmental stage)?</a></li>
             <li><a href="FAQ.html#multiConditionQuery">How do I search for multiple conditions at once?</a></li>
-            <li><a href="FAQ.html#geneSearch">How do I find out in which conditions my favourite gene is expressed?</a></li>
+            <li><a href="FAQ.html#geneSearch">How do I find out in which conditions my favourite gene is expressed?</a>
+            </li>
             <li><a href="FAQ.html#multiGeneQuery">How do I search for multiple genes at once?</a></li>
             <li><a href="FAQ.html#geneIDs">What gene identifiers can I use to search?</a></li>
             <li><a href="FAQ.html#exptLink">How do I find a particular experiment?</a></li>
@@ -654,19 +685,26 @@
         </ul>
         <h5><a href="FAQ.html#results">Results</a></h5>
         <ul class="menu vertical">
-            <li><a href="FAQ.html#blResults">When I search in Expression Atlas, what do the Baseline Expression results show?</a></li>
-            <li><a href="FAQ.html#blHeatmapColours">In Baseline expression results, how are baseline expression levels represented?</a></li>
-            <li><a href="FAQ.html#blExperimentPage">How can I see the results for each experiment in Baseline expression results?</a></li>
-            <li><a href="FAQ.html#blHeatmapColoursExpPage">In the experiment page, how are baseline expression levels represented?</a></li>
+            <li><a href="FAQ.html#blResults">When I search in Expression Atlas, what do the Baseline Expression results
+                show?</a></li>
+            <li><a href="FAQ.html#blHeatmapColours">In Baseline expression results, how are baseline expression levels
+                represented?</a></li>
+            <li><a href="FAQ.html#blExperimentPage">How can I see the results for each experiment in Baseline expression
+                results?</a></li>
+            <li><a href="FAQ.html#blHeatmapColoursExpPage">In the experiment page, how are baseline expression levels
+                represented?</a></li>
             <li><a href="FAQ.html#blDownloadAnalytics">Can I download the baseline expression results?</a></li>
             <li><a href="FAQ.html#ensembl">Can I view the results in the Ensembl browser?</a></li>
             <li><a href="FAQ.html#similarExpression">How are similarly expressed genes computed?</a></li>
 
-            <li><a href="FAQ.html#deResults">When I search in Expression Atlas, what do the Differential Expression results show?</a></li>
+            <li><a href="FAQ.html#deResults">When I search in Expression Atlas, what do the Differential Expression
+                results show?</a></li>
             <li><a href="FAQ.html#designElement">What is a &quot;design element&quot;?</a></li>
             <li><a href="FAQ.html#comparison">What is a &quot;comparison&quot;?</a></li>
-            <li><a href="FAQ.html#deHeatmapColours">What do the red and blue colours mean in the Differential expression results?</a></li>
-            <li><a href="FAQ.html#displayLogFoldChanges">How do I see the actual log<sub>2</sub> fold-changes in the Differential expression results table?</a></li>
+            <li><a href="FAQ.html#deHeatmapColours">What do the red and blue colours mean in the Differential expression
+                results?</a></li>
+            <li><a href="FAQ.html#displayLogFoldChanges">How do I see the actual log<sub>2</sub> fold-changes in the
+                Differential expression results table?</a></li>
             <li><a href="FAQ.html#pvalue">Where do the <i>p</i>-values come from?</a></li>
             <li><a href="FAQ.html#gseaPlots">How are the gene set enrichment plots created?</a></li>
             <li><a href="FAQ.html#deDownloadAnalytics">Can I download the differential expression results?</a></li>
@@ -675,7 +713,7 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function(event) {
-        document.getElementById("local-nav-faq").className += ' active';
-    });
+  document.addEventListener('DOMContentLoaded', function (event) {
+    document.getElementById('local-nav-faq').className += ' active'
+  })
 </script>
