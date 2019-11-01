@@ -4,8 +4,8 @@ A collection of data reuse licences from projects that publish study datasets wh
 in [Expression Atlas](https://www.ebi.ac.uk/gxa).
 
 ## How to use
-```
-import disclaimers from 'expression-atlas-disclaimers'
+```javascript
+import disclaimers from '@ebi-gene-expression-group/expression-atlas-disclaimers'
 
 // Object.keys[disclaimers] = [`blueprint`, `lauderdale` or `pcawg`]
 const Disclaimer = disclaimers[`pcawg`]
