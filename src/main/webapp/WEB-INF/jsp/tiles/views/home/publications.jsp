@@ -4,13 +4,13 @@
     <h4>Publications </h4>
     <div class="row">
         <div class="small-12 columns">
-            <a href="https://academic.oup.com/nar/article/46/D1/D246/4641906" target="_blank">
+            <a href="https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkz947/5609521" target="_blank">
                 <div class="media-object margin-bottom-large">
                     <div class="media-object-section middle">
                         <h3><span class="icon icon-conceptual" data-icon="l"></span></h3>
                     </div>
                     <div class="media-object-section middle">
-                        <p>Expression Atlas: gene and protein expression across multiple studies and organisms<br/><i>Nucleic Acids Research</i>, 20 November 2017.</p>
+                        <p>Expression Atlas update: from tissues to single cells <br/><i>Nucleic Acids Research</i>, 30 October 2019.</p>
                     </div>
                 </div>
             </a>
