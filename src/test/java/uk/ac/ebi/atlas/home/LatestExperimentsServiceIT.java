@@ -1,6 +1,8 @@
 package uk.ac.ebi.atlas.home;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,19 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
-import uk.ac.ebi.atlas.utils.ExperimentInfo;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 @WebAppConfiguration
@@ -78,32 +75,16 @@ public class LatestExperimentsServiceIT {
                         ));
     }
 
-    public void assertThatExperimentsAreSortedByDate(List<ExperimentInfo> listOfExperimentInfo) throws Exception {
-        Iterator<ExperimentInfo> iterator = listOfExperimentInfo.iterator();
-
-        while (iterator.hasNext()) {
-            ExperimentInfo thisElement = iterator.next();
-            ExperimentInfo nextElement = iterator.hasNext() ? iterator.next() : null;
-
-            if (nextElement != null) {
-                Date thisDate = DATE_FORMAT.parse(thisElement.getLastUpdate());
-                Date nextDate = DATE_FORMAT.parse(nextElement.getLastUpdate());
-
-                if (!thisDate.equals(nextDate)) {
-                    assertThat(
-                            DATE_FORMAT.parse(thisElement.getLastUpdate())
-                                    .after(DATE_FORMAT.parse(nextElement.getLastUpdate())),
-                            is(true));
-                }
-            }
-        }
-    }
-
     @Test
     public void fetchLatestExperimentsAttributes() throws Exception {
-        assertThat(subject.fetchLatestExperimentsAttributes().get("latestExperiments"), instanceOf(List.class));
-        assertThatExperimentsAreSortedByDate(
-                (List<ExperimentInfo>) subject.fetchLatestExperimentsAttributes().get("latestExperiments")
-        );
+        var latestExperimentsJson =
+                new GsonBuilder().create().toJsonTree(subject.fetchLatestExperimentsAttributes().get("latestExperiments"));
+
+        var builder = ImmutableList.<Date>builder();
+        for (var element : latestExperimentsJson.getAsJsonArray()) {
+            builder.add(DATE_FORMAT.parse(element.getAsJsonObject().get("lastUpdate").getAsString()));
+        }
+        var dates = builder.build();
+        assertThat(dates.reverse()).isSorted();
     }
 }

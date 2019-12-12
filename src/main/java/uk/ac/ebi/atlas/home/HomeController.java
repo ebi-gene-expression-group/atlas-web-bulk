@@ -6,11 +6,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
-import uk.ac.ebi.atlas.experiments.ExperimentInfoListService;
+import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.species.SpeciesProperties;
 import uk.ac.ebi.atlas.species.SpeciesPropertiesTrader;
-import uk.ac.ebi.atlas.utils.ExperimentInfo;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
+import java.util.Collection;
 import java.util.Random;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
@@ -36,14 +37,14 @@ public class HomeController extends HtmlExceptionHandlingController {
 
     private final SpeciesPropertiesTrader speciesPropertiesTrader;
     private final AtlasInformationDao atlasInformationDao;
-    private final ExperimentInfoListService experimentInfoListService;
+    private final ExperimentTrader experimentTrader;
 
     public HomeController(SpeciesPropertiesTrader speciesPropertiesTrader,
                           AtlasInformationDao atlasInformationDao,
-                          ExperimentInfoListService experimentInfoListService) {
+                          ExperimentTrader experimentTrader) {
         this.speciesPropertiesTrader = speciesPropertiesTrader;
         this.atlasInformationDao = atlasInformationDao;
-        this.experimentInfoListService = experimentInfoListService;
+        this.experimentTrader = experimentTrader;
     }
 
     @RequestMapping(value = "/home", produces = "text/html;charset=UTF-8")
@@ -60,18 +61,20 @@ public class HomeController extends HtmlExceptionHandlingController {
         model.addAttribute("species", allSpecies);
         model.addAttribute("speciesPath", ""); // Required by Spring form tag
 
-        model.addAttribute("numberOfStudies", experimentInfoListService.listPublicExperiments().size());
+        model.addAttribute("numberOfStudies", experimentTrader.getPublicExperiments().size());
 
         var numberOfSpecies =
-                experimentInfoListService.listPublicExperiments().stream()
-                        .map(ExperimentInfo::getSpecies)
+                experimentTrader.getPublicExperiments().stream()
+                        .map(Experiment::getSpecies)
                         .distinct()
                         .count();
+
         model.addAttribute("numberOfSpecies", numberOfSpecies);
 
         var numberOfAssays =
-                experimentInfoListService.listPublicExperiments().stream()
-                        .mapToInt(ExperimentInfo::getNumberOfAssays)
+                experimentTrader.getPublicExperiments().stream()
+                        .map(Experiment::getAnalysedAssays)
+                        .mapToInt(Collection::size)
                         .sum();
         model.addAttribute("numberOfAssays", numberOfAssays);
 
