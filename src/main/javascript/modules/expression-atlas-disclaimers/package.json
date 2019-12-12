@@ -1,6 +1,6 @@
 {
   "name": "@ebi-gene-expression-group/expression-atlas-disclaimers",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Disclaimers for Expression Atlas experiments",
   "main": "lib/disclaimers.js",
   "scripts": {

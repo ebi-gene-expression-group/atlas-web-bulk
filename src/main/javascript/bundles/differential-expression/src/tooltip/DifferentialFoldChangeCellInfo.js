@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
-import ScientificNotationNumber from 'expression-atlas-number-format'
+import ScientificNotationNumber from '@ebi-gene-expression-group/expression-atlas-number-format'
 
 const BorderLessTable = styled.table`
   border-collapse: collapse;

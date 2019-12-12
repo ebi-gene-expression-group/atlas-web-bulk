@@ -4,7 +4,7 @@ import styled from 'styled-components'
 
 import URI from 'urijs'
 
-import EbiSpeciesIcon  from 'react-ebi-species'
+import EbiSpeciesIcon  from '@ebi-gene-expression-group/react-ebi-species'
 import DisplayLevelsButton from './DisplayLevelsButton'
 import DifferentialDownloadButton from './DifferentialDownloadButton'
 import DifferentialFoldChangeCell from './DifferentialFoldChangeCell'
