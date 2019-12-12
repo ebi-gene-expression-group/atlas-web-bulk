@@ -3,7 +3,8 @@
 <%--@elvariable id="hasExtraInfo" type="boolean"--%>
 <%--@elvariable id="dataProviderURL" type="List<String>"--%>
 <%--@elvariable id="dataProviderDescription" type="List<String>"--%>
-<%--@elvariable id="allArrayDesigns" type="SortedSet<String>"--%>
+<%--@elvariable id="arrayDesignAccessions" type="Set<String>"--%>
+<%--@elvariable id="arrayDesignNames" type="Set<String>"--%>
 <%--@elvariable id="pubMedIds" type="Set<String>"--%>
 <%--@elvariable id="species" type="uk.ac.ebi.atlas.species.Species"--%>
 <%--@elvariable id="type" type="uk.ac.ebi.atlas.model.ExperimentType"--%>
