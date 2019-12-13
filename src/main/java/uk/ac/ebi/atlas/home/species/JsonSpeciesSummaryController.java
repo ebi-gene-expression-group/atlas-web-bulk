@@ -22,6 +22,6 @@ public class JsonSpeciesSummaryController extends JsonExceptionHandlingControlle
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getSpeciesSummaryGroupedByKingdom() {
         return speciesSummarySerializer.serialize(
-                speciesSummaryService.getSpeciesSummariesGroupedByKingdom());
+                speciesSummaryService.getReferenceSpeciesSummariesGroupedByKingdom());
     }
 }
