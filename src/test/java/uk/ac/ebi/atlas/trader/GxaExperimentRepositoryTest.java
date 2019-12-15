@@ -101,5 +101,4 @@ class GxaExperimentRepositoryTest {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> subject.getExperiment(experimentAccession));
     }
-
 }
