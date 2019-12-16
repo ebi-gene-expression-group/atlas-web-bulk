@@ -10,7 +10,6 @@ import uk.ac.ebi.atlas.experimentimport.ExperimentCrudDao;
 import uk.ac.ebi.atlas.experimentimport.ExperimentDto;
 import uk.ac.ebi.atlas.experimentimport.idf.IdfParser;
 import uk.ac.ebi.atlas.experimentimport.idf.IdfParserOutput;
-import uk.ac.ebi.atlas.experimentimport.sdrf.SdrfParser;
 import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.trader.factory.BaselineExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.MicroarrayExperimentFactory;
@@ -45,9 +44,6 @@ class GxaExperimentRepositoryTest {
     private IdfParser idfParserMock;
 
     @Mock
-    private SdrfParser sdrfParser;
-
-    @Mock
     private BaselineExperimentFactory baselineExperimentFactoryMock;
 
     @Mock
@@ -65,7 +61,6 @@ class GxaExperimentRepositoryTest {
                         experimentCrudDaoMock,
                         experimentDesignParserMock,
                         idfParserMock,
-                        sdrfParser,
                         baselineExperimentFactoryMock,
                         rnaSeqDifferentialExperimentFactoryMock,
                         microarrayExperimentFactoryMock);
