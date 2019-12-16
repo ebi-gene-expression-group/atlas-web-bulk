@@ -1,5 +1,6 @@
 package uk.ac.ebi.atlas.trader;
 
+import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -57,17 +58,41 @@ public class GxaExperimentRepository implements ExperimentRepository {
         var idfParserOutput = idfParser.parse(experimentDto.getExperimentAccession());
         switch (experimentDto.getExperimentType()) {
             case PROTEOMICS_BASELINE:
+                return baselineExperimentFactory.create(
+                        experimentDto,
+                        experimentDesign,
+                        idfParserOutput,
+                        ImmutableSet.of("Proteomics"));
             case RNASEQ_MRNA_BASELINE:
-                return baselineExperimentFactory.create(experimentDto, experimentDesign, idfParserOutput,
-                        sdrfParser.parseSingleCellTechnologyType(experimentAccession));
+                return baselineExperimentFactory.create(
+                        experimentDto,
+                        experimentDesign,
+                        idfParserOutput,
+                        ImmutableSet.of("RNA-Seq mRNA"));
             case RNASEQ_MRNA_DIFFERENTIAL:
-                return rnaSeqDifferentialExperimentFactory.create(experimentDto, experimentDesign, idfParserOutput,
-                        sdrfParser.parseSingleCellTechnologyType(experimentAccession));
+                return rnaSeqDifferentialExperimentFactory.create(
+                        experimentDto,
+                        experimentDesign,
+                        idfParserOutput,
+                        ImmutableSet.of("RNA-Seq mRNA"));
             case MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL:
+                return microarrayExperimentFactory.create(
+                        experimentDto,
+                        experimentDesign,
+                        idfParserOutput,
+                        ImmutableSet.of("Microarray 1-colour miRNA"));
             case MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL:
+                return microarrayExperimentFactory.create(
+                        experimentDto,
+                        experimentDesign,
+                        idfParserOutput,
+                        ImmutableSet.of("Microarray 1-colour mRNA"));
             case MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL:
-                return microarrayExperimentFactory.create(experimentDto, experimentDesign, idfParserOutput,
-                        sdrfParser.parseSingleCellTechnologyType(experimentAccession));
+                return microarrayExperimentFactory.create(
+                        experimentDto,
+                        experimentDesign,
+                        idfParserOutput,
+                        ImmutableSet.of("Microarray 2-colour mRNA"));
             default:
                 throw new IllegalArgumentException(
                         "Unable to build experiment " + experimentDto.getExperimentAccession()

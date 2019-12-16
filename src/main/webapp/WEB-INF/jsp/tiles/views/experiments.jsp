@@ -14,29 +14,13 @@
                     [
                         {type: 'sort', title: 'Type', width: 50, dataParam: 'experimentType',
                             image: {
-                                MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL: {
+                                Differential: {
                                     src: '${pageContext.request.contextPath}/resources/images/experiments-table/differential.png',
-                                    alt: 'Microarray 1-colour miRNA'
+                                    alt: 'Differential experiment'
                                 },
-                                PROTEOMICS_BASELINE: {
+                                Baseline: {
                                     src: '${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png',
-                                    alt: 'Proteomics baseline'
-                                },
-                                RNASEQ_MRNA_BASELINE: {
-                                    src: "${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png",
-                                    alt: 'RNA-Seq mRNA baseline'
-                                },
-                                MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL: {
-                                    src: '${pageContext.request.contextPath}/resources/images/experiments-table/differential.png',
-                                    alt: 'Microarray 2-colour mRNA'
-                                },
-                                MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL: {
-                                    src: '${pageContext.request.contextPath}/resources/images/experiments-table/differential.png',
-                                    alt: 'Microarray 1-colour mRNA'
-                                },
-                                RNASEQ_MRNA_DIFFERENTIAL: {
-                                    src: '${pageContext.request.contextPath}/resources/images/experiments-table/differential.png',
-                                    alt: 'RNA-Seq mRNA differential'
+                                    alt: 'Baseline experiment'
                                 }
                             }
                         },
@@ -49,8 +33,7 @@
                         {type: 'sort', title: 'Comparisons', width: 100, dataParam: 'numberOfContrasts',
                             link: 'experimentAccession', resource: 'experiments', endpoint: 'Experiment%20Design'},
                         {type: 'search', title: 'experiment factors', width: 200, dataParam: 'experimentalFactors'},
-                        {type: 'search', title: 'array designs', width: 220, dataParam: 'arrayDesignNames',
-                            link: 'arrayDesigns', resource: 'https://www.ebi.ac.uk/arrayexpress/arrays', endpoint: ''}
+                        {type: 'sort', title: 'Technology', width: 220, dataParam: 'technologyType'}
                     ],
             tableFilters : [
                 {label: `Kingdom`, dataParam: `kingdom`},

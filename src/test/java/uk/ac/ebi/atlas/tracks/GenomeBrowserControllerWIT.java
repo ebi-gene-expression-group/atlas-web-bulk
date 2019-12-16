@@ -97,7 +97,7 @@ class GenomeBrowserControllerWIT {
         this.mockMvc
                 .perform(get(MessageFormat.format(URL_TEMPLATE, "ensembl", "E-PROT-1", "ENSG00000013297", "any")))
                 .andExpect(status().isFound())
-                .andExpect(redirectedUrl("http://www.ensembl.org/Homo_sapiens/Location/View?g=ENSG00000013297"))
+                .andExpect(redirectedUrl("https://www.ensembl.org/Homo_sapiens/Location/View?g=ENSG00000013297"))
                 .andReturn();
     }
 
@@ -136,7 +136,7 @@ class GenomeBrowserControllerWIT {
         assertThat(
                 redirectedUrl,
                 startsWith(
-                        "http://plants.ensembl.org/Brachypodium_distachyon/Location/View" +
+                        "https://plants.ensembl.org/Brachypodium_distachyon/Location/View" +
                         "?g=BRADI3G11800;contigviewbottom=url:http"));
         assertThat(
                 redirectedUrl,
@@ -186,7 +186,7 @@ class GenomeBrowserControllerWIT {
         assertThat(
                 redirectedUrl,
                 startsWith(
-                        "http://plants.ensembl.org/Oryza_sativa/Location/View" +
+                        "https://plants.ensembl.org/Oryza_sativa/Location/View" +
                                 "?g=OS04G0581000;contigviewbottom=url:http"));
         assertThat(
                 redirectedUrl,
@@ -215,7 +215,7 @@ class GenomeBrowserControllerWIT {
         assertThat(
                 redirectedUrl,
                 startsWith(
-                        "http://parasite.wormbase.org/Schistosoma_mansoni_prjea36577/Location/View" +
+                        "https://parasite.wormbase.org/Schistosoma_mansoni_prjea36577/Location/View" +
                                 "?g=Smp_131110;contigviewbottom=url:http"));
         assertThat(
                 redirectedUrl,
@@ -237,7 +237,7 @@ class GenomeBrowserControllerWIT {
 
         assertThat(
                 redirectedUrl,
-                startsWith("http://parasite.wormbase.org/Caenorhabditis_elegans_prjna13758/Location/View" +
+                startsWith("https://parasite.wormbase.org/Caenorhabditis_elegans_prjna13758/Location/View" +
                         "?g=WBGene00003778;contigviewbottom=url:http"));
         assertThat(
                 redirectedUrl,
@@ -262,7 +262,7 @@ class GenomeBrowserControllerWIT {
         assertThat(
                 redirectedUrl,
                 startsWith(
-                        "http://www.ensembl.org/Homo_sapiens/Location/View" +
+                        "https://www.ensembl.org/Homo_sapiens/Location/View" +
                                 "?g=ENSG00000102970;contigviewbottom=url:http"));
         assertThat(
                 redirectedUrl,
@@ -286,7 +286,7 @@ class GenomeBrowserControllerWIT {
         assertThat(
                 redirectedUrl,
                 startsWith(
-                        "http://www.ensembl.org/Mus_musculus/Location/View" +
+                        "https://www.ensembl.org/Mus_musculus/Location/View" +
                                 "?g=ENSMUSG00000002688;contigviewbottom=url:http"));
         assertThat(
                 redirectedUrl,

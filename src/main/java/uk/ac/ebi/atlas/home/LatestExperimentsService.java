@@ -3,16 +3,15 @@ package uk.ac.ebi.atlas.home;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.atlassian.util.concurrent.LazyReference;
-import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
-import uk.ac.ebi.atlas.utils.ExperimentInfo;
+import uk.ac.ebi.atlas.experiments.ExperimentJsonSerializer;
 
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 public class LatestExperimentsService {
     private final LatestExperimentsDao latestExperimentsDao;
@@ -24,13 +23,12 @@ public class LatestExperimentsService {
                 @Override
                     protected ImmutableMap<String, Object> create() {
 
-                        long experimentCount = latestExperimentsDao.fetchPublicExperimentsCount(experimentTypes);
-
-                        List<ExperimentInfo> latestExperimentInfo =
+                        var experimentCount = latestExperimentsDao.fetchPublicExperimentsCount(experimentTypes);
+                        var latestExperimentInfo =
                                 latestExperimentsDao.fetchLatestExperimentAccessions(experimentTypes).stream()
                                         .map(experimentTrader::getPublicExperiment)
-                                        .map(Experiment::buildExperimentInfo)
-                                        .collect(Collectors.toList());
+                                        .map(ExperimentJsonSerializer::serialize)
+                                        .collect(toImmutableSet());
 
                         return ImmutableMap.of(
                                 "experimentCount", experimentCount,
