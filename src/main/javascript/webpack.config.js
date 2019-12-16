@@ -6,12 +6,12 @@ const vendorsBundleName = `vendorCommons`
 
 module.exports = {
   entry: {
-    expressionAtlasHeatmapHighcharts: `expression-atlas-heatmap-highcharts`,
-    experimentPage: `expression-atlas-experiment-page`,
-    expressionAtlasBioentityInformation: `sc-atlas-bioentity-information`,
+    expressionAtlasHeatmapHighcharts: `@ebi-gene-expression-group/expression-atlas-heatmap-highcharts`,
+    experimentPage: `@ebi-gene-expression-group/expression-atlas-experiment-page`,
+    expressionAtlasBioentityInformation: `@ebi-gene-expression-group/atlas-bioentity-information`,
     expressionAtlasBaselineExpression: `./bundles/baseline-expression`,
     expressionAtlasDifferentialExpression: `./bundles/differential-expression`,
-    feedbackForm: `atlas-feedback-form`,
+    feedbackForm: `@ebi-gene-expression-group/atlas-feedback-form`,
     homepageSpeciesSummaryPanel: `./bundles/homepage-species-summary-panel`,
     homepageExperimentsSummaryPanel: `./bundles/homepage-experiments-summary-panel`,
     experimentTable: `./bundles/experiment-table`
@@ -33,7 +33,7 @@ module.exports = {
 
   resolve: {
     alias: {
-      "expression-atlas-heatmap-highcharts": path.resolve(`./node_modules/expression-atlas-heatmap-highcharts`),
+      "expression-atlas-heatmap-highcharts": path.resolve(`./node_modules/@ebi-gene-expression-group/expression-atlas-heatmap-highcharts`),
       "he": path.resolve(`./node_modules/he`),
       "highcharts": path.resolve(`./node_modules/highcharts`),
       "lodash": path.resolve(`./node_modules/lodash`),
@@ -45,8 +45,8 @@ module.exports = {
       "styled-components": path.resolve(`./node_modules/styled-components`),
       "react-router-dom": path.resolve(`./node_modules/react-router-dom`),
       "urijs": path.resolve(`./node_modules/urijs`),
-      "atlas-homepage-cards": path.resolve(`./node_modules/atlas-homepage-cards`),
-      "atlas-react-fetch-loader": path.resolve(`./node_modules/atlas-react-fetch-loader`)
+      "atlas-homepage-cards": path.resolve(`./node_modules/@ebi-gene-expression-group/atlas-homepage-cards`),
+      "atlas-react-fetch-loader": path.resolve(`./node_modules/@ebi-gene-expression-group/atlas-react-fetch-loader`)
     }
   },
 

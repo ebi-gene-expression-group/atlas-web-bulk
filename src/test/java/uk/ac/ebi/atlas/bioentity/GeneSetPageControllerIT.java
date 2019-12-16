@@ -25,7 +25,8 @@ class GeneSetPageControllerIT {
     private GeneSetPageController subject;
 
     @ParameterizedTest
-    @ValueSource(strings = {"GO:0016746", "PO:0005052"})
+    // TODO Add  to parameters when PO terms in plants species are back "PO:0005052"
+    @ValueSource(strings = {"GO:0016746"})
     void bioentityProperties(String bioentityIdentifier) {
         Model model = new BindingAwareModelMap();
         subject.showGeneSetPage(bioentityIdentifier, "", model);
