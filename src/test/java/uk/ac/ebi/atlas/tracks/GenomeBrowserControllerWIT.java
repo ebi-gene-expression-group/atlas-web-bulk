@@ -318,7 +318,7 @@ class GenomeBrowserControllerWIT {
                                         "ensemblgenomes",
                                         "E-MTAB-4106",
                                         "SPAC869.01", "g5_g1") +
-                                        "&accessKey=1483a23f-4853-4583-b10c-5ab333bf522f"))
+                                        "&accessKey=90b4a8a4-31cc-4658-a52b-853aeeb327c5"))
                 .andExpect(status().isFound())
                 .andReturn();
 
@@ -327,6 +327,6 @@ class GenomeBrowserControllerWIT {
                 containsString(
                         "/experiments-content/E-MTAB-4106/tracks/" +
                                 "E-MTAB-4106.g5_g1.genes.log2foldchange.bedGraph" +
-                                "?accessKey=1483a23f-4853-4583-b10c-5ab333bf522f"));
+                                "?accessKey=90b4a8a4-31cc-4658-a52b-853aeeb327c5"));
     }
 }
