@@ -40,7 +40,7 @@
                 {label: `Experiment Type`, dataParam: `experimentType`}
             ],
             species: '${species}',
-            enableDownload: false
+            enableDownload: true
         }, 'experiments');
     });
 </script>
