@@ -92,7 +92,11 @@
             }
           ],
           species: '${species}',
-          enableDownload: true
+          enableDownload: true,
+          downloadTooltip: '<ul>' +
+            '<li>Expression matrices in TPMs or log<sub>2</sub>fold-change</li>' +
+            '<li>Experiment design file with experimental metadata</li>' +
+            '</ul>',
         },
         'experiments');
     });
