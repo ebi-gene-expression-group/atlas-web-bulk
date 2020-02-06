@@ -1,3 +1,6 @@
+<%--@elvariable id="species" type="java.lang.String"--%>
+<%--@elvariable id="experimentSet" type="java.lang.String"--%>
+
 <%@ page contentType="text/html;charset=UTF-8" %>
 
 <div id="experiments"></div>
@@ -97,6 +100,7 @@
             '<li>Expression matrices in TPMs or log<sub>2</sub>fold-change</li>' +
             '<li>Experiment design file with experimental metadata</li>' +
             '</ul>',
+          initialSearchAll: '${experimentSet}'
         },
         'experiments');
     });
