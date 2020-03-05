@@ -9,94 +9,88 @@
     document.addEventListener('DOMContentLoaded', function(event) {
       experimentTable.render(
         {
-          host: '${pageContext.request.contextPath}/',
-          resource: 'json/experiments',
-          tableHeader:
-            [
-              {
-                type: 'sort',
-                title: 'Type',
-                width: 50,
-                dataParam: 'experimentType',
-                image: {
-                  Differential: {
-                    src: '${pageContext.request.contextPath}/resources/images/experiments-table/differential.png',
-                    alt: 'Differential experiment'
-                  },
-                  Baseline: {
-                    src: '${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png',
-                    alt: 'Baseline experiment'
-                  }
+          tableHeaders: [
+            {
+              label: 'Type',
+              dataKey: 'experimentType',
+              sortable: true,
+              width: 0.5,
+              image: {
+                Differential: {
+                  src: '${pageContext.request.contextPath}/resources/images/experiments-table/differential.png',
+                  alt: 'Differential experiment',
+                  title: 'Differential experiment'
+                },
+                Baseline: {
+                  src: '${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png',
+                  alt: 'Baseline experiment',
+                  title: 'Baseline experiment'
                 }
-              },
-              {
-                type: 'sort',
-                title: 'Loaded date',
-                width: 120,
-                dataParam: 'lastUpdate'
-              },
-              {
-                type: 'search',
-                title: 'species',
-                width: 200,
-                dataParam: 'species'
-              },
-              {
-                type: 'search',
-                title: 'experiment description',
-                width: 400,
-                dataParam: 'experimentDescription',
-                link: 'experimentAccession',
-                resource: 'experiments',
-                endpoint: 'Results'
-              },
-              {
-                type: 'sort',
-                title: 'Number of assays',
-                width: 120,
-                dataParam: 'numberOfAssays',
-                link: 'experimentAccession',
-                resource: 'experiments',
-                endpoint: 'Experiment%20Design'
-              },
-              {
-                type: 'sort',
-                title: 'Comparisons',
-                width: 100,
-                dataParam: 'numberOfContrasts',
-                link: 'experimentAccession',
-                resource: 'experiments',
-                endpoint: 'Experiment%20Design'
-              },
-              {
-                type: 'search',
-                title: 'experiment factors',
-                width: 200,
-                dataParam: 'experimentalFactors'
-              },
-              {
-                type: 'sort',
-                title: 'Technology',
-                width: 220,
-                dataParam: 'technologyType'
               }
-            ],
-          tableFilters: [
+            },
+            {
+              label: 'Load date',
+              dataKey: 'loadDate',
+              sortable: true,
+              width: 0.5
+            },
+            {
+              label: 'Species',
+              dataKey: 'species',
+              searchable: true,
+              sortable: true
+            },
+            {
+              label: 'Title',
+              dataKey: 'experimentDescription',
+              searchable: true,
+              sortable: true,
+              linkTo: function(dataRow) { return 'experiments/' + dataRow.experimentAccession + '/Results'; },
+              width: 2
+            },
+            {
+              label: 'Assays',
+              dataKey: 'numberOfAssays',
+              sortable: true,
+              linkTo: function(dataRow) { return 'experiments/' + dataRow.experimentAccession + '/Experiment%20Design'; },
+              width: 0.5
+            },
+            {
+              label: 'Experimental factors',
+              dataKey: 'experimentalFactors',
+              searchable: true,
+              linkTo: function(dataRow) { return 'experiments/' + dataRow.experimentAccession + '/Experiment%20Design'; }
+            },
+            {
+              label: 'Technology',
+              dataKey: 'technologyType',
+              sortable: false
+            }
+          ],
+          dropdownFilters: [
             {
               label: 'Kingdom',
-              dataParam: 'kingdom'
+              dataKey: 'kingdom'
             },
             {
               label: 'Experiment Type',
-              dataParam: 'experimentType'
+              dataKey: 'experimentType'
             }
           ],
-          species: '${species}',
-          enableDownload: true,
-          downloadTooltip: '<ul>' +
-            '<li>Expression matrices in TPMs or log<sub>2</sub>fold-change</li>' +
-            '<li>Experiment design file with experimental metadata</li>' +
-            '</ul>',
+          rowSelectionColumn: {
+            label: 'Download',
+            dataKey: 'experimentAccession',
+            tooltipContent:
+              '<ul>' +
+              '<li>Expression matrices in TPMs or log<sub>2</sub>fold-change</li>' +
+              '<li>Experiment design file with experimental metadata</li>' +
+              '</ul>',
+            width: 0.75
+          },
+          sortColumnIndex: 1,
+          ascendingOrder: false,
+          host: '${pageContext.request.contextPath}/',
+          basename: '${pageContext.request.contextPath}/'
         },
         'experiments');
     });
