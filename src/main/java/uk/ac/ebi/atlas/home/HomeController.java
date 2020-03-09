@@ -11,10 +11,11 @@ import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Random;
 import java.util.function.Function;
 
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.common.collect.ImmutableSortedMap.toImmutableSortedMap;
 import static uk.ac.ebi.atlas.home.AtlasInformationDataType.EFO;
 import static uk.ac.ebi.atlas.home.AtlasInformationDataType.EG;
 import static uk.ac.ebi.atlas.home.AtlasInformationDataType.ENSEMBL;
@@ -51,7 +52,10 @@ public class HomeController extends HtmlExceptionHandlingController {
     public String getHome(Model model) {
         var species = speciesSummaryService.getReferenceSpecies()
                 .stream()
-                .collect(toImmutableMap(Function.identity(), StringUtils::capitalize));
+                .collect(toImmutableSortedMap(
+                        Comparator.<String>naturalOrder(),
+                        Function.identity(),
+                        StringUtils::capitalize));
 
         model.addAttribute("numberOfSpecies", species.size());
         model.addAttribute("numberOfStudies", experimentTrader.getPublicExperiments().size());
