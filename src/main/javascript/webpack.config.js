@@ -28,7 +28,8 @@ module.exports = {
     library: `[name]`,
     filename: `[name].bundle.js`,
     publicPath: `/gxa/resources/js-bundles/`,
-    path: path.resolve(__dirname, `../webapp/resources/js-bundles`)
+    path: path.resolve(__dirname, `../webapp/resources/js-bundles`),
+    devtoolNamespace: `firefox`
   },
 
   resolve: {

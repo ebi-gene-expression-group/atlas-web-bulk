@@ -1,24 +1,21 @@
 package uk.ac.ebi.atlas.search;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonArray;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.atlas.bioentity.properties.BioEntityCardModelFactory;
 import uk.ac.ebi.atlas.bioentity.properties.BioEntityPropertyDao;
 import uk.ac.ebi.atlas.controllers.JsonExceptionHandlingController;
-import uk.ac.ebi.atlas.solr.BioentityPropertyName;
-import uk.ac.ebi.atlas.species.Species;
 import uk.ac.ebi.atlas.species.SpeciesInferrer;
 
 import javax.inject.Inject;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static uk.ac.ebi.atlas.bioentity.properties.BioEntityCardProperties.BIOENTITY_PROPERTY_NAMES;
 import static uk.ac.ebi.atlas.solr.BioentityPropertyName.SYMBOL;
+import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 
 @RestController
 public class JsonBioentityInformationController extends JsonExceptionHandlingController {
@@ -36,18 +33,14 @@ public class JsonBioentityInformationController extends JsonExceptionHandlingCon
         this.speciesInferrer = speciesInferrer;
     }
 
-    @RequestMapping(
-            value = "/json/bioentity_information/{geneId:.+}", // Don't truncate ".value" at the end of IDs
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String getBioentityInformation(@PathVariable String geneId) {
-        Species species = speciesInferrer.inferSpeciesForGeneQuery(SemanticQuery.create(geneId));
-        Map<BioentityPropertyName, Set<String>> propertyValues = bioEntityPropertyDao.fetchGenePageProperties(geneId);
-        String geneName =
-                bioEntityPropertyDao.fetchPropertyValuesForGeneId(geneId, SYMBOL).stream()
-                        .collect(Collectors.joining("/"));
+    @GetMapping(value = "/json/bioentity-information/{geneId:.+}", // Don't truncate ".value" at the end of IDs
+                produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public String jsonBioentityInformation(@PathVariable String geneId) {
+        var species = speciesInferrer.inferSpeciesForGeneQuery(SemanticQuery.create(geneId));
+        var propertyValues = bioEntityPropertyDao.fetchGenePageProperties(geneId);
+        var geneName = String.join("/", bioEntityPropertyDao.fetchPropertyValuesForGeneId(geneId, SYMBOL));
 
-        Map<String, Object> model =
+        var model =
                 bioEntityCardModelFactory.modelAttributes(
                         geneId,
                         species,
@@ -55,6 +48,9 @@ public class JsonBioentityInformationController extends JsonExceptionHandlingCon
                         geneName,
                         propertyValues);
 
-        return model.get("bioentityProperties").toString();
+        return GSON.toJson(
+                ImmutableMap.of(
+                        "bioentityProperties",
+                        GSON.fromJson(model.get("bioentityProperties").toString(), JsonArray.class)));
     }
 }
