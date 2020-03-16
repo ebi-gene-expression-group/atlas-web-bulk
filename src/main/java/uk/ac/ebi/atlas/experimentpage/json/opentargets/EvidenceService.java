@@ -295,9 +295,13 @@ EvidenceService<
         return result;
     }
 
-    double getPValue(X expression) {
-        return Double.valueOf(
-                String.format("%3.2e", expression.getPValue() == 0.0 ? MIN_P_VALUE : expression.getPValue()));
+    private double getPValue(X expression) {
+        return Double.parseDouble(
+                String.format(
+                        "%3.2e",
+                        expression.getPValue() == 0.0 ?
+                                MIN_P_VALUE :
+                                expression.getPValue()));
     }
 
     private JsonObject resourceScore(X expression, String methodDescription) {
@@ -544,7 +548,7 @@ EvidenceService<
         return DiseaseAssociation.CONFIDENCE.LOW;
     }
 
-    Map<String, Map<Contrast, Integer>> getPercentileRanks(E experiment) {
+    private Map<String, Map<Contrast, Integer>> getPercentileRanks(E experiment) {
         return readPercentileRanks(
                 experiment,
                 dataFileHub.getDifferentialExperimentFiles(experiment.getAccession()).percentileRanks.get());
@@ -595,7 +599,7 @@ EvidenceService<
     If something's a factor then it is also a characteristic unless we've made a mistake.
     Example mistake was E-GEOD-23764.
      */
-    boolean cellLineAsSampleCharacteristicButNoDiseaseAsFactor(ExperimentDesign experimentDesign) {
+    private boolean cellLineAsSampleCharacteristicButNoDiseaseAsFactor(ExperimentDesign experimentDesign) {
         return (experimentDesign.getSampleCharacteristicHeaders().contains("cell line") ||
                 experimentDesign.getFactorHeaders().contains("cell line"))  &&
                 !experimentDesign.getFactorHeaders().contains("disease");
