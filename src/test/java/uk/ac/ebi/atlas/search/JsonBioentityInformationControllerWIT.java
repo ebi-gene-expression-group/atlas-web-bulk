@@ -36,7 +36,7 @@ public class JsonBioentityInformationControllerWIT {
 
     private MockMvc mockMvc;
 
-    private static final String urlTemplate = "/json/bioentity_information/{geneId}";
+    private static final String urlTemplate = "/json/bioentity-information/{geneId}";
 
     @BeforeEach
     public void setUp() {
@@ -51,12 +51,12 @@ public class JsonBioentityInformationControllerWIT {
                 .perform(get(urlTemplate, geneId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("$[0].type", isA(String.class)))
-                .andExpect(jsonPath("$[0].name", isA(String.class)))
-                .andExpect(jsonPath("$[0].values", hasSize(greaterThanOrEqualTo(1))))
-                .andExpect(jsonPath("$[0].values[0].text", isA(String.class)))
-                .andExpect(jsonPath("$[0].values[0].url", isA(String.class)))
-                .andExpect(jsonPath("$[0].values[0].relevance", isA(Number.class)));
+                .andExpect(jsonPath("$.bioentityProperties[0].type", isA(String.class)))
+                .andExpect(jsonPath("$.bioentityProperties[0].name", isA(String.class)))
+                .andExpect(jsonPath("$.bioentityProperties[0].values", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$.bioentityProperties[0].values[0].text", isA(String.class)))
+                .andExpect(jsonPath("$.bioentityProperties[0].values[0].url", isA(String.class)))
+                .andExpect(jsonPath("$.bioentityProperties[0].values[0].relevance", isA(Number.class)));
     }
 
     @Test

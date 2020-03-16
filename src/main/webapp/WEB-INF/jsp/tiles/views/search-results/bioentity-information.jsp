@@ -8,10 +8,10 @@
 
 <script defer src="${pageContext.request.contextPath}/resources/js-bundles/expressionAtlasBioentityInformation.bundle.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function(event) {
+    document.addEventListener('DOMContentLoaded', function(event) {
         expressionAtlasBioentityInformation.render({
-            atlasUrl: "${pageContext.request.contextPath}/",
-            geneId: "${identifier}"
+            host: '${pageContext.request.contextPath}/',
+            resource: 'json/bioentity-information/${identifier}'
         }, 'bioentityInformationTab')
     })
 </script>
