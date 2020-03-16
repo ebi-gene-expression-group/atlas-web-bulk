@@ -17,7 +17,6 @@ import uk.ac.ebi.atlas.model.experiment.sdrf.SampleCharacteristic;
 import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.experiment.sdrf.Factor;
-import uk.ac.ebi.atlas.model.experiment.sdrf.FactorSet;
 import uk.ac.ebi.atlas.model.experiment.sample.Contrast;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExpression;
@@ -41,13 +40,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class
-EvidenceService<
-        X extends DifferentialExpression,
-        E extends DifferentialExperiment,
-        O extends DifferentialProfileStreamOptions,
-        P extends Profile<Contrast, X, P>> {
-
+public class EvidenceService<X extends DifferentialExpression,
+                             E extends DifferentialExperiment,
+                             O extends DifferentialProfileStreamOptions,
+                             P extends Profile<Contrast, X, P>> {
     private static final double MIN_P_VALUE = 1e-234;
     private static final String ACTIVITY_URL_TEMPLATE = "http://identifiers.org/cttv.activity/{0}";
 
@@ -55,10 +51,9 @@ EvidenceService<
     private final DataFileHub dataFileHub;
     private final String expressionAtlasVersion;
 
-
-    public EvidenceService(
-            ProfileStreamFactory<Contrast, X, E, O, P> differentialProfileStreamFactory,
-            DataFileHub dataFileHub, String expressionAtlasVersion) {
+    public EvidenceService(ProfileStreamFactory<Contrast, X, E, O, P> differentialProfileStreamFactory,
+                           DataFileHub dataFileHub,
+                           String expressionAtlasVersion) {
         this.differentialProfileStreamFactory = differentialProfileStreamFactory;
         this.dataFileHub = dataFileHub;
         this.expressionAtlasVersion = expressionAtlasVersion;
@@ -71,17 +66,16 @@ EvidenceService<
             return;
         }
 
-        Map<Contrast, DiseaseAssociation> diseaseAssociations = getDiseaseAssociations(experiment);
+        var diseaseAssociations = getDiseaseAssociations(experiment);
         if (diseaseAssociations.size() == 0) {
             return;
         }
 
-        String methodDescription = getMethodDescriptionFromAnalysisMethodsFile(experiment);
+        var methodDescription = getMethodDescriptionFromAnalysisMethodsFile(experiment);
+        var rankPerContrastPerGene = getPercentileRanks(experiment);
 
-        Map<String, Map<Contrast, Integer>> rankPerContrastPerGene = getPercentileRanks(experiment);
-
-        for (Contrast contrast : diseaseAssociations.keySet()) {
-            for (P profile :
+        for (var contrast : diseaseAssociations.keySet()) {
+            for (var profile :
                     differentialProfileStreamFactory.select(
                             experiment, queryForOneContrast.apply(contrast), Collections.emptySet(),
                             p -> p.getExpression(contrast) != null,
@@ -90,12 +84,11 @@ EvidenceService<
                                     GeneProfilesList::new))) {
 
                 // If experiment is microarray, retrieve probe ID
-                // TODO Or could check experiment.getType().isMicroarray() instead?
-                Optional<String> probeId = profile instanceof MicroarrayProfile ?
+                var probeId = profile instanceof MicroarrayProfile ?
                         Optional.of(((MicroarrayProfile) profile).getDesignElementName()) :
-                        Optional.empty();
+                        Optional.<String>empty();
 
-                X expression = profile.getExpression(contrast);
+                var expression = profile.getExpression(contrast);
                 if (expression != null) {
                     piecesOfEvidence(
                             experiment,
@@ -127,22 +120,22 @@ EvidenceService<
                                   Optional<String> probeId,
                                   Contrast contrast,
                                   Consumer<JsonObject> yield) {
-        for (OntologyTerm diseaseUri : linkToDisease.diseaseInfo().getValueOntologyTerms()) {
-            yield.accept(pieceOfEvidence(
-                    experiment,
-                    methodDescription,
-                    diseaseUri,
-                    linkToDisease.biosampleInfo(),
-                    Pair.of(linkToDisease.testSampleLabel(), linkToDisease.referenceSampleLabel()),
-                    linkToDisease.confidence(),
-                    expression,
-                    foldChangeRank,
-                    ensemblGeneId,
-                    probeId,
-                    contrast,
-                    linkToDisease.isCttvPrimary(),
-                    linkToDisease.organismPart())
-            );
+        for (var diseaseUri : linkToDisease.diseaseInfo().getValueOntologyTerms()) {
+            yield.accept(
+                    pieceOfEvidence(
+                            experiment,
+                            methodDescription,
+                            diseaseUri,
+                            linkToDisease.biosampleInfo(),
+                            Pair.of(linkToDisease.testSampleLabel(), linkToDisease.referenceSampleLabel()),
+                            linkToDisease.confidence(),
+                            expression,
+                            foldChangeRank,
+                            ensemblGeneId,
+                            probeId,
+                            contrast,
+                            linkToDisease.isCttvPrimary(),
+                            linkToDisease.organismPart()));
         }
     }
 
@@ -159,7 +152,6 @@ EvidenceService<
                                        Contrast contrast,
                                        boolean isCttvPrimary,
                                        SampleCharacteristic organismPart) {
-
         return withLiteratureReferences(
                 associationRecord(
                         uniqueAssociationFields(
@@ -170,12 +162,10 @@ EvidenceService<
                         ),
                         target(ensemblGeneId,
                                 isCttvPrimary,
-                                expression
-                        ),
+                                expression),
                         disease(
                                 diseaseUri,
-                                biosampleInfo
-                        ),
+                                biosampleInfo),
                         evidence(
                                 experiment,
                                 ensemblGeneId,
@@ -185,20 +175,18 @@ EvidenceService<
                                 contrast,
                                 confidence,
                                 methodDescription,
-                                organismPart)
-                ), experiment.getPubMedIds()
-        );
+                                organismPart)),
+                experiment.getPubMedIds());
     }
 
     private JsonObject withLiteratureReferences(JsonObject object, Collection<String> pubmedIds) {
         if (!pubmedIds.isEmpty()) {
-            JsonObject literature = new JsonObject();
-            JsonArray references = new JsonArray();
-            for (String pubmedId : pubmedIds) {
-                JsonObject reference = new JsonObject();
+            var literature = new JsonObject();
+            var references = new JsonArray();
+            for (var pubmedId : pubmedIds) {
+                var reference = new JsonObject();
                 reference.addProperty("lit_id", MessageFormat.format(
-                        "http://europepmc.org/abstract/MED/{0}", pubmedId
-                ));
+                        "http://europepmc.org/abstract/MED/{0}", pubmedId));
                 references.add(reference);
             }
             literature.add("references", references);
@@ -208,14 +196,16 @@ EvidenceService<
         return object;
     }
 
-    private JsonObject evidence(E experiment, String ensemblGeneId,
-                                X expression, Integer foldChangeRank,
+    private JsonObject evidence(E experiment,
+                                String ensemblGeneId,
+                                X expression,
+                                Integer foldChangeRank,
                                 Pair<String, String> testAndReferenceLabels,
                                 Contrast contrast,
                                 DiseaseAssociation.CONFIDENCE confidence,
                                 String methodDescription,
                                 SampleCharacteristic organismPart) {
-        JsonObject result = new JsonObject();
+        var result = new JsonObject();
         result.addProperty("is_associated", true);
         result.addProperty(
                 "unique_experiment_reference", MessageFormat.format("STUDYID_{0}", experiment.getAccession()));
@@ -238,7 +228,7 @@ EvidenceService<
     }
 
     private JsonObject linkUrl(String niceName, String url) {
-        JsonObject result = new JsonObject();
+        var result = new JsonObject();
         result.addProperty("nice_name", niceName);
         result.addProperty("url", url);
 
@@ -253,7 +243,7 @@ EvidenceService<
     }
 
     private JsonArray linkUrls(String experimentAccession, String ensemblGeneId) {
-        JsonArray result = new JsonArray();
+        var result = new JsonArray();
         result.add(linkUrl(
                 "ArrayExpress Experiment overview",
                 MessageFormat.format("http://identifiers.org/arrayexpress/{0}", experimentAccession)
@@ -279,7 +269,7 @@ EvidenceService<
     But we are not including this data in the JSON report for now.
     */
     private JsonArray evidenceCodes(ExperimentType experimentType) {
-        JsonArray result = new JsonArray();
+        var result = new JsonArray();
         if (experimentType.isMicroarray()) {
             result.add(new JsonPrimitive("http://purl.obolibrary.org/obo/ECO_0000058"));
         } else if (experimentType.isRnaSeqDifferential()) {
@@ -289,7 +279,7 @@ EvidenceService<
     }
 
     private JsonObject log2FoldChange(X expression, Integer foldChangeRank) {
-        JsonObject result = new JsonObject();
+        var result = new JsonObject();
         result.addProperty("value", expression.getFoldChange());
         result.addProperty("percentile_rank", foldChangeRank);
         return result;
@@ -305,14 +295,14 @@ EvidenceService<
     }
 
     private JsonObject resourceScore(X expression, String methodDescription) {
-        JsonObject result = new JsonObject();
+        var result = new JsonObject();
         /*
         probability estimates shouldn't be zero but sometimes we get them from the pipeline as rounding errors
         use the smallest positive double greater than zero,
          */
         result.addProperty("value", getPValue(expression));
 
-        JsonObject method = new JsonObject();
+        var method = new JsonObject();
         method.addProperty("description", methodDescription);
         result.add("method", method);
         result.addProperty("type", "pvalue");
@@ -320,8 +310,8 @@ EvidenceService<
     }
 
     private JsonObject provenanceType() {
-        JsonObject result = new JsonObject();
-        JsonObject database = new JsonObject();
+        var result = new JsonObject();
+        var database = new JsonObject();
         database.addProperty("version", expressionAtlasVersion);
         database.addProperty("id", "Expression_Atlas");
         result.add("database", database);
@@ -338,16 +328,16 @@ EvidenceService<
 
     //https://github.com/opentargets/json_schema/blob/master/src/bioentity/disease.json
     private JsonObject disease(OntologyTerm diseaseUri, SampleCharacteristic biosampleInfo) {
-        JsonObject result = new JsonObject();
+        var result = new JsonObject();
         result.addProperty("id", diseaseUri.uri());
         result.add("biosample", biosampleInfo(biosampleInfo));
         return result;
     }
 
     private JsonObject biosampleInfo(SampleCharacteristic biosampleInfo) {
-        JsonObject result = new JsonObject();
+        var result = new JsonObject();
         result.addProperty("name", biosampleInfo.getValue());
-        Optional<OntologyTerm> ontologyTerm = biosampleInfo.getValueOntologyTerms().stream().findFirst();
+        var ontologyTerm = biosampleInfo.getValueOntologyTerms().stream().findFirst();
         ontologyTerm.ifPresent(ontologyTerm1 -> result.addProperty("id", ontologyTerm1.uri()));
         return result;
     }
@@ -360,7 +350,6 @@ EvidenceService<
         result.addProperty("geneID", geneUri(ensemblGeneId));
         result.addProperty("study_id", experimentAccessionUri(experimentAccession));
         result.addProperty("comparison_name", comparisonName);
-
         probeId.ifPresent(x -> result.addProperty("probe_id", x));
         return result;
     }
@@ -378,7 +367,7 @@ EvidenceService<
     }
 
     private JsonObject target(String ensemblGeneId, boolean isCttvPrimary, X expression) {
-        JsonObject result = new JsonObject();
+        var result = new JsonObject();
         result.addProperty("id", geneUri(ensemblGeneId));
         result.addProperty("target_type", "http://identifiers.org/cttv.target/transcript_evidence");
         result.addProperty("activity", activity(isCttvPrimary, expression));
@@ -387,10 +376,10 @@ EvidenceService<
     }
 
     private JsonObject associationRecord(JsonObject uniqueAssociationFields,
-                                 JsonObject target,
-                                 JsonObject disease,
-                                 JsonObject evidence) {
-        JsonObject result = new JsonObject();
+                                         JsonObject target,
+                                         JsonObject disease,
+                                         JsonObject evidence) {
+        var result = new JsonObject();
         result.addProperty("sourceID", "expression_atlas");
         result.addProperty("type", "rna_expression");
         result.addProperty("access_level", "public");
@@ -401,13 +390,13 @@ EvidenceService<
         return result;
     }
 
-    private Map<Contrast, DiseaseAssociation> getDiseaseAssociations(DifferentialExperiment experiment) {
-        Map<Contrast, DiseaseAssociation> result = new HashMap<>();
-        for (Contrast contrast : experiment.getDataColumnDescriptors()) {
+    private ImmutableMap<Contrast, DiseaseAssociation> getDiseaseAssociations(DifferentialExperiment experiment) {
+        var result = ImmutableMap.<Contrast, DiseaseAssociation>builder();
+        for (var contrast: experiment.getDataColumnDescriptors()) {
             DiseaseAssociation.tryCreate(experiment, contrast)
                     .ifPresent(diseaseAssociation -> result.put(contrast, diseaseAssociation));
         }
-        return result;
+        return result.build();
     }
 
     @AutoValue
@@ -417,24 +406,16 @@ EvidenceService<
         }
 
         public abstract SampleCharacteristic biosampleInfo();
-
         public abstract String referenceSampleLabel();
-
         public abstract String testSampleLabel();
-
         public abstract SampleCharacteristic diseaseInfo();
-
         public abstract CONFIDENCE confidence();
-
         public abstract boolean isCttvPrimary();
-
         public abstract SampleCharacteristic organismPart();
 
         public static Optional<DiseaseAssociation> tryCreate(DifferentialExperiment experiment, Contrast contrast) {
-            Optional<SampleCharacteristic> biosampleInfo =
-                    getBiosampleInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
-            Optional<SampleCharacteristic> diseaseInfo =
-                    getDiseaseInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
+            var biosampleInfo = getBiosampleInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
+            var diseaseInfo = getDiseaseInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
 
             if (biosampleInfo.isPresent() && diseaseInfo.isPresent()) {
                 return Optional.of(
@@ -449,18 +430,17 @@ EvidenceService<
             }
         }
 
-
         public static DiseaseAssociation create(SampleCharacteristic biosampleInfo,
                                                 ExperimentDesign experimentDesign,
                                                 Contrast contrast,
                                                 boolean isCttvPrimary,
                                                 SampleCharacteristic diseaseInfo) {
-            String referenceSampleLabel = factorBasedSummaryLabel(experimentDesign, contrast.getReferenceAssayGroup());
-            String testSampleLabel = factorBasedSummaryLabel(experimentDesign, contrast.getTestAssayGroup());
-            DiseaseAssociation.CONFIDENCE confidence =
+            var referenceSampleLabel = factorBasedSummaryLabel(experimentDesign, contrast.getReferenceAssayGroup());
+            var testSampleLabel = factorBasedSummaryLabel(experimentDesign, contrast.getTestAssayGroup());
+            var confidence =
                     determineStudyConfidence(
                             experimentDesign, diseaseInfo, contrast.getTestAssayGroup(), isCttvPrimary);
-            SampleCharacteristic organismPart =
+            var organismPart =
                     Optional.ofNullable(
                             experimentDesign.getSampleCharacteristic(
                                     contrast.getTestAssayGroup().getFirstAssayId(),
@@ -499,11 +479,9 @@ EvidenceService<
                                                                    AssayGroup testAssayGroup) {
         return Stream.of("organism part", "cell line", "cell type").flatMap(
                 x -> {
-                    SampleCharacteristic s =
-                            experimentDesign.getSampleCharacteristic(testAssayGroup.getFirstAssayId(), x);
+                    var s = experimentDesign.getSampleCharacteristic(testAssayGroup.getFirstAssayId(), x);
                     return s == null ? Stream.empty() : Stream.of(s);
-                }
-        ).findFirst();
+                }).findFirst();
     }
 
     /*
@@ -513,11 +491,16 @@ EvidenceService<
      */
     private static Optional<SampleCharacteristic> getDiseaseInfo(final ExperimentDesign experimentDesign,
                                                                  AssayGroup testAssayGroup) {
-        return experimentDesign.getSampleCharacteristics(testAssayGroup.getFirstAssayId()).stream().filter(
-                sampleCharacteristic -> sampleCharacteristic.getHeader().toLowerCase().contains("disease")
-                        && !StringUtils.containsAny(sampleCharacteristic.getValue().toLowerCase(),
-                        "normal", "healthy", "control")
-        ).findFirst();
+        return experimentDesign.getSampleCharacteristics(testAssayGroup.getFirstAssayId()).stream()
+                .filter(
+                        sampleCharacteristic ->
+                                sampleCharacteristic.getHeader().toLowerCase().contains("disease") &&
+                                        !StringUtils.containsAny(
+                                                sampleCharacteristic.getValue().toLowerCase(),
+                                                "normal",
+                                                "healthy",
+                                                "control"))
+                .findFirst();
     }
 
     /*
@@ -533,9 +516,9 @@ EvidenceService<
                                                                           SampleCharacteristic diseaseCharacteristic,
                                                                           AssayGroup testAssayGroup,
                                                                           boolean isCttvPrimary) {
-        FactorSet factorSet = experimentDesign.getFactors(testAssayGroup.getFirstAssayId());
+        var factorSet = experimentDesign.getFactors(testAssayGroup.getFirstAssayId());
         if (factorSet != null) {
-            if (!factorSet.factorsByType.keySet().contains(Factor.normalize(diseaseCharacteristic.getHeader()))) {
+            if (!factorSet.factorsByType.containsKey(Factor.normalize(diseaseCharacteristic.getHeader()))) {
                 return DiseaseAssociation.CONFIDENCE.LOW;
             } else {
                 if (factorSet.size() > 1 || !isCttvPrimary) {
@@ -555,16 +538,15 @@ EvidenceService<
     }
 
     private Map<String, Map<Contrast, Integer>> readPercentileRanks(E experiment, ObjectInputStream<String[]> lines) {
-        Map<Integer, Contrast> whichContrastInWhichLine =
-                percentileRanksColumnsFromHeader(lines.readNext(), experiment);
-        Map<String, Map<Contrast, Integer>> result = new HashMap<>();
-        for (String[] line : new IterableObjectInputStream<>(lines)) {
-            Map<Contrast, Integer> resultForThisGene = new HashMap<>();
+        var whichContrastInWhichLine = percentileRanksColumnsFromHeader(lines.readNext(), experiment);
+        var result = new HashMap<String, Map<Contrast, Integer>>();
+        for (var line : new IterableObjectInputStream<>(lines)) {
+            var resultForThisGene = new HashMap<Contrast, Integer>();
 
-            for (Map.Entry<Integer, Contrast> e : whichContrastInWhichLine.entrySet()) {
-                String value = line[e.getKey()];
+            for (var entry : whichContrastInWhichLine.entrySet()) {
+                String value = line[entry.getKey()];
                 if (!"NA".equals(value)) {
-                    resultForThisGene.put(e.getValue(), Integer.parseInt(value));
+                    resultForThisGene.put(entry.getValue(), Integer.parseInt(value));
                 }
             }
             result.put(line[0], resultForThisGene);
@@ -573,7 +555,7 @@ EvidenceService<
     }
 
     private Map<Integer, Contrast> percentileRanksColumnsFromHeader(String[] header, E experiment) {
-        ImmutableMap.Builder<Integer, Contrast> b = ImmutableMap.builder();
+        var b = ImmutableMap.<Integer, Contrast>builder();
         for (int i = 1; i < header.length; i++) {
             Contrast contrast = experiment.getDataColumnDescriptor(StringUtils.trim(header[i]));
             if (contrast != null) {
@@ -604,5 +586,4 @@ EvidenceService<
                 experimentDesign.getFactorHeaders().contains("cell line"))  &&
                 !experimentDesign.getFactorHeaders().contains("disease");
     }
-
 }
