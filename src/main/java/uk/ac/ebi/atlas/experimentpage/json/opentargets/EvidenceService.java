@@ -158,8 +158,8 @@ public class EvidenceService<X extends DifferentialExpression,
                                 ensemblGeneId,
                                 experiment.getAccession(),
                                 contrast.getDisplayName(),
-                                probeId
-                        ),
+                                probeId,
+                                diseaseUri),
                         target(ensemblGeneId,
                                 isCttvPrimary,
                                 expression),
@@ -345,12 +345,15 @@ public class EvidenceService<X extends DifferentialExpression,
     private JsonObject uniqueAssociationFields(String ensemblGeneId,
                                                String experimentAccession,
                                                String comparisonName,
-                                               Optional<String> probeId) {
-        JsonObject result = new JsonObject();
+                                               Optional<String> probeId,
+                                               OntologyTerm diseaseUri) {
+        var result = new JsonObject();
         result.addProperty("geneID", geneUri(ensemblGeneId));
         result.addProperty("study_id", experimentAccessionUri(experimentAccession));
         result.addProperty("comparison_name", comparisonName);
         probeId.ifPresent(x -> result.addProperty("probe_id", x));
+        result.addProperty("disease_id", diseaseUri.uri());
+
         return result;
     }
 
