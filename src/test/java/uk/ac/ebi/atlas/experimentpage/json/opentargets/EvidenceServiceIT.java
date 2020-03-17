@@ -52,14 +52,14 @@ class EvidenceServiceIT {
 
     @BeforeAll
     void populateDatabaseTables() {
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+        var populator = new ResourceDatabasePopulator();
         populator.addScripts(new ClassPathResource("fixtures/experiment-fixture.sql"));
         populator.execute(dataSource);
     }
 
     @AfterAll
     void cleanDatabaseTables() {
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+        var populator = new ResourceDatabasePopulator();
         populator.addScripts(new ClassPathResource("fixtures/experiment-delete.sql"));
         populator.execute(dataSource);
     }
@@ -75,7 +75,7 @@ class EvidenceServiceIT {
         var experiment = (MicroarrayExperiment) experimentTrader.getPublicExperiment("E-GEOD-40611");
         subject.evidenceForExperiment(
                 experiment, contrast -> {
-                    MicroarrayRequestPreferences requestPreferences = new MicroarrayRequestPreferences();
+                    var requestPreferences = new MicroarrayRequestPreferences();
                     requestPreferences.setHeatmapMatrixSize(1000);
                     requestPreferences.setSelectedColumnIds(ImmutableSet.of(contrast.getId()));
                     return new MicroarrayRequestContext(requestPreferences, experiment); },
@@ -95,7 +95,7 @@ class EvidenceServiceIT {
         var experiment = (MicroarrayExperiment) experimentTrader.getPublicExperiment("E-GEOD-40611");
         subject.evidenceForExperiment(
                 experiment, contrast -> {
-                    MicroarrayRequestPreferences requestPreferences = new MicroarrayRequestPreferences();
+                    var requestPreferences = new MicroarrayRequestPreferences();
                     requestPreferences.setHeatmapMatrixSize(1000);
                     requestPreferences.setSelectedColumnIds(ImmutableSet.of(contrast.getId()));
                     return new MicroarrayRequestContext(requestPreferences, experiment); },
