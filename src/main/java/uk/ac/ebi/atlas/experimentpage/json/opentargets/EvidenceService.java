@@ -205,34 +205,34 @@ public class EvidenceService<X extends DifferentialExpression,
                                 DiseaseAssociation.CONFIDENCE confidence,
                                 String methodDescription,
                                 SampleCharacteristic organismPart) {
-        var result = new JsonObject();
-        result.addProperty("is_associated", true);
-        result.addProperty(
+        var evidence = new JsonObject();
+        evidence.addProperty("is_associated", true);
+        evidence.addProperty(
                 "unique_experiment_reference", MessageFormat.format("STUDYID_{0}", experiment.getAccession()));
-        result.add("urls", linkUrls(experiment.getAccession(), ensemblGeneId));
-        result.add("evidence_codes", evidenceCodes(experiment.getType()));
-        result.add("log2_fold_change", log2FoldChange(expression, foldChangeRank));
-        result.addProperty("test_sample", testAndReferenceLabels.getLeft());
-        result.addProperty("reference_sample", testAndReferenceLabels.getRight());
-        result.addProperty(
+        evidence.add("urls", linkUrls(experiment.getAccession(), ensemblGeneId));
+        evidence.add("evidence_codes", evidenceCodes(experiment.getType()));
+        evidence.add("log2_fold_change", log2FoldChange(expression, foldChangeRank));
+        evidence.addProperty("test_sample", testAndReferenceLabels.getLeft());
+        evidence.addProperty("reference_sample", testAndReferenceLabels.getRight());
+        evidence.addProperty(
                 "date_asserted", new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss'Z'").format(experiment.getLastUpdate()));
-        result.addProperty("experiment_overview", experiment.getDescription());
-        result.addProperty("comparison_name", contrast.getDisplayName());
-        result.addProperty("organism_part", organismPartProperty(organismPart));
-        result.addProperty("test_replicates_n", contrast.getTestAssayGroup().getAssays().size());
-        result.addProperty("reference_replicates_n", contrast.getReferenceAssayGroup().getAssays().size());
-        result.addProperty("confidence_level", confidence.name().toLowerCase());
-        result.add("resource_score", resourceScore(expression, methodDescription));
-        result.add("provenance_type", provenanceType());
-        return result;
+        evidence.addProperty("experiment_overview", experiment.getDescription());
+        evidence.addProperty("comparison_name", contrast.getDisplayName());
+        evidence.addProperty("organism_part", organismPartProperty(organismPart));
+        evidence.addProperty("test_replicates_n", contrast.getTestAssayGroup().getAssays().size());
+        evidence.addProperty("reference_replicates_n", contrast.getReferenceAssayGroup().getAssays().size());
+        evidence.addProperty("confidence_level", confidence.name().toLowerCase());
+        evidence.add("resource_score", resourceScore(expression, methodDescription));
+        evidence.add("provenance_type", provenanceType());
+        return evidence;
     }
 
     private JsonObject linkUrl(String niceName, String url) {
-        var result = new JsonObject();
-        result.addProperty("nice_name", niceName);
-        result.addProperty("url", url);
+        var link = new JsonObject();
+        link.addProperty("nice_name", niceName);
+        link.addProperty("url", url);
 
-        return result;
+        return link;
     }
 
     private String organismPartProperty(SampleCharacteristic organismPart) {
@@ -243,22 +243,19 @@ public class EvidenceService<X extends DifferentialExpression,
     }
 
     private JsonArray linkUrls(String experimentAccession, String ensemblGeneId) {
-        var result = new JsonArray();
-        result.add(linkUrl(
+        var links = new JsonArray();
+        links.add(linkUrl(
                 "ArrayExpress Experiment overview",
-                MessageFormat.format("http://identifiers.org/arrayexpress/{0}", experimentAccession)
-        ));
-        result.add(linkUrl(
+                MessageFormat.format("http://identifiers.org/arrayexpress/{0}", experimentAccession)));
+        links.add(linkUrl(
                 "Gene expression in Expression Atlas",
                 MessageFormat.format(
                         "http://www.ebi.ac.uk/gxa/experiments/{0}?geneQuery={1}",
-                        experimentAccession, ensemblGeneId) //change me to the new format!
-        ));
-        result.add(linkUrl(
+                        experimentAccession, ensemblGeneId)));  //change me to the new format!
+        links.add(linkUrl(
                 "Baseline gene expression in Expression Atlas",
-                MessageFormat.format("http://www.ebi.ac.uk/gxa/genes/{0}", ensemblGeneId)
-        ));
-        return result;
+                MessageFormat.format("http://www.ebi.ac.uk/gxa/genes/{0}", ensemblGeneId)));
+        return links;
     }
 
     /*
@@ -269,20 +266,22 @@ public class EvidenceService<X extends DifferentialExpression,
     But we are not including this data in the JSON report for now.
     */
     private JsonArray evidenceCodes(ExperimentType experimentType) {
-        var result = new JsonArray();
+        var evidenceCodes = new JsonArray();
         if (experimentType.isMicroarray()) {
-            result.add(new JsonPrimitive("http://purl.obolibrary.org/obo/ECO_0000058"));
+            evidenceCodes.add(new JsonPrimitive("http://purl.obolibrary.org/obo/ECO_0000058"));
         } else if (experimentType.isRnaSeqDifferential()) {
-            result.add(new JsonPrimitive("http://purl.obolibrary.org/obo/ECO_0000295"));
+            evidenceCodes.add(new JsonPrimitive("http://purl.obolibrary.org/obo/ECO_0000295"));
         }
-        return result;
+
+        return evidenceCodes;
     }
 
     private JsonObject log2FoldChange(X expression, Integer foldChangeRank) {
-        var result = new JsonObject();
-        result.addProperty("value", expression.getFoldChange());
-        result.addProperty("percentile_rank", foldChangeRank);
-        return result;
+        var foldChange = new JsonObject();
+        foldChange.addProperty("value", expression.getFoldChange());
+        foldChange.addProperty("percentile_rank", foldChangeRank);
+
+        return foldChange;
     }
 
     private double getPValue(X expression) {
@@ -295,27 +294,31 @@ public class EvidenceService<X extends DifferentialExpression,
     }
 
     private JsonObject resourceScore(X expression, String methodDescription) {
-        var result = new JsonObject();
+        var resourceScore = new JsonObject();
         /*
         probability estimates shouldn't be zero but sometimes we get them from the pipeline as rounding errors
         use the smallest positive double greater than zero,
          */
-        result.addProperty("value", getPValue(expression));
+        resourceScore.addProperty("value", getPValue(expression));
 
         var method = new JsonObject();
         method.addProperty("description", methodDescription);
-        result.add("method", method);
-        result.addProperty("type", "pvalue");
-        return result;
+        resourceScore.add("method", method);
+        resourceScore.addProperty("type", "pvalue");
+
+        return resourceScore;
     }
 
     private JsonObject provenanceType() {
-        var result = new JsonObject();
+        var provenanceType = new JsonObject();
+
         var database = new JsonObject();
         database.addProperty("version", expressionAtlasVersion);
         database.addProperty("id", "Expression_Atlas");
-        result.add("database", database);
-        return result;
+
+        provenanceType.add("database", database);
+
+        return provenanceType;
     }
 
     private String geneUri(String ensemblGeneId) {
@@ -328,18 +331,21 @@ public class EvidenceService<X extends DifferentialExpression,
 
     //https://github.com/opentargets/json_schema/blob/master/src/bioentity/disease.json
     private JsonObject disease(OntologyTerm diseaseUri, SampleCharacteristic biosampleInfo) {
-        var result = new JsonObject();
-        result.addProperty("id", diseaseUri.uri());
-        result.add("biosample", biosampleInfo(biosampleInfo));
-        return result;
+        var disease = new JsonObject();
+        disease.addProperty("id", diseaseUri.uri());
+        disease.add("biosample", biosampleInfo(biosampleInfo));
+
+        return disease;
     }
 
-    private JsonObject biosampleInfo(SampleCharacteristic biosampleInfo) {
-        var result = new JsonObject();
-        result.addProperty("name", biosampleInfo.getValue());
-        var ontologyTerm = biosampleInfo.getValueOntologyTerms().stream().findFirst();
-        ontologyTerm.ifPresent(ontologyTerm1 -> result.addProperty("id", ontologyTerm1.uri()));
-        return result;
+    private JsonObject biosampleInfo(SampleCharacteristic biosampleInfoSampleCharacteristic) {
+        var biosampleInfo = new JsonObject();
+        biosampleInfo.addProperty("name", biosampleInfoSampleCharacteristic.getValue());
+
+        var ontologyTerm = biosampleInfoSampleCharacteristic.getValueOntologyTerms().stream().findFirst();
+        ontologyTerm.ifPresent(ontologyTerm1 -> biosampleInfo.addProperty("id", ontologyTerm1.uri()));
+
+        return biosampleInfo;
     }
 
     private JsonObject uniqueAssociationFields(String ensemblGeneId,
@@ -347,14 +353,14 @@ public class EvidenceService<X extends DifferentialExpression,
                                                String comparisonName,
                                                Optional<String> probeId,
                                                OntologyTerm diseaseUri) {
-        var result = new JsonObject();
-        result.addProperty("geneID", geneUri(ensemblGeneId));
-        result.addProperty("study_id", experimentAccessionUri(experimentAccession));
-        result.addProperty("comparison_name", comparisonName);
-        probeId.ifPresent(x -> result.addProperty("probe_id", x));
-        result.addProperty("disease_id", diseaseUri.uri());
+        var uniqueAssociationFields = new JsonObject();
+        uniqueAssociationFields.addProperty("geneID", geneUri(ensemblGeneId));
+        uniqueAssociationFields.addProperty("study_id", experimentAccessionUri(experimentAccession));
+        uniqueAssociationFields.addProperty("comparison_name", comparisonName);
+        probeId.ifPresent(probeIdValue -> uniqueAssociationFields.addProperty("probe_id", probeIdValue));
+        uniqueAssociationFields.addProperty("disease_id", diseaseUri.uri());
 
-        return result;
+        return uniqueAssociationFields;
     }
 
     private String activity(boolean isCttvPrimary, X expression) {
@@ -370,36 +376,37 @@ public class EvidenceService<X extends DifferentialExpression,
     }
 
     private JsonObject target(String ensemblGeneId, boolean isCttvPrimary, X expression) {
-        var result = new JsonObject();
-        result.addProperty("id", geneUri(ensemblGeneId));
-        result.addProperty("target_type", "http://identifiers.org/cttv.target/transcript_evidence");
-        result.addProperty("activity", activity(isCttvPrimary, expression));
+        var target = new JsonObject();
+        target.addProperty("id", geneUri(ensemblGeneId));
+        target.addProperty("target_type", "http://identifiers.org/cttv.target/transcript_evidence");
+        target.addProperty("activity", activity(isCttvPrimary, expression));
 
-        return result;
+        return target;
     }
 
     private JsonObject associationRecord(JsonObject uniqueAssociationFields,
                                          JsonObject target,
                                          JsonObject disease,
                                          JsonObject evidence) {
-        var result = new JsonObject();
-        result.addProperty("sourceID", "expression_atlas");
-        result.addProperty("type", "rna_expression");
-        result.addProperty("access_level", "public");
-        result.add("unique_association_fields", uniqueAssociationFields);
-        result.add("target", target);
-        result.add("disease", disease);
-        result.add("evidence", evidence);
-        return result;
+        var associationRecord = new JsonObject();
+        associationRecord.addProperty("sourceID", "expression_atlas");
+        associationRecord.addProperty("type", "rna_expression");
+        associationRecord.addProperty("access_level", "public");
+        associationRecord.add("unique_association_fields", uniqueAssociationFields);
+        associationRecord.add("target", target);
+        associationRecord.add("disease", disease);
+        associationRecord.add("evidence", evidence);
+
+        return associationRecord;
     }
 
     private ImmutableMap<Contrast, DiseaseAssociation> getDiseaseAssociations(DifferentialExperiment experiment) {
-        var result = ImmutableMap.<Contrast, DiseaseAssociation>builder();
+        var contrastToDiseaseBuilder = ImmutableMap.<Contrast, DiseaseAssociation>builder();
         for (var contrast: experiment.getDataColumnDescriptors()) {
             DiseaseAssociation.tryCreate(experiment, contrast)
-                    .ifPresent(diseaseAssociation -> result.put(contrast, diseaseAssociation));
+                    .ifPresent(diseaseAssociation -> contrastToDiseaseBuilder.put(contrast, diseaseAssociation));
         }
-        return result.build();
+        return contrastToDiseaseBuilder.build();
     }
 
     @AutoValue
@@ -481,9 +488,13 @@ public class EvidenceService<X extends DifferentialExpression,
     private static Optional<SampleCharacteristic> getBiosampleInfo(final ExperimentDesign experimentDesign,
                                                                    AssayGroup testAssayGroup) {
         return Stream.of("organism part", "cell line", "cell type").flatMap(
-                x -> {
-                    var s = experimentDesign.getSampleCharacteristic(testAssayGroup.getFirstAssayId(), x);
-                    return s == null ? Stream.empty() : Stream.of(s);
+                experimentalVariable -> {
+                    var matchingSampleCharacteristic =
+                            experimentDesign.getSampleCharacteristic(
+                                    testAssayGroup.getFirstAssayId(), experimentalVariable);
+                    return matchingSampleCharacteristic == null ?
+                            Stream.empty() :
+                            Stream.of(matchingSampleCharacteristic);
                 }).findFirst();
     }
 
@@ -542,7 +553,8 @@ public class EvidenceService<X extends DifferentialExpression,
 
     private Map<String, Map<Contrast, Integer>> readPercentileRanks(E experiment, ObjectInputStream<String[]> lines) {
         var whichContrastInWhichLine = percentileRanksColumnsFromHeader(lines.readNext(), experiment);
-        var result = new HashMap<String, Map<Contrast, Integer>>();
+        var geneToRankedContrast = new HashMap<String, Map<Contrast, Integer>>();
+
         for (var line : new IterableObjectInputStream<>(lines)) {
             var resultForThisGene = new HashMap<Contrast, Integer>();
 
@@ -552,20 +564,21 @@ public class EvidenceService<X extends DifferentialExpression,
                     resultForThisGene.put(entry.getValue(), Integer.parseInt(value));
                 }
             }
-            result.put(line[0], resultForThisGene);
+            geneToRankedContrast.put(line[0], resultForThisGene);
         }
-        return result;
+
+        return geneToRankedContrast;
     }
 
     private Map<Integer, Contrast> percentileRanksColumnsFromHeader(String[] header, E experiment) {
-        var b = ImmutableMap.<Integer, Contrast>builder();
+        var indexedContrastsBuilder = ImmutableMap.<Integer, Contrast>builder();
         for (int i = 1; i < header.length; i++) {
-            Contrast contrast = experiment.getDataColumnDescriptor(StringUtils.trim(header[i]));
+            var contrast = experiment.getDataColumnDescriptor(StringUtils.trim(header[i]));
             if (contrast != null) {
-                b.put(i, contrast);
+                indexedContrastsBuilder.put(i, contrast);
             }
         }
-        return b.build();
+        return indexedContrastsBuilder.build();
     }
 
     private String getMethodDescriptionFromAnalysisMethodsFile(E experiment) {
