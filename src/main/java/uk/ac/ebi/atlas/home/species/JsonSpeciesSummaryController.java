@@ -17,7 +17,6 @@ public class JsonSpeciesSummaryController extends JsonExceptionHandlingControlle
         this.speciesSummarySerializer = speciesSummarySerializer;
     }
 
-    @Cacheable("speciesSummary")
     @GetMapping(value = "/json/species-summary",
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getSpeciesSummaryGroupedByKingdom() {
