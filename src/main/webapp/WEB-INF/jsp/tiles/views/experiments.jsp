@@ -7,7 +7,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function(event) {
-      experimentTable.render(
+      experimentTable.renderRouter(
         {
           tableHeaders: [
             {
@@ -90,7 +90,7 @@
           sortColumnIndex: 1,
           ascendingOrder: false,
           host: '${pageContext.request.contextPath}/',
-          basename: '${pageContext.request.contextPath}/'
+          basename: '${pageContext.request.contextPath}'
         },
         'experiments');
     });

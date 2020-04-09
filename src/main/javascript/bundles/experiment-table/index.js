@@ -1,18 +1,18 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import { TableManagerSpa } from '@ebi-gene-expression-group/atlas-experiment-table'
+import { TableManagerRouter } from '@ebi-gene-expression-group/atlas-experiment-table'
 import { withFetchLoader } from '@ebi-gene-expression-group/atlas-react-fetch-loader'
 
-const FetchLoadExperimentTable = withFetchLoader(TableManagerSpa)
+const TableManagerRouterWithFetchLoader = withFetchLoader(TableManagerRouter)
 
-const render = (options, target) => {
+const renderRouter = (options, target) => {
   ReactDOM.render(
-    <FetchLoadExperimentTable
+    <TableManagerRouterWithFetchLoader
       {...options}
       resource={`json/experiments`}
       renameDataKeys={{experiments: `dataRows`}}/>,
     document.getElementById(target))
 }
 
-export { render }
+export { renderRouter }
