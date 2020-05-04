@@ -50,7 +50,7 @@ public class HomeController extends HtmlExceptionHandlingController {
 
     @RequestMapping(value = "/home", produces = "text/html;charset=UTF-8")
     public String getHome(Model model) {
-        var species = speciesSummaryService.getReferenceSpecies()
+        var species = speciesSummaryService.getSpecies()
                 .stream()
                 .collect(toImmutableSortedMap(
                         Comparator.<String>naturalOrder(),
