@@ -31,7 +31,8 @@ import static uk.ac.ebi.atlas.utils.UrlHelpers.getLinkWithEmptyLabel;
 
 @RestController
 public class JsonExperimentsSummaryController extends JsonExceptionHandlingController {
-    private static final String COVID19_KEYWORDS = "SARS respiratory coronavirus rsv ifn-alpha";
+    private static final String COVID19_KEYWORDS = "sars contributing coronavirus rsv ifn-alpha infection-related";
+
     private final LatestExperimentsService latestExperimentsService;
 
     public JsonExperimentsSummaryController(LatestExperimentsDao latestExperimentsDao,
