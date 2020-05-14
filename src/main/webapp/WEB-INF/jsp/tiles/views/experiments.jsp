@@ -26,7 +26,8 @@
                   alt: 'Baseline experiment',
                   title: 'Baseline experiment'
                 }
-              }
+              },
+              linkTo: function(dataRow) { return '${pageContext.request.contextPath}/experiments?experimentType=' + dataRow.experimentType.toLowerCase(); }
             },
             {
               label: 'Load date',
@@ -80,6 +81,7 @@
           rowSelectionColumn: {
             label: 'Download',
             dataKey: 'experimentAccession',
+            tableHeaderCellOnClick: experimentTable._validateAndDownloadExperimentFiles('${pageContext.request.contextPath}/'),
             tooltipContent:
               '<ul>' +
               '<li>Expression matrices in TPMs or log<sub>2</sub>fold-change</li>' +
@@ -87,10 +89,9 @@
               '</ul>',
             width: 0.75
           },
-          sortColumnIndex: 1,
-          ascendingOrder: false,
+          basename: '${pageContext.request.contextPath}',
           host: '${pageContext.request.contextPath}/',
-          basename: '${pageContext.request.contextPath}'
+          resource: 'json/experiments'
         },
         'experiments');
     });

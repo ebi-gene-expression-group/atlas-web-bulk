@@ -31,6 +31,7 @@ import static uk.ac.ebi.atlas.utils.UrlHelpers.getLinkWithEmptyLabel;
 
 @RestController
 public class JsonExperimentsSummaryController extends JsonExceptionHandlingController {
+    private static final String COVID19_KEYWORDS = "SARS respiratory coronavirus rsv ifn-alpha";
     private final LatestExperimentsService latestExperimentsService;
 
     public JsonExperimentsSummaryController(LatestExperimentsDao latestExperimentsDao,
@@ -65,6 +66,14 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
 
     private static ImmutableList<CardModel> featuredExperimentsCards() {
         return ImmutableList.of(
+                CardModel.create(
+                        IMAGE,
+                        getExperimentsSummaryImageUrl("covid19-dp"),
+                        getExperimentSetLink(COVID19_KEYWORDS),
+                        ImmutableList.of(
+                                Pair.of("Human experiments", Optional.of(getCustomUrl("/experiments?species=homo+sapiens&experimentDescription=" + COVID19_KEYWORDS))),
+                                Pair.of("Mouse experiments", Optional.of(getCustomUrl("/experiments?species=mus+musculus&experimentDescription="+ COVID19_KEYWORDS))))
+                ),
                 CardModel.create(
                         IMAGE,
                         getExperimentsSummaryImageUrl("encode"),
