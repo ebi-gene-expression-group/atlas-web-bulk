@@ -87,7 +87,7 @@ class GxaExperimentRepositoryTest {
         when(idfParserMock.parse(experimentAccession))
                 .thenReturn(new IdfParserOutput(
                         randomAlphanumeric(500),
-                        randomAlphanumeric(10),
+                        ImmutableList.of(randomAlphanumeric(10)),
                         randomAlphanumeric(100),
                         ImmutableList.of(),
                         RNG.nextInt(50),
