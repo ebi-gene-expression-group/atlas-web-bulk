@@ -53,6 +53,9 @@ public class ExpressionAtlasContentService {
             LinkToArrayExpress.Differential differentialLinkToArrayExpress,
             LinkToArrayExpress.Microarray microarrayLinkToArrayExpress,
             LinkToPride linkToPride,
+            LinkToGeoEnaEga.RnaSeqBaseline rnaSeqBaselineLinkToGeoEnaEga,
+            LinkToGeoEnaEga.Differential differentialLinkToGeoEnaEga,
+            LinkToGeoEnaEga.Microarray microarrayLinkToGeoEnaEga,
             ExperimentTrader experimentTrader) {
         this.experimentTrader = experimentTrader;
 
@@ -71,6 +74,7 @@ public class ExpressionAtlasContentService {
                                 rnaSeqBaselineExperimentDownloadSupplier,
                                 baselineStaticFilesDownload,
                                 baselineExperimentDesignFile,
+                                rnaSeqBaselineLinkToGeoEnaEga,
                                 rnaSeqBaselineLinkToArrayExpress));
 
         this.rnaSeqDifferentialExperimentExternallyAvailableContentService =
@@ -81,6 +85,7 @@ public class ExpressionAtlasContentService {
                                 rnaSeqDifferentialStaticFilesDownload,
                                 rnaSeqDifferentialExperimentDesignFile,
                                 rnaSeqQCReport,
+                                differentialLinkToGeoEnaEga,
                                 differentialLinkToArrayExpress,
                                 rnaSeqDifferentialContrastImageSupplier));
 
@@ -92,6 +97,7 @@ public class ExpressionAtlasContentService {
                                 microarrayStaticFilesDownload,
                                 microarrayExperimentDesignFile,
                                 microarrayLinkToArrayExpress,
+                                microarrayLinkToGeoEnaEga,
                                 microarrayContrastImageSupplier));
     }
 
