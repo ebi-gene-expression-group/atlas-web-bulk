@@ -4,6 +4,9 @@ public enum IconType {
 
     TSV("icon-tsv"),
     ARRAY_EXPRESS("icon-ae"),
+    GEO("icon-geo"),
+    ENA("icon-ena"),
+    EGA("icon-ega"),
     REACTOME("icon-gsea-reactome"),
     INTERPRO("icon-gsea-interpro"),
     R_DATA("icon-Rdata"),
