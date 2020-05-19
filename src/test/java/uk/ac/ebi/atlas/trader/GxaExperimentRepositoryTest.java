@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.trader;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,7 +88,7 @@ class GxaExperimentRepositoryTest {
         when(idfParserMock.parse(experimentAccession))
                 .thenReturn(new IdfParserOutput(
                         randomAlphanumeric(500),
-                        ImmutableList.of(randomAlphanumeric(10)),
+                        ImmutableSet.of(),
                         randomAlphanumeric(100),
                         ImmutableList.of(),
                         RNG.nextInt(50),
