@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import uk.ac.ebi.atlas.experimentpage.ExperimentPageService;
-import uk.ac.ebi.atlas.experimentpage.LinkToGene;
+import uk.ac.ebi.atlas.experimentpage.link.LinkToGene;
 import uk.ac.ebi.atlas.experimentpage.context.DifferentialRequestContext;
 import uk.ac.ebi.atlas.experimentpage.context.DifferentialRequestContextFactory;
 import uk.ac.ebi.atlas.model.ExpressionUnit;
