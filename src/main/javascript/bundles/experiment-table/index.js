@@ -1,12 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import { TableManagerSpa } from '@ebi-gene-expression-group/atlas-experiment-table'
+import { TableManagerRouter, _validateAndDownloadExperimentFiles } from '@ebi-gene-expression-group/atlas-experiment-table'
 import { withFetchLoader } from '@ebi-gene-expression-group/atlas-react-fetch-loader'
 
-const FetchLoadExperimentTable = withFetchLoader(TableManagerSpa)
+const FetchLoadExperimentTable = withFetchLoader(TableManagerRouter)
 
-const render = (options, target) => {
+const renderRouter = (options, target) => {
   ReactDOM.render(
     <FetchLoadExperimentTable
       {...options}
@@ -15,4 +15,4 @@ const render = (options, target) => {
     document.getElementById(target))
 }
 
-export { render }
+export { renderRouter, _validateAndDownloadExperimentFiles }
