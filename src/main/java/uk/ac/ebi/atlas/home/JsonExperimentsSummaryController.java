@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.atlas.controllers.JsonExceptionHandlingController;
+import uk.ac.ebi.atlas.experiments.ExperimentJsonSerializer;
 import uk.ac.ebi.atlas.model.card.CardModel;
 import uk.ac.ebi.atlas.model.card.CardModelAdapter;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
@@ -36,7 +37,8 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
     private final LatestExperimentsService latestExperimentsService;
 
     public JsonExperimentsSummaryController(LatestExperimentsDao latestExperimentsDao,
-                                            ExperimentTrader experimentTrader) {
+                                            ExperimentTrader experimentTrader,
+                                            ExperimentJsonSerializer experimentJsonSerializer) {
         this.latestExperimentsService =
                 new LatestExperimentsService(
                         latestExperimentsDao,
@@ -47,7 +49,8 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
                                 MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
                                 RNASEQ_MRNA_DIFFERENTIAL,
                                 PROTEOMICS_BASELINE,
-                                RNASEQ_MRNA_BASELINE));
+                                RNASEQ_MRNA_BASELINE),
+                        experimentJsonSerializer);
     }
 
     @GetMapping(value = "/json/experiments-summary",
