@@ -16,6 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.atlas.configuration.TestConfig;
+import uk.ac.ebi.atlas.experiments.ExperimentJsonSerializer;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
@@ -40,6 +41,9 @@ public class LatestExperimentsServiceIT {
 
     @Inject
     private LatestExperimentsDao latestExperimentsDao;
+
+    @Inject
+    private ExperimentJsonSerializer experimentJsonSerializer;
 
     @Inject
     private DataSource dataSource;
@@ -72,7 +76,8 @@ public class LatestExperimentsServiceIT {
                                 ExperimentType.RNASEQ_MRNA_DIFFERENTIAL,
                                 ExperimentType.PROTEOMICS_BASELINE,
                                 ExperimentType.RNASEQ_MRNA_BASELINE
-                        ));
+                        ),
+                        experimentJsonSerializer);
     }
 
     @Test

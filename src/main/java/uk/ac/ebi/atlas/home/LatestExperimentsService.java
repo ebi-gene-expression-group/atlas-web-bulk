@@ -16,6 +16,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 public class LatestExperimentsService {
     private final LatestExperimentsDao latestExperimentsDao;
     private final ExperimentTrader experimentTrader;
+    private final ExperimentJsonSerializer experimentJsonSerializer;
     private final ImmutableSet<ExperimentType> experimentTypes;
 
     private final LazyReference<ImmutableMap<String, Object>> latestExperimentsAttributes =
@@ -27,7 +28,7 @@ public class LatestExperimentsService {
                         var latestExperimentInfo =
                                 latestExperimentsDao.fetchLatestExperimentAccessions(experimentTypes).stream()
                                         .map(experimentTrader::getPublicExperiment)
-                                        .map(ExperimentJsonSerializer::serialize)
+                                        .map(experimentJsonSerializer::serialize)
                                         .collect(toImmutableSet());
 
                         return ImmutableMap.of(
@@ -40,10 +41,12 @@ public class LatestExperimentsService {
 
     public LatestExperimentsService(LatestExperimentsDao latestExperimentsDao,
                                     ExperimentTrader experimentTrader,
-                                    Set<ExperimentType> experimentTypes) {
+                                    Set<ExperimentType> experimentTypes,
+                                    ExperimentJsonSerializer experimentJsonSerializer) {
         this.latestExperimentsDao = latestExperimentsDao;
         this.experimentTrader = experimentTrader;
         this.experimentTypes = ImmutableSet.copyOf(experimentTypes);
+        this.experimentJsonSerializer = experimentJsonSerializer;
     }
 
     public ImmutableMap<String, Object> fetchLatestExperimentsAttributes() {
