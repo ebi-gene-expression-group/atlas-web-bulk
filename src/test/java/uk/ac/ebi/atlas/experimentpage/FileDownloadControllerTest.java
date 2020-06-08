@@ -2,16 +2,16 @@ package uk.ac.ebi.atlas.experimentpage;
 
 import com.google.common.collect.ImmutableList;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.ReadContext;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.ac.ebi.atlas.experimentpage.download.ExperimentDownloadController;
+import uk.ac.ebi.atlas.experimentpage.download.ExperimentDownloadSupplier;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -23,16 +23,15 @@ import static org.mockito.Mockito.when;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELINE;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FileDownloadControllerTest {
-
+@ExtendWith(MockitoExtension.class)
+class FileDownloadControllerTest {
     private static final List<String> EXPERIMENT_ACCESSION_LIST = ImmutableList.of(
             "E-ERAD-475", //RNASEQ_MRNA_BASELINE
             "E-GEOD-43049"); //MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL
-            //"E-MEXP-1968", //MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL
-            //"E-MTAB-3834", //RNASEQ_MRNA_DIFFERENTIAL
-           // "E-PROT-1", //PROTEOMICS_BASELINE
-            //"E-TABM-713"); //MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL
+    //"E-MEXP-1968", //MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL
+    //"E-MTAB-3834", //RNASEQ_MRNA_DIFFERENTIAL
+    // "E-PROT-1", //PROTEOMICS_BASELINE
+    //"E-TABM-713"); //MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL
 
     @Mock
     private ExperimentFileLocationService experimentFileLocationServiceMock;
@@ -52,11 +51,10 @@ public class FileDownloadControllerTest {
     @Mock
     private ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier;
 
-
     private ExperimentDownloadController subject;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         subject = new ExperimentDownloadController(
                 experimentTraderMock,
                 proteomicsExperimentDownloadSupplier,
@@ -67,20 +65,19 @@ public class FileDownloadControllerTest {
     }
 
     @Test
-    public void testInvalidFilesForDownloading() {
-
-        Experiment experiment = mock(Experiment.class);
+    void testInvalidFilesForDownloading() {
+        var experiment = mock(Experiment.class);
         when(experiment.getAccession()).thenReturn(EXPERIMENT_ACCESSION_LIST.get(0));
         when(experiment.getType()).thenReturn(RNASEQ_MRNA_BASELINE);
         when(experimentTraderMock.getPublicExperiment(EXPERIMENT_ACCESSION_LIST.get(0))).thenReturn(experiment);
 
-        Experiment experiment_microarray = mock(Experiment.class);
-        when(experiment_microarray.getAccession()).thenReturn(EXPERIMENT_ACCESSION_LIST.get(1));
-        when(experiment_microarray.getType()).thenReturn(MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL);
-        when(experimentTraderMock.getPublicExperiment(EXPERIMENT_ACCESSION_LIST.get(1))).thenReturn(experiment_microarray);
+        var experimentMicroarray = mock(Experiment.class);
+        when(experimentMicroarray.getAccession()).thenReturn(EXPERIMENT_ACCESSION_LIST.get(1));
+        when(experimentMicroarray.getType()).thenReturn(MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL);
+        when(experimentTraderMock.getPublicExperiment(EXPERIMENT_ACCESSION_LIST.get(1))).thenReturn(experimentMicroarray);
 
-        String textPath = "file:dir/filename";
-        Path path = Paths.get(textPath);
+        var textPath = "file:dir/filename";
+        var path = Paths.get(textPath);
 
         when(experimentFileLocationServiceMock.getFilePath(
                 EXPERIMENT_ACCESSION_LIST.get(0),
@@ -104,7 +101,7 @@ public class FileDownloadControllerTest {
                 .thenReturn(path);
 
         when(experimentFileLocationServiceMock.getFilePathsForArchive(
-                experiment_microarray,
+                experimentMicroarray,
                 ExperimentFileType.MICROARRAY_D_ANALYTICS))
                 .thenReturn(ImmutableList.of(path, path));
         when(experimentFileLocationServiceMock.getFilePath(
@@ -120,8 +117,8 @@ public class FileDownloadControllerTest {
                 ExperimentFileType.IDF))
                 .thenReturn(path);
 
-        String jsonResponse = subject.checkMultipleExperimentsFileValid(EXPERIMENT_ACCESSION_LIST);
-        ReadContext ctx = JsonPath.parse(jsonResponse);
+        var jsonResponse = subject.checkMultipleExperimentsFileValid(EXPERIMENT_ACCESSION_LIST);
+        var ctx = JsonPath.parse(jsonResponse);
 
         assertThat(ctx.<Map<String, Object>>read("$"))
                 .extracting("invalidFiles")
@@ -129,7 +126,5 @@ public class FileDownloadControllerTest {
                 .contains(
                         tuple(List.of("filename", "filename", "filename", "filename", "filename"),
                                 List.of("filename", "filename", "filename", "filename", "filename")));
-
     }
-
 }

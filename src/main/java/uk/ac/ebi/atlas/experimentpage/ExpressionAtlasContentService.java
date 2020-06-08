@@ -3,6 +3,7 @@ package uk.ac.ebi.atlas.experimentpage;
 import com.google.common.collect.ImmutableList;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.experimentpage.differential.download.DifferentialSecondaryDataFiles;
+import uk.ac.ebi.atlas.experimentpage.download.ExperimentDownloadSupplier;
 import uk.ac.ebi.atlas.experimentpage.qc.RnaSeqQcReport;
 import uk.ac.ebi.atlas.model.download.ExternallyAvailableContent;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
