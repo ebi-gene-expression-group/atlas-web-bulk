@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.utils.URIBuilder;
+import uk.ac.ebi.atlas.experimentpage.download.ExperimentDownloadController;
 import uk.ac.ebi.atlas.model.Profile;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
@@ -25,9 +26,9 @@ import static java.util.Collections.singletonList;
 import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 
 public class ExperimentPageService {
-    protected Map<String, JsonElement> payloadAttributes(Experiment experiment,
+    protected Map<String, JsonElement> payloadAttributes(Experiment<?> experiment,
                                                          String accessKey,
-                                                         ExperimentPageRequestPreferences requestPreferences,
+                                                         ExperimentPageRequestPreferences<?> requestPreferences,
                                                          Optional<String> theOnlyGeneInResults) {
         Map<String, JsonElement> result = new HashMap<>();
 
@@ -38,9 +39,9 @@ public class ExperimentPageService {
         return result;
     }
 
-    private JsonElement experimentDescription(Experiment experiment,
+    private JsonElement experimentDescription(Experiment<?> experiment,
                                               String accessKey,
-                                              ExperimentPageRequestPreferences requestPreferences,
+                                              ExperimentPageRequestPreferences<?> requestPreferences,
                                               Optional<String> theOnlyGeneInResults) {
 
         JsonObject experimentDescription = new JsonObject();
@@ -111,7 +112,7 @@ public class ExperimentPageService {
     private URI callbackLinkWithRequestPreferences(String urlBase,
                                                    ExperimentType experimentType,
                                                    String accessKey,
-                                                   ExperimentPageRequestPreferences requestPreferences) {
+                                                   ExperimentPageRequestPreferences<?> requestPreferences) {
         try {
             URIBuilder builder = new URIBuilder(urlBase);
 
@@ -132,9 +133,9 @@ public class ExperimentPageService {
         }
     }
 
-    URI experimentDownloadLink(Experiment experiment,
+    URI experimentDownloadLink(Experiment<?> experiment,
                                String accessKey,
-                               ExperimentPageRequestPreferences requestPreferences) {
+                               ExperimentPageRequestPreferences<?> requestPreferences) {
         return callbackLinkWithRequestPreferences(
                 ExperimentDownloadController.DOWNLOAD_URL_TEMPLATE
                         .replace("{experimentAccession}", experiment.getAccession())
@@ -144,10 +145,10 @@ public class ExperimentPageService {
                 requestPreferences);
     }
 
-    URI geneSpecificResultsLink(Experiment experiment,
+    URI geneSpecificResultsLink(Experiment<?> experiment,
                                 String gene,
                                 String accessKey,
-                                ExperimentPageRequestPreferences requestPreferences) {
+                                ExperimentPageRequestPreferences<?> requestPreferences) {
         return callbackLinkWithRequestPreferences(
                 MessageFormat.format("json/experiments/{0}/genes/{1}", experiment.getAccession(), gene),
                 experiment.getType(),
@@ -155,11 +156,11 @@ public class ExperimentPageService {
                 requestPreferences);
     }
 
-    public static Optional<String> getTheOnlyId(List<? extends Profile> profiles) {
+    public static Optional<String> getTheOnlyId(List<? extends Profile<?, ?, ?>> profiles) {
         return profiles.size() == 1 ? Optional.of(profiles.get(0).getId()) : Optional.empty();
     }
 
-    private JsonObject config(Experiment<?> experiment, ExperimentPageRequestPreferences preferences) {
+    private JsonObject config(Experiment<?> experiment, ExperimentPageRequestPreferences<?> preferences) {
         JsonObject config = new JsonObject();
         config.addProperty("geneQuery", preferences.getGeneQuery().toUrlEncodedJson());
         config.addProperty("species", experiment.getSpecies().getName());
