@@ -24,7 +24,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.RnaSeqProfile;
 import uk.ac.ebi.atlas.profiles.stream.MicroarrayProfileStreamFactory;
 import uk.ac.ebi.atlas.profiles.stream.RnaSeqProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.ContrastImageTrader;
-import uk.ac.ebi.atlas.solr.bioentities.query.SolrQueryService;
+import uk.ac.ebi.atlas.search.bioentities.BioentitiesSearchDao;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
 import uk.ac.ebi.atlas.web.MicroarrayRequestPreferences;
@@ -56,18 +56,18 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
     public JsonDifferentialExperimentController(ExperimentTrader experimentTrader,
                                                 RnaSeqProfileStreamFactory rnaSeqProfileStreamFactory,
                                                 MicroarrayProfileStreamFactory microarrayProfileStreamFactory,
-                                                SolrQueryService solrQueryService,
+                                                BioentitiesSearchDao bioentitiesSearchDao,
                                                 ContrastImageTrader atlasResourceHub) {
         super(experimentTrader);
 
         diffRnaSeqExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.RnaSeq(),
-                        new DifferentialProfilesHeatMap<>(rnaSeqProfileStreamFactory, solrQueryService),
+                        new DifferentialProfilesHeatMap<>(rnaSeqProfileStreamFactory, bioentitiesSearchDao),
                         atlasResourceHub);
 
         diffMicroarrayExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.Microarray(),
-                        new DifferentialProfilesHeatMap<>(microarrayProfileStreamFactory, solrQueryService),
+                        new DifferentialProfilesHeatMap<>(microarrayProfileStreamFactory, bioentitiesSearchDao),
                         atlasResourceHub);
     }
 

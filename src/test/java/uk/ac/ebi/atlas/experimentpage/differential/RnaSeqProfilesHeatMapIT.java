@@ -22,7 +22,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.DifferentialProfilesList;
 import uk.ac.ebi.atlas.model.experiment.differential.Regulation;
 import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.RnaSeqProfile;
 import uk.ac.ebi.atlas.profiles.stream.RnaSeqProfileStreamFactory;
-import uk.ac.ebi.atlas.solr.bioentities.query.SolrQueryService;
+import uk.ac.ebi.atlas.search.bioentities.BioentitiesSearchDao;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
@@ -56,7 +56,7 @@ class RnaSeqProfilesHeatMapIT {
     private RnaSeqProfileStreamFactory rnaSeqProfileStreamFactory;
 
     @Inject
-    private SolrQueryService solrQueryService;
+    private BioentitiesSearchDao bioentitiesSearchDao;
 
     private DifferentialRequestPreferences requestPreferences;
 
@@ -81,7 +81,7 @@ class RnaSeqProfilesHeatMapIT {
     @BeforeEach
     void setUp() {
         requestPreferences = new DifferentialRequestPreferences();
-        subject = new DifferentialProfilesHeatMap<>(rnaSeqProfileStreamFactory, solrQueryService);
+        subject = new DifferentialProfilesHeatMap<>(rnaSeqProfileStreamFactory, bioentitiesSearchDao);
     }
 
     private RnaSeqRequestContext populateRequestContext(String experimentAccession) {

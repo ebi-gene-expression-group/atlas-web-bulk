@@ -26,7 +26,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperi
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExpression;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayProfile;
 import uk.ac.ebi.atlas.profiles.stream.MicroarrayProfileStreamFactory;
-import uk.ac.ebi.atlas.solr.bioentities.query.SolrQueryService;
+import uk.ac.ebi.atlas.search.bioentities.BioentitiesSearchDao;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.MicroarrayRequestPreferences;
@@ -63,7 +63,7 @@ class MicroarrayProfilesHeatMapIT {
     private MicroarrayProfileStreamFactory microarrayProfileStreamFactory;
 
     @Inject
-    private SolrQueryService solrQueryService;
+    private BioentitiesSearchDao bioentitiesSearchDao;
 
     private MicroarrayRequestPreferences requestPreferences;
 
@@ -87,7 +87,7 @@ class MicroarrayProfilesHeatMapIT {
 
     @BeforeEach
     void setUp() {
-        subject = new DifferentialProfilesHeatMap<>(microarrayProfileStreamFactory, solrQueryService);
+        subject = new DifferentialProfilesHeatMap<>(microarrayProfileStreamFactory, bioentitiesSearchDao);
         requestPreferences = new MicroarrayRequestPreferences();
     }
 
