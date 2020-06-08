@@ -1,146 +1,87 @@
 package uk.ac.ebi.atlas.experimentpage.baseline.coexpression;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
-import uk.ac.ebi.atlas.solr.bioentities.query.GeneQueryResponse;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.ac.ebi.atlas.testutils.RandomDataTestUtils.generateRandomEnsemblGeneId;
+import static uk.ac.ebi.atlas.testutils.RandomDataTestUtils.generateRandomExperimentAccession;
 
-public class CoexpressedGenesServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CoexpressedGenesServiceTest {
+    private final static ThreadLocalRandom RNG = ThreadLocalRandom.current();
+    private final static int MAX_COEXPRESSIONS_COUNT = 1000;
+
     @Mock
     private CoexpressedGenesDao coexpressedGenesDao;
 
-    private static final String EX1_GENE_ID = "EX1_GENE_ID";
-    private static final String EX2_GENE_ID = "EX2";
-
-    private static final Map<Pair<String, String>, ImmutableList<String>> STATE_OF_DATABASE =
-            ImmutableMap.of(
-                    Pair.of(EX1_GENE_ID, "T0"), ImmutableList.of("C00", "C01", "C02"),
-                    Pair.of(EX1_GENE_ID, "T1"), ImmutableList.of("C10", "C11"),
-                    Pair.of(EX2_GENE_ID, "T1"), ImmutableList.of("C12"));
-
     private CoexpressedGenesService subject;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+    @BeforeEach
+    void setUp() {
         subject = new CoexpressedGenesService(coexpressedGenesDao);
-        for (Map.Entry<Pair<String, String>, ImmutableList<String>> e: STATE_OF_DATABASE.entrySet()) {
-            when(coexpressedGenesDao.coexpressedGenesFor(e.getKey().getLeft(), e.getKey().getRight()))
-                    .thenReturn(e.getValue());
-        }
     }
 
     @Test
-    public void testWithRetrievedIdsSameAsQueryTerms1() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0"), ImmutableMap.of());
+    void returnsRequestedNumberOfCoexpressions() {
+        var randomGeneIds = generateNonEmptyCollectionOfRandomGeneIds();
+        when(coexpressedGenesDao.coexpressedGenesFor(anyString(), anyString())).thenReturn(randomGeneIds);
 
-        assertEquals(ImmutableSet.of("T0"), r);
+        var requestedNumberOfCoexpressions = RNG.nextInt(MAX_COEXPRESSIONS_COUNT);
+        assertThat(
+                subject.fetchCoexpressions(
+                        generateRandomExperimentAccession(),
+                        generateRandomEnsemblGeneId(),
+                        requestedNumberOfCoexpressions))
+                .hasSize(Math.min(randomGeneIds.size(), requestedNumberOfCoexpressions));
     }
 
     @Test
-    public void testWithRetrievedIdsSameAsQueryTerms2() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0", "T2"), ImmutableMap.of());
-
-        assertEquals(ImmutableSet.of("T0", "T2"), r);
+    void ifNoCoexpressionsCanBeFoundReturnEmptyList() {
+        when(coexpressedGenesDao.coexpressedGenesFor(anyString(), anyString())).thenReturn(ImmutableList.of());
+        assertThat(
+                subject.fetchCoexpressions(
+                        generateRandomExperimentAccession(),
+                        generateRandomEnsemblGeneId(),
+                        RNG.nextInt(Integer.MIN_VALUE, Integer.MAX_VALUE)))
+                .isEmpty();
     }
 
     @Test
-    public void testWithRetrievedIdsSameAsQueryTerms3() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0"), ImmutableMap.of("T0", 3));
-
-        assertEquals(ImmutableSet.of("T0", "C00", "C01", "C02"), r);
+    void ifZeroCoexpressionsAreRequestedReturnEmptyList() {
+        when(coexpressedGenesDao.coexpressedGenesFor(anyString(), anyString()))
+                .thenReturn(generateNonEmptyCollectionOfRandomGeneIds());
+        assertThat(subject.fetchCoexpressions(generateRandomExperimentAccession(), generateRandomEnsemblGeneId(), 0))
+                .isEmpty();
     }
 
+    // Maybe this one is overly defensive
     @Test
-    public void testWithRetrievedIdsSameAsQueryTerms4() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0", "T2"), ImmutableMap.of("T0", 3));
-
-        assertEquals(ImmutableSet.of("T0", "C00", "C01", "C02", "T2"), r);
+    void ifNegativeAmountOfCoexpressionsAreRequestedReturnEmptyList() {
+        when(coexpressedGenesDao.coexpressedGenesFor(anyString(), anyString()))
+                .thenReturn(generateNonEmptyCollectionOfRandomGeneIds());
+        assertThat(
+                subject.fetchCoexpressions(
+                        generateRandomExperimentAccession(),
+                        generateRandomEnsemblGeneId(),
+                        RNG.nextInt(Integer.MIN_VALUE, -1)))
+                .isEmpty();
     }
 
-    @Test
-    public void testWithRetrievedIdsSameAsQueryTerms5() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0", "T2"), ImmutableMap.of("T0", 1));
-
-        assertEquals(ImmutableSet.of("T0", "C00", "T2"), r);
-    }
-
-    @Test
-    public void testWithRetrievedIdsSameAsQueryTerms6() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0", "T1"), ImmutableMap.of("T0", 1));
-
-        assertEquals(ImmutableSet.of("T0", "C00", "T1"), r);
-    }
-
-    @Test
-    public void testWithRetrievedIdsSameAsQueryTerms7() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0", "T1"), ImmutableMap.of("T0", 1, "T1", 2));
-
-        assertEquals(ImmutableSet.of("T0", "C00", "T1", "C10", "C11"), r);
-    }
-
-    @Test
-    public void testWithRetrievedIdsSameAsQueryTerms8() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0"), ImmutableMap.of("T0", 100000));
-
-        assertEquals(ImmutableSet.of("T0", "C00", "C01", "C02"), r);
-    }
-    @Test
-    public void testWithRetrievedIdsSameAsQueryTerms9() {
-        Collection<String> r =
-                extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-                        ImmutableList.of("T0"), ImmutableMap.of("T0", -1));
-
-        assertEquals(ImmutableSet.of("T0"), r);
-    }
-
-
-    private
-    ImmutableSet<String> extendGeneQueryWithCoexpressionsWhenGeneQueryTermsAreTheSameAsRetrievedIds(
-            Collection<String> geneQueryTerms, Map<String, Integer> requested) {
-
-        GeneQueryResponse r = new GeneQueryResponse();
-        for (String s : geneQueryTerms) {
-            r.addGeneIds(s, ImmutableSet.of(s));
-        }
-
-        BaselineExperiment e = mock(BaselineExperiment.class);
-        when(e.getAccession()).thenReturn(EX1_GENE_ID);
-
-        Pair<GeneQueryResponse, List<String>> p =
-                subject.extendGeneQueryResponseWithCoexpressions(r, e, requested);
-
-        return ImmutableSet.<String>builder().addAll(p.getLeft().getAllGeneIds()).build();
-
+    private ImmutableList<String> generateNonEmptyCollectionOfRandomGeneIds() {
+        return IntStream.range(0, RNG.nextInt(1, MAX_COEXPRESSIONS_COUNT))
+                .boxed()
+                .map(__ -> generateRandomEnsemblGeneId())
+                .collect(toImmutableList());
     }
 }
