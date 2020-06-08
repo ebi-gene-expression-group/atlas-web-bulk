@@ -6,13 +6,13 @@ import uk.ac.ebi.atlas.experimentpage.baseline.topgenes.BaselineExperimentTopGen
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
+import uk.ac.ebi.atlas.species.Species;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
 import java.util.List;
 
 // Get lists of gene IDs and/or preferences from the experiment page sidebar and get baseline profiles (i.e. heatmap
 // rows).
-
 @Component
 public class BaselineExperimentProfilesService {
     private final BaselineExperimentTopGenesService baselineExperimentTopGenesService;
@@ -26,16 +26,17 @@ public class BaselineExperimentProfilesService {
     }
 
     public GeneProfilesList<BaselineProfile> getTopGeneProfiles(String experimentAccession,
+                                                                Species species,
                                                                 List<AssayGroup> assayGroups,
                                                                 BaselineRequestPreferences<?> preferences) {
 
-        List<String> topGeneIds = preferences.isSpecific() ?
+        var matchingGeneIdsInExperiment = preferences.isSpecific() ?
                 baselineExperimentTopGenesService.searchSpecificGenesInBaselineExperiment(
-                        experimentAccession, preferences) :
+                        experimentAccession, species, preferences) :
                 baselineExperimentTopGenesService.searchMostExpressedGenesInBaselineExperiment(
-                        experimentAccession, preferences);
+                        experimentAccession, species, preferences);
 
-        return baselineExperimentProfilesDao.fetchProfiles(topGeneIds, assayGroups, preferences, experimentAccession);
+        return baselineExperimentProfilesDao.fetchProfiles(matchingGeneIdsInExperiment, assayGroups, preferences, experimentAccession);
     }
 
     public GeneProfilesList<BaselineProfile> getGeneProfiles(String experimentAccession,
@@ -44,10 +45,5 @@ public class BaselineExperimentProfilesService {
                                                             String... geneIds) {
         return baselineExperimentProfilesDao.fetchProfiles(
                 ImmutableList.copyOf(geneIds), assayGroups, preferences, experimentAccession);
-    }
-
-
-    public long fetchCount(String experimentAccession, BaselineRequestPreferences<?> preferences) {
-        return baselineExperimentProfilesDao.fetchCount(experimentAccession, preferences);
     }
 }

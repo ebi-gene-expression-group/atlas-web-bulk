@@ -76,16 +76,11 @@ public class BaselineExperimentPageService extends ExperimentPageService {
 
     private GeneProfilesList<BaselineProfile> fetchProfiles(BaselineExperiment experiment,
                                                             BaselineRequestPreferences<?> preferences) {
-        GeneProfilesList<BaselineProfile> baselineProfilesList =
-                baselineExperimentProfilesService.getTopGeneProfiles(
-                        experiment.getAccession(),
-                        experiment.getDataColumnDescriptors(),
-                        preferences);
-
-        baselineProfilesList.setTotalResultCount(
-                baselineExperimentProfilesService.fetchCount(experiment.getAccession(), preferences));
-
-        return baselineProfilesList;
+        return baselineExperimentProfilesService.getTopGeneProfiles(
+                experiment.getAccession(),
+                experiment.getSpecies(),
+                experiment.getDataColumnDescriptors(),
+                preferences);
     }
 
     private JsonArray constructColumnHeaders(BaselineRequestContext<?> requestContext, BaselineExperiment experiment) {
