@@ -1,7 +1,7 @@
 package uk.ac.ebi.atlas.experimentpage.baseline.topgenes;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-import org.apache.solr.client.solrj.SolrQuery;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.solr.cloud.SolrCloudCollectionProxyFactory;
 import uk.ac.ebi.atlas.solr.cloud.TupleStreamer;
@@ -13,7 +13,6 @@ import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.TupleStreamBuilder
 import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.decorator.InnerJoinStreamBuilder;
 import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.decorator.SelectStreamBuilder;
 import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.decorator.SortStreamBuilder;
-import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.decorator.TopStreamBuilder;
 import uk.ac.ebi.atlas.solr.cloud.search.streamingexpressions.source.FacetStreamBuilder;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
@@ -25,7 +24,6 @@ import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProx
 
 // Produces streams of Solr tuples which contain gene IDs that match the search criteria in the experiment page
 // sidebar. They include average expression over selected assay groups and specificity (counts) if specific is checked.
-
 @Component
 public class BaselineExperimentTopGenesDao {
     private final BulkAnalyticsCollectionProxy bulkAnalyticsCollectionProxy;
@@ -35,49 +33,48 @@ public class BaselineExperimentTopGenesDao {
     }
 
     public TupleStreamer aggregateGeneIdsAndSortByAverageExpression(String experimentAccession,
-                                                                    BaselineRequestPreferences<?> preferences) {
-        AnalyticsSchemaField expressionLevelField =
+                                                                    BaselineRequestPreferences<?> preferences,
+                                                                    ImmutableCollection<String> geneIds) {
+        var expressionLevelField =
                 BulkAnalyticsCollectionProxy.getExpressionLevelFieldNames(preferences.getUnit()).getLeft();
 
-        SolrQuery solrQuery =
-                ExperimentRequestPreferencesSolrQueryFactory.createSolrQuery(experimentAccession, preferences);
+        var solrQuery =
+                ExperimentRequestPreferencesSolrQueryFactory.createSolrQuery(experimentAccession, preferences, geneIds);
 
-        FacetStreamBuilder<BulkAnalyticsCollectionProxy> facetStreamBuilder =
+        var facetStreamBuilder =
                 new FacetStreamBuilder<>(bulkAnalyticsCollectionProxy, BIOENTITY_IDENTIFIER)
                         .withQuery(solrQuery)
                         .sortByAbsoluteAverageDescending(expressionLevelField);
 
-        SelectStreamBuilder selectStreamBuilder = mapMetricFieldNames(facetStreamBuilder, expressionLevelField);
+        var selectStreamBuilder = mapMetricFieldNames(facetStreamBuilder, expressionLevelField);
 
-        TopStreamBuilder topStreamBuilder =
-                new TopStreamBuilder(selectStreamBuilder, preferences.getHeatmapMatrixSize(), AVERAGE_EXPRESSION_KEY);
-
-        return TupleStreamer.of(topStreamBuilder.build());
+        return TupleStreamer.of(selectStreamBuilder.build());
     }
 
     public TupleStreamer aggregateGeneIdsAndSortBySpecificity(String experimentAccession,
-                                                              BaselineRequestPreferences<?> preferences) {
-        AnalyticsSchemaField expressionLevelField =
+                                                              BaselineRequestPreferences<?> preferences,
+                                                              ImmutableCollection<String> geneIds) {
+        var expressionLevelField =
                 BulkAnalyticsCollectionProxy.getExpressionLevelFieldNames(preferences.getUnit()).getLeft();
 
         // Get all experiment gene IDs, applying cutoff, with global specificity
-        SolrQuery experimentFilter =
+        var experimentFilter =
                 new SolrQueryBuilder<BulkAnalyticsCollectionProxy>()
                         .addFilterFieldByTerm(EXPERIMENT_ACCESSION, experimentAccession)
                         .addFilterFieldByRangeMin(expressionLevelField, preferences.getCutoff())
                         .build();
 
-        FacetStreamBuilder<BulkAnalyticsCollectionProxy> blahFacetStreamBuilder =
+        var blahFacetStreamBuilder =
                 new FacetStreamBuilder<>(bulkAnalyticsCollectionProxy, BIOENTITY_IDENTIFIER)
                         .withQuery(experimentFilter)
                         .withCounts()
                         .sortByAscending(BIOENTITY_IDENTIFIER);
 
         // Get experiment gene IDs expressed in the selected assay groups with average expression sorted by gene ID
-        SolrQuery solrQuery =
-                ExperimentRequestPreferencesSolrQueryFactory.createSolrQuery(experimentAccession, preferences);
+        var solrQuery =
+                ExperimentRequestPreferencesSolrQueryFactory.createSolrQuery(experimentAccession, preferences, geneIds);
 
-        FacetStreamBuilder<BulkAnalyticsCollectionProxy> facetStreamBuilder =
+        var facetStreamBuilder =
                 new FacetStreamBuilder<>(bulkAnalyticsCollectionProxy, BIOENTITY_IDENTIFIER)
                         .withQuery(solrQuery)
                         .sortByAscending(BIOENTITY_IDENTIFIER)
@@ -85,15 +82,13 @@ public class BaselineExperimentTopGenesDao {
 
         // Join previous two streams, creating a stream of the gene IDs expressed in the selected assay group with the
         // average expression and the global specificity
-        InnerJoinStreamBuilder innerJoinStreamBuilder =
+        var innerJoinStreamBuilder =
                 new InnerJoinStreamBuilder(facetStreamBuilder, blahFacetStreamBuilder, BIOENTITY_IDENTIFIER.name());
 
-        SelectStreamBuilder selectStreamBuilder =
-                mapMetricFieldNames(innerJoinStreamBuilder, expressionLevelField);
+        var selectStreamBuilder = mapMetricFieldNames(innerJoinStreamBuilder, expressionLevelField);
 
         // Sort resulting stream by specificity
-        SortStreamBuilder sortStreamBuilder =
-                new SortStreamBuilder(selectStreamBuilder, SPECIFICITY_KEY);
+        var sortStreamBuilder = new SortStreamBuilder(selectStreamBuilder, SPECIFICITY_KEY);
 
         return TupleStreamer.of(sortStreamBuilder.build());
     }
@@ -109,7 +104,5 @@ public class BaselineExperimentTopGenesDao {
                                         BIOENTITY_IDENTIFIER.name(), GENE_KEY,
                                         "avg(abs(" + expressionLevelField.name() + "))", AVERAGE_EXPRESSION_KEY,
                                         "count(*)", SPECIFICITY_KEY));
-
     }
-
 }
