@@ -1,4 +1,4 @@
-package uk.ac.ebi.atlas.experimentpage;
+package uk.ac.ebi.atlas.experimentpage.download;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.IOUtils;
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import uk.ac.ebi.atlas.experimentpage.ExperimentFileLocationService;
+import uk.ac.ebi.atlas.experimentpage.ExperimentFileType;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
@@ -104,7 +106,7 @@ public class ExperimentDownloadController {
     }
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    private class NoExperimentSubResourceException extends RuntimeException {
+    private static class NoExperimentSubResourceException extends RuntimeException {
     }
 
     @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=PROTEOMICS_BASELINE")
@@ -148,7 +150,7 @@ public class ExperimentDownloadController {
 
     }
 
-    void microarrayExperimentDownload(String experimentAccession,
+    public void microarrayExperimentDownload(String experimentAccession,
                                       String accessKey,
                                       MicroarrayRequestPreferences preferences,
                                       HttpServletResponse response) {
