@@ -3,7 +3,6 @@
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/experiment.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/alt-customized-bootstrap-3.3.5.css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/popup-feedback.css" type="text/css" media="all">
 
 <div class="row expanded margin-top-large">
     <div class="small-12 columns">
