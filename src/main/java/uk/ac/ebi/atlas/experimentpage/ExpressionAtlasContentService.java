@@ -175,50 +175,53 @@ public class ExpressionAtlasContentService {
                                                  ExternallyAvailableContent.ContentType contentType) {
         Experiment<?> experiment = experimentTrader.getExperiment(experimentAccession, accessKey);
         String externalResourceType = externalResourceLinksPriority(experiment);
-
-        if (experiment.getType().isProteomicsBaseline()) {
-            return proteomicsBaselineExperimentExternallyAvailableContentService.list(
-                    (BaselineExperiment) experiment, contentType);
-        } else if (experiment.getType().isRnaSeqBaseline()) {
-            List list = rnaSeqBaselineExperimentExternallyAvailableContentService.list(
-                    (BaselineExperiment) experiment, contentType);
-            List list2 =  externalResourceType.equals("geo") ?
-                    rnaSeqBaselineExperimentExternallyAvailableContentServiceGeo.list(
-                    (BaselineExperiment) experiment, contentType) :
-                    externalResourceType.equals("ega") ?
-                    rnaSeqBaselineExperimentExternallyAvailableContentServiceEga.list(
-                            (BaselineExperiment) experiment, contentType) :
-                    rnaSeqBaselineExperimentExternallyAvailableContentServiceEna.list(
-                            (BaselineExperiment) experiment, contentType);
-            list.addAll(list2);
-            return list;
-        } else if (experiment.getType().isRnaSeqDifferential()) {
-            List list = rnaSeqDifferentialExperimentExternallyAvailableContentService.list(
-                    (DifferentialExperiment) experiment, contentType);
-            List list2 =  externalResourceType.equals("geo") ?
-                    rnaSeqDifferentialExperimentExternallyAvailableContentServiceGeo.list(
-                            (DifferentialExperiment) experiment, contentType) :
-                    externalResourceType.equals("ega") ?
-                    rnaSeqDifferentialExperimentExternallyAvailableContentServiceEga.list(
-                            (DifferentialExperiment) experiment, contentType) :
-                    rnaSeqDifferentialExperimentExternallyAvailableContentServiceEna.list(
-                            (DifferentialExperiment) experiment, contentType);
-            list.addAll(list2);
-            return list;
-        } else {
-            List list = microarrayExperimentExternallyAvailableContentService.list(
-                    (MicroarrayExperiment) experiment, contentType);
-            List list2 =  externalResourceType.equals("geo") ?
-                    microarrayExperimentExternallyAvailableContentServiceGeo.list(
-                            (MicroarrayExperiment) experiment, contentType) :
-                    externalResourceType.equals("ega") ?
-                    microarrayExperimentExternallyAvailableContentServiceEga.list(
-                            (MicroarrayExperiment) experiment, contentType) :
-                    microarrayExperimentExternallyAvailableContentServiceEna.list(
-                            (MicroarrayExperiment) experiment, contentType);
-            list.addAll(list2);
-            return list;
+        List arrayExpressLinks;
+        List otherExternalResourceLinks;
+        switch (experiment.getType()) {
+            case PROTEOMICS_BASELINE:
+                arrayExpressLinks = proteomicsBaselineExperimentExternallyAvailableContentService.list(
+                        (BaselineExperiment) experiment, contentType);
+                break;
+            case RNASEQ_MRNA_BASELINE:
+                arrayExpressLinks = rnaSeqBaselineExperimentExternallyAvailableContentService.list(
+                        (BaselineExperiment) experiment, contentType);
+                otherExternalResourceLinks = externalResourceType.equals("geo") ?
+                        rnaSeqBaselineExperimentExternallyAvailableContentServiceGeo.list(
+                                (BaselineExperiment) experiment, contentType) :
+                        externalResourceType.equals("ega") ?
+                                rnaSeqBaselineExperimentExternallyAvailableContentServiceEga.list(
+                                        (BaselineExperiment) experiment, contentType) :
+                                rnaSeqBaselineExperimentExternallyAvailableContentServiceEna.list(
+                                        (BaselineExperiment) experiment, contentType);
+                arrayExpressLinks.addAll(otherExternalResourceLinks);
+                break;
+            case RNASEQ_MRNA_DIFFERENTIAL:
+                arrayExpressLinks = rnaSeqDifferentialExperimentExternallyAvailableContentService.list(
+                        (DifferentialExperiment) experiment, contentType);
+                otherExternalResourceLinks = externalResourceType.equals("geo") ?
+                        rnaSeqDifferentialExperimentExternallyAvailableContentServiceGeo.list(
+                                (DifferentialExperiment) experiment, contentType) :
+                        externalResourceType.equals("ega") ?
+                                rnaSeqDifferentialExperimentExternallyAvailableContentServiceEga.list(
+                                        (DifferentialExperiment) experiment, contentType) :
+                                rnaSeqDifferentialExperimentExternallyAvailableContentServiceEna.list(
+                                        (DifferentialExperiment) experiment, contentType);
+                arrayExpressLinks.addAll(otherExternalResourceLinks);
+                break;
+            default:
+                arrayExpressLinks = microarrayExperimentExternallyAvailableContentService.list(
+                        (MicroarrayExperiment) experiment, contentType);
+                otherExternalResourceLinks =  externalResourceType.equals("geo") ?
+                        microarrayExperimentExternallyAvailableContentServiceGeo.list(
+                                (MicroarrayExperiment) experiment, contentType) :
+                        externalResourceType.equals("ega") ?
+                                microarrayExperimentExternallyAvailableContentServiceEga.list(
+                                        (MicroarrayExperiment) experiment, contentType) :
+                                microarrayExperimentExternallyAvailableContentServiceEna.list(
+                                        (MicroarrayExperiment) experiment, contentType);
+                arrayExpressLinks.addAll(otherExternalResourceLinks);
         }
+        return arrayExpressLinks;
     }
 
     private String externalResourceLinksPriority(Experiment<?> experiment) {
@@ -230,6 +233,5 @@ public class ExpressionAtlasContentService {
                 .collect(toImmutableList());
 
         return geoAccessions.isEmpty() ? egaAccessions.isEmpty() ? "ena" : "ega" : "geo";
-
     }
 }
