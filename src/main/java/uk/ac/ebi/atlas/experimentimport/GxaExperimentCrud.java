@@ -88,7 +88,8 @@ public class GxaExperimentCrud extends ExperimentCrud {
             @CacheEvict(cacheNames = "speciesSummary", allEntries = true),
             @CacheEvict(cacheNames = "experimentContent", key = "#experimentAccession"),
             @CacheEvict(cacheNames = "publicBioentityIdentifiers", allEntries = true),
-            @CacheEvict(cacheNames = "publicSpecies", allEntries = true) })
+            @CacheEvict(cacheNames = "publicSpecies", allEntries = true),
+            @CacheEvict(cacheNames = "experiment2Collections", key = "#experimentAccession") })
     public void deleteExperiment(String experimentAccession) {
         super.deleteExperiment(experimentAccession);
     }

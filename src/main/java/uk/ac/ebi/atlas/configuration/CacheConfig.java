@@ -42,6 +42,9 @@ public class CacheConfig {
                                                 .orElse(DEFAULT_CACHE_CAPACITY)),
                 builder -> builder.name("experimentAttributes").eternal(true),
                 builder -> builder.name("speciesSummary").eternal(true),
+                // Spring unwraps Optional types
+                builder -> builder.name("experimentCollection").permitNullValues(true),
+                builder -> builder.name("experiment2Collections"),
 
                 builder -> builder.name("experimentContent").eternal(true),
 
