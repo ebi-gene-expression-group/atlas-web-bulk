@@ -48,6 +48,45 @@
         </div>
         </c:if>
 
+        <c:if test="${not empty publications}">
+            <div id="experimentReferences">
+                <c:choose>
+                    <c:when test="${publications.size() == 1}">
+                        Publication:
+                    </c:when>
+                    <c:otherwise>
+                        Publications:
+                    </c:otherwise>
+                </c:choose>
+
+                <ul>
+                    <c:forEach var="publication" items="${publications}">
+                        <li>
+                            <c:if test="${not empty publication.getAuthors()}">
+                                <span>${publication.getAuthors()} (${publication.getPublicationYear()})</span>
+                            </c:if>
+                            <i>
+                                <c:choose>
+                                    <c:when test="${not empty publication.getPubmedId()}">
+                                        <a class="pubmed-id"
+                                           href="https://europepmc.org/abstract/MED/${publication.getPubmedId()}"
+                                           title="Read publication"
+                                           target='_blank'>${publication.getTitle()}</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a class="pubmed-id"
+                                           href="https://doi.org/${publication.getDoi()}"
+                                           title="Read publication"
+                                           target='_blank'>${publication.getTitle()}</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </i>
+                        </li>
+                    </c:forEach>
+                </ul>
+            </div>
+        </c:if>
+
         <c:if test="${not empty dataProviderURL and not empty dataProviderDescription}">
         <div id="dataProvider">Raw Data Provider:
             <c:forEach var="dataProvider" items="${dataProviderURL}" varStatus="i">
