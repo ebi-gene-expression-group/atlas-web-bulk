@@ -19,7 +19,6 @@ import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
-import java.util.List;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import java.util.function.Function;
 
@@ -170,58 +169,59 @@ public class ExpressionAtlasContentService {
         }
     }
 
-    public List<ExternallyAvailableContent> list(String experimentAccession,
+    public ImmutableList<ExternallyAvailableContent> list(String experimentAccession,
                                                  String accessKey,
                                                  ExternallyAvailableContent.ContentType contentType) {
         Experiment<?> experiment = experimentTrader.getExperiment(experimentAccession, accessKey);
         String externalResourceType = externalResourceLinksPriority(experiment);
-        List arrayExpressLinks;
-        List otherExternalResourceLinks;
+        ImmutableList.Builder<ExternallyAvailableContent> arrayExpressAndOtherExternalResourcesLinks = ImmutableList.builder();
+        ImmutableList.Builder<ExternallyAvailableContent> otherExternalResourceLinks = ImmutableList.builder();
+
         switch (experiment.getType()) {
             case PROTEOMICS_BASELINE:
-                arrayExpressLinks = proteomicsBaselineExperimentExternallyAvailableContentService.list(
-                        (BaselineExperiment) experiment, contentType);
+                arrayExpressAndOtherExternalResourcesLinks.addAll(proteomicsBaselineExperimentExternallyAvailableContentService.list(
+                        (BaselineExperiment) experiment, contentType));
                 break;
             case RNASEQ_MRNA_BASELINE:
-                arrayExpressLinks = rnaSeqBaselineExperimentExternallyAvailableContentService.list(
-                        (BaselineExperiment) experiment, contentType);
-                otherExternalResourceLinks = externalResourceType.equals("geo") ?
+                arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqBaselineExperimentExternallyAvailableContentService.list(
+                        (BaselineExperiment) experiment, contentType));
+                otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?
                         rnaSeqBaselineExperimentExternallyAvailableContentServiceGeo.list(
                                 (BaselineExperiment) experiment, contentType) :
                         externalResourceType.equals("ega") ?
                                 rnaSeqBaselineExperimentExternallyAvailableContentServiceEga.list(
                                         (BaselineExperiment) experiment, contentType) :
                                 rnaSeqBaselineExperimentExternallyAvailableContentServiceEna.list(
-                                        (BaselineExperiment) experiment, contentType);
-                arrayExpressLinks.addAll(otherExternalResourceLinks);
+                                        (BaselineExperiment) experiment, contentType));
+                arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case RNASEQ_MRNA_DIFFERENTIAL:
-                arrayExpressLinks = rnaSeqDifferentialExperimentExternallyAvailableContentService.list(
-                        (DifferentialExperiment) experiment, contentType);
-                otherExternalResourceLinks = externalResourceType.equals("geo") ?
+                arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqDifferentialExperimentExternallyAvailableContentService.list(
+                        (DifferentialExperiment) experiment, contentType));
+                otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?
                         rnaSeqDifferentialExperimentExternallyAvailableContentServiceGeo.list(
                                 (DifferentialExperiment) experiment, contentType) :
                         externalResourceType.equals("ega") ?
                                 rnaSeqDifferentialExperimentExternallyAvailableContentServiceEga.list(
                                         (DifferentialExperiment) experiment, contentType) :
                                 rnaSeqDifferentialExperimentExternallyAvailableContentServiceEna.list(
-                                        (DifferentialExperiment) experiment, contentType);
-                arrayExpressLinks.addAll(otherExternalResourceLinks);
+                                        (DifferentialExperiment) experiment, contentType));
+                arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             default:
-                arrayExpressLinks = microarrayExperimentExternallyAvailableContentService.list(
-                        (MicroarrayExperiment) experiment, contentType);
-                otherExternalResourceLinks =  externalResourceType.equals("geo") ?
+                arrayExpressAndOtherExternalResourcesLinks.addAll(microarrayExperimentExternallyAvailableContentService.list(
+                        (MicroarrayExperiment) experiment, contentType));
+                otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?
                         microarrayExperimentExternallyAvailableContentServiceGeo.list(
                                 (MicroarrayExperiment) experiment, contentType) :
                         externalResourceType.equals("ega") ?
                                 microarrayExperimentExternallyAvailableContentServiceEga.list(
                                         (MicroarrayExperiment) experiment, contentType) :
                                 microarrayExperimentExternallyAvailableContentServiceEna.list(
-                                        (MicroarrayExperiment) experiment, contentType);
-                arrayExpressLinks.addAll(otherExternalResourceLinks);
+                                        (MicroarrayExperiment) experiment, contentType));
+                arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
         }
-        return arrayExpressLinks;
+        return arrayExpressAndOtherExternalResourcesLinks.build();
     }
 
     private String externalResourceLinksPriority(Experiment<?> experiment) {
