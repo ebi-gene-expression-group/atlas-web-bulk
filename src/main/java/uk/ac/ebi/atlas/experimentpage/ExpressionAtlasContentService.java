@@ -208,7 +208,9 @@ public class ExpressionAtlasContentService {
                                         (DifferentialExperiment) experiment, contentType));
                 arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
-            default:
+            case MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL:
+            case MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL:
+            case MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(microarrayExperimentExternallyAvailableContentService.list(
                         (MicroarrayExperiment) experiment, contentType));
                 otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?
@@ -220,7 +222,11 @@ public class ExpressionAtlasContentService {
                                 microarrayExperimentExternallyAvailableContentServiceEna.list(
                                         (MicroarrayExperiment) experiment, contentType));
                 arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
+                break;
+            default:
+                throw new IllegalArgumentException(experiment.getType() + ": experiment type not supported.");
         }
+
         return arrayExpressAndOtherExternalResourcesLinks.build();
     }
 
