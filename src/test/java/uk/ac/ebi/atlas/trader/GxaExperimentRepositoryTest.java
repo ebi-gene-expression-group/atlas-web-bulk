@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.trader;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,6 @@ import uk.ac.ebi.atlas.trader.factory.MicroarrayExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.RnaSeqDifferentialExperimentFactory;
 
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
@@ -88,7 +88,7 @@ class GxaExperimentRepositoryTest {
         when(idfParserMock.parse(experimentAccession))
                 .thenReturn(new IdfParserOutput(
                         randomAlphanumeric(500),
-                        Collections.emptyList(),
+                        ImmutableSet.of(),
                         randomAlphanumeric(100),
                         ImmutableList.of(),
                         RNG.nextInt(50),
