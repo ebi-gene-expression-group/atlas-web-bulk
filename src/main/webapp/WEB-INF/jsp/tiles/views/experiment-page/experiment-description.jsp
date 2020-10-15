@@ -10,6 +10,7 @@
 <%--@elvariable id="type" type="uk.ac.ebi.atlas.model.ExperimentType"--%>
 <%--@elvariable id="alternativeViews" type="List<String>"--%>
 <%--@elvariable id="alternativeViewDescriptions" type="List<String>"--%>
+<%--@elvariable id="publications" type="List<uk.ac.ebi.atlas.model.Publication>"--%>
 
 <%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
@@ -46,6 +47,45 @@
                     </span>
             </c:forEach>
         </div>
+        </c:if>
+
+        <c:if test="${not empty publications}">
+            <div id="experimentReferences">
+                <c:choose>
+                    <c:when test="${publications.size() == 1}">
+                        Publication:
+                    </c:when>
+                    <c:otherwise>
+                        Publications:
+                    </c:otherwise>
+                </c:choose>
+
+                <ul>
+                    <c:forEach var="publication" items="${publications}">
+                        <li>
+                            <c:if test="${not empty publication.getAuthors()}">
+                                <span>${publication.getAuthors()} (${publication.getPublicationYear()})</span>
+                            </c:if>
+                            <i>
+                                <c:choose>
+                                    <c:when test="${not empty publication.getPubmedId()}">
+                                        <a class="pubmed-id"
+                                           href="https://europepmc.org/abstract/MED/${publication.getPubmedId()}"
+                                           title="Read publication"
+                                           target='_blank'>${publication.getTitle()}</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a class="pubmed-id"
+                                           href="https://doi.org/${publication.getDoi()}"
+                                           title="Read publication"
+                                           target='_blank'>${publication.getTitle()}</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </i>
+                        </li>
+                    </c:forEach>
+                </ul>
+            </div>
         </c:if>
 
         <c:if test="${not empty dataProviderURL and not empty dataProviderDescription}">
