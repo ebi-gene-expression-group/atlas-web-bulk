@@ -29,3 +29,7 @@ do
     done
   done
 done
+
+# Set aliases
+curl "http://${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=bioentities&collections=bioentities-v1"
+curl "http://${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=analytics&collections=analytics-v1"
