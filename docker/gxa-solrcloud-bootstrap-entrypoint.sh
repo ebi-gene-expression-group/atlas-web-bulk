@@ -7,6 +7,9 @@
 /index-gxa/bin/create-gxa-analytics-collection.sh
 /index-gxa/bin/create-gxa-analytics-schema.sh
 
+/solr-bulk/bin/create-bulk-analytics-collection.sh
+/solr-bulk/bin/create-bulk-analytics-schema.sh
+
 # Restore all collections
 # Env variables come from Dockerfile
 for SOLR_HOST in $SOLR_HOSTS
