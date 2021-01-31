@@ -148,8 +148,7 @@ backup operation with (set `SOLR_HOST` and `SOLR_COLLECTION` to the appropriate 
 ```bash
 docker exec -i ${SOLR_HOST} curl -s "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=details"
 ```
-
-### The Solr don’t work
+### I’m not getting any suggestions in Epression Atlas
 Read the important message after you run `gxa-solrlcoud-bootstrap`:
 > PLEASE READ!
 > Suggesters haven’t been built because it’s very likely to get a `java.net.SocketTimeoutException` due
