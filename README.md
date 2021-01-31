@@ -158,9 +158,11 @@ Read the important message after you run `gxa-solrlcoud-bootstrap`:
 > The best option is to manually build and supervise this step.
 > 
 > On one terminal session run the following command (don’t worry if the request returns a 500 error):
+>
 > `docker exec -i gxa-solrcloud-1 curl 'http://localhost:8983/solr/bioentities-v1/suggest?suggest.build=true&suggest.dictionary=propertySuggester'`
 > 
 > On another terminal, monitor the size of the suggester directory size:
+>
 > `docker exec -it gxa-solrcloud-1 bash -c 'watch du -sc server/solr/bioentities-v1*/data/*'`
 > 
 > The suggester will be built when the propertySuggester directory size stabilises.
