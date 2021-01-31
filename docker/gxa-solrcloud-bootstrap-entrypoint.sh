@@ -32,9 +32,11 @@ done
 
 # Set aliases
 curl "http://${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=bioentities&collections=bioentities-v1"
-curl "http://${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=analytics&collections=analytics-v1"
+curl "http://${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=bulk-analytics&collections=bulk-analytics-v1"
+printf "The following aliases have been set:\n"
+curl "http://${SOLR_HOST}:8983/solr/admin/collections?action=LISTALIASES"
 
-printf "PLEASE READ!\n"
+printf "\nPLEASE READ!\n"
 printf "Suggesters haven’t been built because it’s very likely to get a java.net.SocketTimeoutException due\n"
 printf "to the size of the bioentities collection. Raising the timeout in Jetty could mask other errors down\n"
 printf "the line, and ignoring the exception doesn’t guarantee the suggester to be fully built since it still\n"
