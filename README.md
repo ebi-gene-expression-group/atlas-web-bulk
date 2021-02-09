@@ -109,7 +109,7 @@ instructions to do that.
 ### PostgreSQL
 If at some point you wish to create a backup dump of the database run the command below:
 ```bash
-docker exec -it gxa-postgres bash -c 'pg_dump -d $POSTGRES_DB -h localhost -p 5432 -U $POSTGRES_USER -f /var/lib/postgresql/gxa/pg-dump.bin -F c -n $POSTGRES_USER -t $POSTGRES_USER.* -T *flyway*'
+docker exec -it gxa-postgres bash -c 'pg_dump -d $POSTGRES_DB -h localhost -p 5432 -U $POSTGRES_USER -f /var/backups/postgresql/pg-dump.bin -F c -n $POSTGRES_USER -t $POSTGRES_USER.* -T *flyway*'
 ```
 
 ### SolrCloud
