@@ -34,7 +34,7 @@ done
 curl "http://${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=bioentities&collections=bioentities-v1"
 curl "http://${SOLR_HOST}/solr/admin/collections?action=CREATEALIAS&name=bulk-analytics&collections=bulk-analytics-v1"
 printf "The following aliases have been set:\n"
-curl "http://${SOLR_HOST}:8983/solr/admin/collections?action=LISTALIASES"
+curl "http://${SOLR_HOST}/solr/admin/collections?action=LISTALIASES"
 
 printf "\nPLEASE READ!\n"
 printf "Suggesters haven’t been built because it’s very likely to get a java.net.SocketTimeoutException due\n"
