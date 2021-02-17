@@ -1,7 +1,9 @@
 <%--@elvariable id="entityBriefName" type="java.lang.String"--%>
+<%--@elvariable id="entityFullName" type="java.lang.String"--%>
 <%--@elvariable id="searchDescription" type="java.lang.String"--%>
 <%--@elvariable id="identifier" type="java.lang.String"--%>
 <%--@elvariable id="species" type="java.lang.String"--%>
+<%--@elvariable id="bioEntityDescription" type="java.lang.String"--%>
 <%--@elvariable id="hasBaselineResults" type="boolean"--%>
 <%--@elvariable id="hasDifferentialResults" type="boolean"--%>
 
@@ -25,16 +27,16 @@
         <c:if test="${empty entityBriefName}">
             <div>
                 <h3 class="gxaSearchTermDescription">
-                    Results for <span class="searchterm">${searchDescription}</span>
+                    Results for <span class="searchterm"><c:out value="${searchDescription}"/></span>
                 </h3>
             </div>
         </c:if>
 
         <c:if test="${not empty entityBriefName}">
             <div class="gxaBioentityHeader">
-                <p class="gxaBioentityName">${entityFullName}</p>
-                <p class="gxaBioentitySpecies">${species}</p>
-                <p class="gxaBioentityDescription">${bioEntityDescription}</p>
+                <p class="gxaBioentityName"><c:out value="${entityFullName}"/></p>
+                <p class="gxaBioentitySpecies"><c:out value="${species}"/></p>
+                <p class="gxaBioentityDescription"><c:out value="${bioEntityDescription}"/></p>
             </div>
         </c:if>
 
@@ -59,7 +61,7 @@
                 <li class="tabs-title ${differentialTabClass}"><a href="#differential">Differential expression</a></li>
 
                 <c:if test="${not empty entityBriefName}">
-                    <li class="tabs-title"><a href="#information">${entityBriefName} information</a></li>
+                    <li class="tabs-title"><a href="#information"><c:out value="${entityBriefName}"/> information</a></li>
                 </c:if>
             </ul>
 
