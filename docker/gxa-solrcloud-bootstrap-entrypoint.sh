@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-/index-gxa/bin/create-bioentities-collection.sh
-/index-gxa/bin/create-bioentities-schema.sh
+/index-bioentities/bin/create-bioentities-collection.sh
+/index-bioentities/bin/create-bioentities-schema.sh
+/index-bioentities/bin/create-bioentities-suggesters-gxa.sh
 
 /index-gxa/bin/create-gxa-analytics-config-set.sh
 /index-gxa/bin/create-gxa-analytics-collection.sh
