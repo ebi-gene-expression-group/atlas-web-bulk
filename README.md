@@ -142,6 +142,13 @@ rsync -ravz $ATLAS_DATA_PATH/* ebi-cli:/nfs/ftp/pub/databases/microarray/data/at
 
 ## Troubleshooting
 
+### One of the Solrcloud keeps shutting down on Macbook
+The plausible reason for this is that Mac Docker application is setting the memory limit on docker containers
+on system level. One way of fixing this would be to go to Docker dashboard and change the memory size allocation 
+preferrably to between `8-12 GB` and disk image to `100 GB or more`. Please see the screenshot below for reference:
+
+[![Screenshot-2021-02-18-at-18-27-40.png](https://i.postimg.cc/ZRjZR9Lh/Screenshot-2021-02-18-at-18-27-40.png)](https://postimg.cc/627FbpSH)
+
 ### The script that backs up Solr snapshot hangs
 Ensure you have writing privileges for the directory bind at `/var/backups/solr`. You can check the status of your
 backup operation with (set `SOLR_HOST` and `SOLR_COLLECTION` to the appropriate values):
