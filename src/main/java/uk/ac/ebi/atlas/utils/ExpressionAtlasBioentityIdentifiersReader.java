@@ -2,6 +2,7 @@ package uk.ac.ebi.atlas.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import uk.ac.ebi.atlas.commons.streams.ObjectInputStream;
 import uk.ac.ebi.atlas.experimentimport.analytics.baseline.BaselineAnalytics;
 import uk.ac.ebi.atlas.experimentimport.analytics.baseline.BaselineAnalyticsInputStreamFactory;
@@ -15,8 +16,6 @@ import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.IOException;
 import java.util.HashSet;
 
@@ -28,17 +27,15 @@ import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFER
 // TODO this code could be much shorter. Make the DifferentialAnalytics and BaselineAnalytics inherit from
 // TODO Analytics, with has a method getGeneId(), make the analytics input streams inherit from a common parent, and
 // TODO write one method that gets all gene ids for an experiment accession.
-@Named
+@Service
 public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifiersReader {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionAtlasBioentityIdentifiersReader.class);
 
     private final ExperimentTrader experimentTrader;
-
     private final BaselineAnalyticsInputStreamFactory baselineAnalyticsInputStreamFactory;
     private final MicroarrayDifferentialAnalyticsInputStreamFactory microarrayDifferentialAnalyticsInputStreamFactory;
     private final RnaSeqDifferentialAnalyticsInputStreamFactory rnaSeqDifferentialAnalyticsInputStreamFactory;
 
-    @Inject
     public ExpressionAtlasBioentityIdentifiersReader(ExperimentTrader experimentTrader,
                                                      BaselineAnalyticsInputStreamFactory
                                                              baselineAnalyticsInputStreamFactory,
