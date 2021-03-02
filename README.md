@@ -112,6 +112,7 @@ If at some point you wish to create a backup dump of the database run the comman
 docker exec -it gxa-postgres bash -c 'pg_dump -d $POSTGRES_DB -h localhost -p 5432 -U $POSTGRES_USER -f /var/backups/postgresql/pg-dump.bin -F c -n $POSTGRES_USER -t $POSTGRES_USER.* -T *flyway*'
 ```
 
+![Screenshot-2021-02-18-at-18-27-40](https://user-images.githubusercontent.com/4425744/109644544-83457e80-7b4d-11eb-9099-b9714090b299.png)
 ### SolrCloud
 ```bash
 for SOLR_COLLECTION in $SOLR_COLLECTIONS
@@ -147,9 +148,10 @@ Docker for macOS sets fairly strict resource limits for all Docker containers. I
 memory you need to increase the available amount in the Docker Dashboard. For bulk Expression Atlas, plase set Memory
 to between 8-12 GB and disk image to 100 GB or more. Please see the screenshot below for reference:
 
-[![Screenshot-2021-02-18-at-18-27-40.png](https://i.postimg.cc/ZRjZR9Lh/Screenshot-2021-02-18-at-18-27-40.png)](https://postimg.cc/627FbpSH)
+![Screenshot-2021-02-18-at-18-27-40](https://user-images.githubusercontent.com/4425744/109644570-8ccee680-7b4d-11eb-9db0-7a29fb4d9e2b.png)
 
 ### The script that backs up Solr snapshot hangs
+
 Ensure you have writing privileges for the directory bind at `/var/backups/solr`. You can check the status of your
 backup operation with (set `SOLR_HOST` and `SOLR_COLLECTION` to the appropriate values):
 ```bash
