@@ -12,15 +12,11 @@ plugins {
 }
 
 war {
-    archiveName 'gxa.war'
+    def artifactName = 'gxa'
+    destinationDirectory = file('./webapps')
+    delete "./webapps/$artifactName"
+    archiveName "$artifactName.war"
 }
-
-task explodedWar(type: Copy) {
-    into "$buildDir/exploded"
-    with war
-}
-
-war.dependsOn explodedWar
 
 group 'uk.ac.ebi.ge'
 version '36.0.0-SNAPSHOT'
