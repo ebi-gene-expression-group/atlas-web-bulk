@@ -9,7 +9,6 @@ services:
       - gxa
     ports:
       - "2181:2181"
-    restart: always
     volumes:
       - zk-1-data:/data
       - zk-1-datalog:/datalog
@@ -24,7 +23,6 @@ services:
       - gxa
     ports:
       - "2182:2181"
-    restart: always
     volumes:
       - zk-2-data:/data
       - zk-2-datalog:/datalog
@@ -39,7 +37,6 @@ services:
       - gxa
     ports:
       - "2183:2181"
-    restart: always
     volumes:
       - zk-3-data:/data
       - zk-3-datalog:/datalog
@@ -91,7 +88,6 @@ services:
     container_name: $POSTGRES_HOST
     networks:
       - gxa
-    restart: always
     command: -c max_wal_size=2GB
     environment:
       POSTGRES_USER: $POSTGRES_USER
