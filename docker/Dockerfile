@@ -4,7 +4,7 @@ RUN apk --no-cache add bash curl git grep
 
 RUN git clone https://github.com/ebi-gene-expression-group/index-gxa.git \
     && git clone https://github.com/ebi-gene-expression-group/solr-bulk.git \
-    && git clone -b bugfix/correctly-source-schema-version-1 https://github.com/ebi-gene-expression-group/index-bioentities.git
+    && git clone https://github.com/ebi-gene-expression-group/index-bioentities.git
 
 COPY gxa-solrcloud-bootstrap-entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh
