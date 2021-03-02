@@ -1,0 +1,158 @@
+version: "3.6"
+
+services:
+  #### SolrCloud
+  zk-1:
+    image: zookeeper:3.4.14
+    container_name: gxa-zk-1
+    networks:
+      - gxa
+    ports:
+      - "2181:2181"
+    volumes:
+      - zk-1-data:/data
+      - zk-1-datalog:/datalog
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888 server.2=gxa-zk-2:2888:3888 server.3=gxa-zk-3:2888:3888
+
+  zk-2:
+    image: zookeeper:3.4.14
+    container_name: gxa-zk-2
+    networks:
+      - gxa
+    ports:
+      - "2182:2181"
+    volumes:
+      - zk-2-data:/data
+      - zk-2-datalog:/datalog
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=gxa-zk-1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=gxa-zk-3:2888:3888
+
+  zk-3:
+    image: zookeeper:3.4.14
+    container_name: gxa-zk-3
+    networks:
+      - gxa
+    ports:
+      - "2183:2181"
+    volumes:
+      - zk-3-data:/data
+      - zk-3-datalog:/datalog
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=gxa-zk-1:2888:3888 server.2=gxa-zk-2:2888:3888 server.3=0.0.0.0:2888:3888
+
+  solrcloud-1:
+    image: solr:7.1.0
+    container_name: gxa-solrcloud-1
+    networks:
+      - gxa
+    ports:
+      - "8983:8983"
+    volumes:
+      - solrcloud-1-data:/opt/solr/server/solr
+      - $ATLAS_DATA_PATH/solrcloud/solr1:/var/backups/solr
+    environment:
+      - SOLR_HEAP=4g
+      - SOLR_OPTS=-Denable.runtime.lib=true
+      - ZK_HOST=gxa-zk-1:2181,gxa-zk-2:2181,gxa-zk-3:2181
+    depends_on:
+      - zk-1
+      - zk-2
+      - zk-3
+
+  solrcloud-2:
+    image: solr:7.1.0
+    container_name: gxa-solrcloud-2
+    networks:
+      - gxa
+    ports:
+      - "8984:8983"
+    volumes:
+      - solrcloud-2-data:/opt/solr/server/solr
+      - $ATLAS_DATA_PATH/solrcloud/solr2:/var/backups/solr
+    environment:
+      - SOLR_HEAP=4g
+      - SOLR_OPTS=-Denable.runtime.lib=true
+      - ZK_HOST=gxa-zk-1:2181,gxa-zk-2:2181,gxa-zk-3:2181
+    depends_on:
+      - zk-1
+      - zk-2
+      - zk-3
+
+  #### PostgreSQL database
+  postgres:
+    image: postgres:10-alpine
+    container_name: $POSTGRES_HOST
+    networks:
+      - gxa
+    command: -c max_wal_size=2GB
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - $ATLAS_DATA_PATH/postgresql:/var/backups/postgresql
+
+  flyway:
+    image: flyway/flyway
+    container_name: gxa-flyway
+    networks:
+      - gxa
+    command: -url=jdbc:postgresql://$POSTGRES_HOST/$POSTGRES_DB -schemas=$POSTGRES_USER -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD -connectRetries=60 migrate
+    volumes:
+      - ../../atlas-web-core/src/test/resources/schemas/flyway/gxa/:/flyway/sql
+    depends_on:
+      - postgres
+
+  #### Web server and filesystem
+  tomcat:
+    image: tomcat:9-jdk11
+    container_name: gxa-tomcat
+    networks:
+      - gxa
+    environment:
+      JPDA_ADDRESS: "*:8000"
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    volumes:
+      - ../webapps:/usr/local/tomcat/webapps
+      - $ATLAS_DATA_PATH/filesystem:/atlas-data
+      - tomcat-conf:/usr/local/tomcat/conf
+    depends_on:
+      - postgres
+      - solrcloud-1
+      - solrcloud-2
+    command: ["catalina.sh", "jpda", "run"]
+
+volumes:
+  zk-1-data:
+    name: gxa-zk-1-data
+  zk-1-datalog:
+    name: gxa-zk-1-datalog
+  zk-2-data:
+    name: gxa-zk-2-data
+  zk-2-datalog:
+    name: gxa-zk-2-datalog
+  zk-3-data:
+    name: gxa-zk-3-data
+  zk-3-datalog:
+    name: gxa-zk-3-datalog
+  solrcloud-1-data:
+    name: gxa-solrcloud-1-data
+  solrcloud-2-data:
+    name: gxa-solrcloud-2-data
+  pgdata:
+    name: gxa-pgdata
+  tomcat-conf:
+    name: gxa-tomcat-conf
+
+networks:
+  gxa:
+    name: gxa
