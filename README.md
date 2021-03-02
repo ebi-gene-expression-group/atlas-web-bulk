@@ -142,10 +142,10 @@ rsync -ravz $ATLAS_DATA_PATH/* ebi-cli:/nfs/ftp/pub/databases/microarray/data/at
 
 ## Troubleshooting
 
-### One of the Solrcloud keeps shutting down on Macbook
-The plausible reason for this is that Mac Docker application is setting the memory limit on docker containers
-on system level. One way of fixing this would be to go to Docker dashboard and change the memory size allocation 
-preferrably to between `8-12 GB` and disk image to `100 GB or more`. Please see the screenshot below for reference:
+### SolrCloud nodes shut down on macOS
+Docker for macOS sets fairly strict resource limits for all Docker containers. If your containers require e.g. more
+memory you need to increase the available amount in the Docker Dashboard. For bulk Expression Atlas, plase set Memory
+to between 8-12 GB and disk image to 100 GB or more. Please see the screenshot below for reference:
 
 [![Screenshot-2021-02-18-at-18-27-40.png](https://i.postimg.cc/ZRjZR9Lh/Screenshot-2021-02-18-at-18-27-40.png)](https://postimg.cc/627FbpSH)
 
