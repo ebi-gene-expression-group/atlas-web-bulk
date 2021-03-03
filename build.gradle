@@ -12,18 +12,11 @@ plugins {
 }
 
 war {
-    archiveName 'gxa.war'
+      archiveName 'gxa.war'
 }
-
-task explodedWar(type: Copy) {
-    into "$buildDir/exploded"
-    with war
-}
-
-war.dependsOn explodedWar
 
 group 'uk.ac.ebi.ge'
-version '35.0.0'
+version '36.0.0-SNAPSHOT'
 sourceCompatibility = 11
 targetCompatibility = 11
 
@@ -37,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'uk.ac.ebi.ge:atlas-web-core:5.0.0'
+    implementation 'uk.ac.ebi.ge:atlas-web-core:6.0.0-SNAPSHOT'
 
     implementation 'org.springframework:spring-context:5.1.5.RELEASE'
     implementation 'org.springframework:spring-jdbc:5.1.5.RELEASE'
