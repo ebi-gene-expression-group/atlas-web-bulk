@@ -12,10 +12,7 @@ plugins {
 }
 
 war {
-    def artifactName = 'gxa'
-    destinationDirectory = file('./webapps')
-    delete "./webapps/$artifactName"
-    archiveName "$artifactName.war"
+      archiveName 'gxa.war'
 }
 
 group 'uk.ac.ebi.ge'
