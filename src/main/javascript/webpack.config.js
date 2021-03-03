@@ -14,7 +14,8 @@ module.exports = {
     feedbackForm: `@ebi-gene-expression-group/atlas-feedback-form`,
     homepageSpeciesSummaryPanel: `./bundles/homepage-species-summary-panel`,
     homepageExperimentsSummaryPanel: `./bundles/homepage-experiments-summary-panel`,
-    experimentTable: `./bundles/experiment-table`
+    experimentTable: `./bundles/experiment-table`,
+    informationBanner: `./bundles/atlas-information-banner`
   },
 
   plugins: [
