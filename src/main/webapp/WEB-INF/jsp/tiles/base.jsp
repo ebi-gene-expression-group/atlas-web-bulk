@@ -90,6 +90,7 @@
 <script src="${pageContext.request.contextPath}/resources/js/lib/babel-polyfill.min.js"></script>
 <script src="${pageContext.request.contextPath}/resources/js/lib/fetch-polyfill.min.js"></script>
 <script src="${pageContext.request.contextPath}/resources/js-bundles/vendorCommons.bundle.js"></script>
+<script src="${pageContext.request.contextPath}/resources/js-bundles/informationBanner.bundle.js"></script>
 
 <!-- JavaScript -->
 <script defer="defer" src="https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.3/js/script.js"></script>
@@ -113,6 +114,7 @@
 
   ga('create', 'UA-37676851-1', 'auto');
   ga('send', 'pageview');
+  informationBanner.render({}, 'information-banner');
 </script>
 
 </body>
