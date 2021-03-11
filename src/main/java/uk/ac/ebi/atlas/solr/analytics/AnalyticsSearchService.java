@@ -75,7 +75,7 @@ public class AnalyticsSearchService implements SpeciesFinder {
         return readBuckets(response);
     }
 
-    public boolean tissueExpressionAvailableFor(SemanticQuery geneQuery) {
+    public boolean tissueExpressionAvailableInBaselineExperiments(SemanticQuery geneQuery) {
         String response =
                 miscellaneousAnalyticsSearchDao.searchBioentityIdentifiersForTissuesInBaselineExperiments(geneQuery);
 

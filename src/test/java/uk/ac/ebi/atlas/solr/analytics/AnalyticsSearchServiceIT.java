@@ -74,7 +74,7 @@ class AnalyticsSearchServiceIT {
 
     @Test
     void tissueExpressionAvailableFor() {
-        var result = subject.tissueExpressionAvailableFor(query);
+        var result = subject.tissueExpressionAvailableInBaselineExperiments(query);
         assertThat(result).isTrue();
     }
 
