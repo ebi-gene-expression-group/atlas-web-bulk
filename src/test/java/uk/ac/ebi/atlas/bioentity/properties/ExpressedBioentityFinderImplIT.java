@@ -6,6 +6,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import uk.ac.ebi.atlas.configuration.TestConfig;
+import uk.ac.ebi.atlas.testutils.SolrUtils;
 
 import javax.inject.Inject;
 
@@ -17,11 +18,22 @@ import static uk.ac.ebi.atlas.testutils.RandomDataTestUtils.generateRandomEnsemb
 @WebAppConfiguration
 class ExpressedBioentityFinderImplIT {
     @Inject
+    SolrUtils solrUtils;
+
+    @Inject
     private ExpressedBioentityFinderImpl subject;
 
     @Test
     void unknownGeneIdIsNotExpressed() {
         assertThat(subject.bioentityIsExpressedInAtLeastOneExperiment(generateRandomEnsemblGeneId()))
                 .isFalse();
+    }
+
+    @Test
+    void expressedGeneIdIsExpressed() {
+        var geneId = solrUtils.fetchRandomGeneIdFromAnalytics();
+
+        assertThat(subject.bioentityIsExpressedInAtLeastOneExperiment(geneId))
+                .isTrue();
     }
 }
