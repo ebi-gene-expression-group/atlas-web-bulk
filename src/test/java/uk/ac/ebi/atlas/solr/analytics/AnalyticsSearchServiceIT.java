@@ -1,12 +1,11 @@
 package uk.ac.ebi.atlas.solr.analytics;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.search.SemanticQuery;
@@ -16,102 +15,94 @@ import uk.ac.ebi.atlas.species.SpeciesFactory;
 
 import javax.inject.Inject;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
 @WebAppConfiguration
-public class AnalyticsSearchServiceIT {
+class AnalyticsSearchServiceIT {
     @Inject
     private SpeciesFactory speciesFactory;
 
     @Inject
     private AnalyticsSearchService subject;
 
-    private SemanticQuery query = SemanticQuery.create("zinc finger");
-    private SemanticQuery condition = SemanticQuery.create("watering");
+    private final SemanticQuery query = SemanticQuery.create("zinc finger");
+    private final SemanticQuery condition = SemanticQuery.create("watering");
     private Species species;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         species = speciesFactory.create("oryza sativa");
     }
 
     @Test
-    public void fetchExperimentTypes1() {
-        ImmutableSet<String> result = subject.fetchExperimentTypes("ENSG00000006432");
-        assertThat(result.size(), greaterThan(0));
+    public void fetchExperimentTypesForUnqualifiedGeneQuery() {
+        var result = subject.fetchExperimentTypes("ENSG00000006432");
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void fetchExperimentTypesInAnyField() {
-        ImmutableSet<String> result = subject.fetchExperimentTypesInAnyField(query);
-        assertThat(result.size(), greaterThan(0));
+    void fetchExperimentTypesInAnyField() {
+        var result = subject.fetchExperimentTypesInAnyField(query);
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void fetchExperimentTypes2() {
-        ImmutableSet<String> result = subject.fetchExperimentTypes(query, species.getReferenceName());
-        assertThat(result.size(), greaterThan(0));
+    void fetchExperimentTypesForGeneQueryWithSpecies() {
+        var result = subject.fetchExperimentTypes(query, species.getReferenceName());
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void fetchExperimentTypes3() {
-        ImmutableSet<String> result = subject.fetchExperimentTypes(query, condition, species.getReferenceName());
-        assertThat(result.size(), greaterThan(0));
+    void fetchExperimentTypesForGeneQueryWithConditionQueryAndSpecies() {
+        var result = subject.fetchExperimentTypes(query, condition, species.getReferenceName());
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void searchMoreThanOneBioentityIdentifier() {
-        ImmutableSet<String> result =
-                subject.searchMoreThanOneBioentityIdentifier(query, condition, species.getReferenceName());
-        assertThat(result.size(), greaterThan(0));
+    void searchMoreThanOneBioentityIdentifier() {
+        var result = subject.searchMoreThanOneBioentityIdentifier(query, condition, species.getReferenceName());
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void searchBioentityIdentifiers() {
-        ImmutableSet<String> result = subject.searchBioentityIdentifiers(query, condition, species.getReferenceName());
-        assertThat(result.size(), greaterThan(0));
+    void searchBioentityIdentifiers() {
+        var result = subject.searchBioentityIdentifiers(query, condition, species.getReferenceName());
+        assertThat(result).isNotEmpty();
     }
 
     @Test
-    public void tissueExpressionAvailableFor() {
-        boolean result = subject.tissueExpressionAvailableFor(query);
-        assertThat(result, is(true));
+    void tissueExpressionAvailableFor() {
+        var result = subject.tissueExpressionAvailableFor(query);
+        assertThat(result).isTrue();
     }
 
     @Test
-    public void speciesOfEmptyQuery() {
-        ImmutableList<String> speciesList = subject.findSpecies(SemanticQuery.create(), SemanticQuery.create());
-        assertThat(speciesList.size(), is(greaterThan(0)));
+    void speciesOfEmptyQuery() {
+        var speciesList = subject.findSpecies(SemanticQuery.create(), SemanticQuery.create());
+        assertThat(speciesList).isNotEmpty();
     }
 
     @Test
-    public void speciesWhenNoResults() {
-        SemanticQueryTerm foobarQueryTerm = SemanticQueryTerm.create("Foo", "Bar");
-        ImmutableList<String> speciesList =
-                subject.findSpecies(SemanticQuery.create(), SemanticQuery.create(foobarQueryTerm));
-        assertThat(speciesList, hasSize(0));
+    void speciesWhenNoResults() {
+        var foobarQueryTerm = SemanticQueryTerm.create("Foo", "Bar");
+        var speciesList = subject.findSpecies(SemanticQuery.create(), SemanticQuery.create(foobarQueryTerm));
+        assertThat(speciesList).isEmpty();
     }
 
     @Test
-    public void speciesSpecificSearch() {
-        SemanticQueryTerm reactomeQueryTerm = SemanticQueryTerm.create("R-MMU-69002", "pathwayid");
-        ImmutableList<String> speciesList =
-                subject.findSpecies(SemanticQuery.create(reactomeQueryTerm), SemanticQuery.create());
-        assertThat(speciesList, hasSize(1));
-        assertThat(speciesList.get(0), is("mus musculus"));
+    void speciesSpecificSearch() {
+        var reactomeQueryTerm = SemanticQueryTerm.create("R-MMU-69002", "pathwayid");
+        var speciesList = subject.findSpecies(SemanticQuery.create(reactomeQueryTerm), SemanticQuery.create());
+        assertThat(speciesList).containsExactly("mus musculus");
     }
 
     @Test
-    public void multipleSpeciesSearch() {
-        SemanticQueryTerm reactomeQueryTerm = SemanticQueryTerm.create("GO:0008150", "go");
-        ImmutableList<String> speciesList =
-                subject.findSpecies(SemanticQuery.create(reactomeQueryTerm), SemanticQuery.create());
-        assertThat(speciesList.size(), is(greaterThan(0)));
-        assertThat(speciesFactory.create(speciesList.get(0)).isUnknown(), is(false));
+    void multipleSpeciesSearch() {
+        var reactomeQueryTerm = SemanticQueryTerm.create("GO:0008150", "go");
+        var speciesList = subject.findSpecies(SemanticQuery.create(reactomeQueryTerm), SemanticQuery.create());
+        assertThat(speciesList).isNotEmpty();
+        assertThat(speciesFactory.create(speciesList.get(0)).isUnknown()).isFalse();
     }
 }
