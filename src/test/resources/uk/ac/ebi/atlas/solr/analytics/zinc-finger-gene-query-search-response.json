@@ -1,0 +1,62 @@
+{
+  "response": {
+    "numFound": 78799,
+    "start": 0,
+    "docs": []
+  },
+  "facet_counts": {
+    "facet_queries": {},
+    "facet_fields": {
+      "species": [
+        "homo sapiens",
+        59445,
+        "mus musculus",
+        9060,
+        "ovis aries",
+        5233,
+        "rattus norvegicus",
+        1118,
+        "caenorhabditis elegans",
+        802,
+        "papio anubis",
+        594,
+        "arabidopsis thaliana",
+        377,
+        "macaca mulatta",
+        372,
+        "monodelphis domestica",
+        324,
+        "xenopus tropicalis",
+        305,
+        "gallus gallus",
+        290,
+        "sorghum bicolor",
+        226,
+        "anolis carolinensis",
+        222,
+        "bos taurus",
+        202,
+        "triticum aestivum",
+        106,
+        "hordeum vulgare",
+        35,
+        "vitis vinifera",
+        34,
+        "oryza sativa",
+        22,
+        "zea mays",
+        15,
+        "glycine max",
+        12,
+        "danio rerio",
+        4,
+        "drosophila melanogaster",
+        1
+      ]
+    },
+    "facet_dates": {},
+    "facet_ranges": {},
+    "facet_intervals": {},
+    "facet_heatmaps": {}
+  }
+}

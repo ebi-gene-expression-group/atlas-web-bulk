@@ -1,0 +1,17 @@
+{
+  "response": {
+    "numFound": 0,
+    "start": 0,
+    "docs": []
+  },
+  "facet_counts": {
+    "facet_queries": {},
+    "facet_fields": {
+      "species": []
+    },
+    "facet_dates": {},
+    "facet_ranges": {},
+    "facet_intervals": {},
+    "facet_heatmaps": {}
+  }
+}
