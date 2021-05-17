@@ -80,11 +80,14 @@ dependencies {
 
     // Nasty bug in HttpClient 4.5.3 (bundled with Solr)
     // https://issues.apache.org/jira/browse/HTTPCLIENT-1831
-    implementation 'org.apache.httpcomponents:httpclient:4.5.5'
-    implementation ('org.apache.solr:solr-core:7.1.0') {
-        exclude module: 'httpclient'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.8'
+    // We’re using a patched version of SolrJ in which QueryRequest uses POST instead of GET to avoid erros due to very
+    // long (i.e. unparseable) URIs. You need to install this on your local Maven repository: see mavenLocal() above
+    implementation ('org.apache.solr:solr-core:7.1.0-QUERY_REQUEST_WITH_POST') {
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
-    implementation 'org.apache.solr:solr-solrj:7.1.0'
+    // solr-core includes/depends on solrj, but if we don’t explicitly set a version Gradle will pull 8.5.2
+    implementation 'org.apache.solr:solr-solrj:7.1.0-QUERY_REQUEST_WITH_POST'
 
     implementation 'org.postgresql:postgresql:42.2.5.jre7'
     implementation 'org.apache.tiles:tiles-extras:3.0.8'
