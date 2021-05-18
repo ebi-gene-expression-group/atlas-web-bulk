@@ -1,0 +1,38 @@
+plugins {
+    id 'atlas-web-app.java-conventions'
+    id 'war'
+}
+
+version '36.0.0'
+
+war {
+    // Let’s clean the exploded WAR if it’s there
+    def destinationPath = '../webapps'
+    def artifactName = 'gxa'
+    doFirst {
+        delete "${destinationPath}/${artifactName}"
+    }
+
+    archiveFileName = "${artifactName}.war"
+    destinationDirectory = file "${destinationPath}"
+}
+
+def cache2kVersion = '1.2.4.Final'
+dependencies {
+    implementation project(':atlas-web-core')
+
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+    implementation 'commons-net:commons-net:3.3'
+
+    implementation "org.cache2k:cache2k-api:${cache2kVersion}"
+    runtimeOnly "org.cache2k:cache2k-core:${cache2kVersion}"
+    implementation "org.cache2k:cache2k-spring:${cache2kVersion}"
+
+    runtimeOnly 'org.apache.tiles:tiles-extras:3.0.8'
+    // For URL rewrite (see WEB-INF/web.xml), or your Filter will fail with the most confusing error messages
+    runtimeOnly 'org.tuckey:urlrewritefilter:4.0.3'
+    runtimeOnly 'jstl:jstl:1.2'
+
+    testImplementation 'commons-beanutils:commons-beanutils:1.9.3'
+    testImplementation 'javax.servlet.jsp:jsp-api:2.2'
+}
