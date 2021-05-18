@@ -11,13 +11,6 @@ plugins {
     id 'jacoco'
 }
 
-war {
-    def artifactName = 'gxa'
-    destinationDirectory = file('./webapps')
-    delete "./webapps/$artifactName"
-    archiveName "$artifactName.war"
-}
-
 group 'uk.ac.ebi.ge'
 version '36.0.0-SNAPSHOT'
 sourceCompatibility = 11
@@ -108,58 +101,3 @@ dependencies {
     testRuntime 'org.junit.vintage:junit-vintage-engine:5.4.1'
 }
 
-test {
-    if (project.hasProperty('testResultsPath')) {
-        reporting.baseDir = "$buildDir/reports/" + project.property('testResultsPath')
-        testResultsDirName = "test-results/" + project.property('testResultsPath')
-    }
-  
-    if (project.hasProperty('excludeTests')) {
-        exclude project.property('excludeTests')
-    }
-
-    testLogging {
-        outputs.upToDateWhen {false}
-        showStandardStreams = true
-    }
-    useJUnitPlatform()
-    maxHeapSize = '2048m'
-}
-
-if (!hasProperty('buildProfile')) ext.buildProfile = 'dev'
-apply from: "build-profiles/profile-${buildProfile}.gradle"
-
-processResources {
-    exclude(['dev', 'prod'])
-    from("src/main/resources/${buildEnvironment}")
-
-    filesMatching(['*.properties', '*.xml']) {
-        expand(
-                projectBuildDirectory: buildDir,
-                dataFilesLocation: dataFilesLocation,
-                jdbcUrl: jdbcUrl,
-                jdbcUsername: jdbcUsername,
-                jdbcPassword: jdbcPassword,
-                zkHost: zkHost,
-                zkPort: zkPort,
-                solrHost: solrHost,
-                solrPort: solrPort,
-                // Set at compile time with ./gradlew -PbuildNumber={...} ...
-                buildNumber: buildNumber,
-                buildBranch: buildBranch,
-                buildRevision: buildRevision,
-                // Set at runtime by Tomcat
-                catalinaBase: '${catalina.base}',
-                tomcatHostname: '${tomcat.hostname}'
-        )
-    }
-}
-
-processTestResources {
-    filesMatching(['*.properties', '*.xml']) {
-        expand(
-                projectBuildDirectory: buildDir,
-                testLogs: testLogs
-        )
-    }
-}

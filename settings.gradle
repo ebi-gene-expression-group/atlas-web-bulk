@@ -9,4 +9,3 @@
 
 rootProject.name = 'atlas-web-bulk'
 
-includeBuild '../atlas-web-core'
