@@ -11,12 +11,12 @@ plugins {
     id 'jacoco'
 }
 
-war {
-    def artifactName = 'gxa'
-    destinationDirectory = file('./webapps')
-    delete "./webapps/$artifactName"
-    archiveName "$artifactName.war"
-}
+//war {
+//    def artifactName = 'gxa'
+//    destinationDirectory = file('./webapps')
+//    delete "./webapps/$artifactName"
+//    archiveName "$artifactName.war"
+//}
 
 group 'uk.ac.ebi.ge'
 version '36.0.0-SNAPSHOT'
