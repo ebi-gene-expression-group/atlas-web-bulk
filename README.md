@@ -25,7 +25,7 @@ Choose a suitable location for the experiment files, database and Solr backup da
 
 To download the data you can use `rsync` if you’re connected to the EBI network (over VPN or from campus):
 ```bash
-ATLAS_DATA_PATH=/path/to/sc/atlas/data 
+ATLAS_DATA_PATH=/path/to/bulk/atlas/data 
 rsync -ravz ebi-cli:/nfs/ftp/pub/databases/microarray/data/atlas/test/gxa/* $ATLAS_DATA_PATH
 ```
 
@@ -164,15 +164,15 @@ Read the important message after you run `gxa-solrlcoud-bootstrap`:
 > the line, and ignoring the exception doesn’t guarantee the suggester to be fully built since it still
 > takes a few extra minutes: the exception is thrown before the process has completed.
 > The best option is to manually build and supervise this step.
-> 
+>
 > On one terminal session run the following command (don’t worry if the request returns a 500 error):
 >
 > `docker exec -i gxa-solrcloud-1 curl 'http://localhost:8983/solr/bioentities-v1/suggest?suggest.build=true&suggest.dictionary=propertySuggester'`
-> 
+>
 > On another terminal, monitor the size of the suggester directory size:
 >
 > `docker exec -it gxa-solrcloud-1 bash -c 'watch du -sc server/solr/bioentities-v1*/data/*'`
-> 
+>
 > The suggester will be built when the propertySuggester directory size stabilises.
 > Run the above procedure for each of your SolrCloud containers.
  
