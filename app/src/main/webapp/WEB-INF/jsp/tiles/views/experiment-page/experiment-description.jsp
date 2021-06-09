@@ -37,17 +37,17 @@
         </div>
         </c:if>
 
-        <c:if test="${not empty pubMedIds}">
-        <div id="experimentReferences">Reference(s):
-            <c:forEach var="pubMedId" items="${pubMedIds}">
-                    <span><a class="pubmed-id" href="https://europepmc.org/abstract/MED/${pubMedId}"
-                             title="View publication in PubMed" target='_blank'>${pubMedId}</a>
-                        <a class="pubmed-genequery" style="cursor: pointer" data-pubmed-id="${pubMedId}" title="Filter by text-mined genes/proteins in reference publication">(Filter by genes in paper)</a>
-                        &nbsp;&nbsp;&nbsp;
-                    </span>
-            </c:forEach>
-        </div>
-        </c:if>
+<%--        <c:if test="${not empty pubMedIds}">--%>
+<%--        <div id="experimentReferences">Reference(s):--%>
+<%--            <c:forEach var="pubMedId" items="${pubMedIds}">--%>
+<%--                    <span><a class="pubmed-id" href="https://europepmc.org/abstract/MED/${pubMedId}"--%>
+<%--                             title="View publication in PubMed" target='_blank'>${pubMedId}</a>--%>
+<%--                        <a class="pubmed-genequery" style="cursor: pointer" data-pubmed-id="${pubMedId}" title="Filter by text-mined genes/proteins in reference publication">(Filter by genes in paper)</a>--%>
+<%--                        &nbsp;&nbsp;&nbsp;--%>
+<%--                    </span>--%>
+<%--            </c:forEach>--%>
+<%--        </div>--%>
+<%--        </c:if>--%>
 
         <c:if test="${not empty publications}">
             <div id="experimentReferences">
