@@ -12,6 +12,10 @@ import Legend from './legend/LegendDifferential'
 
 import ContrastTooltipLoader from './tooltip/ContrastTooltipLoader'
 
+import { withFetchLoader } from '@ebi-gene-expression-group/atlas-react-fetch-loader'
+
+const FetchLoaderContrastTooltip = withFetchLoader(ContrastTooltipLoader)
+
 const Header = styled.th`
   text-align: center;
 `
@@ -61,15 +65,16 @@ const DifferentialResultsRow = (props) =>
       <a href={URI(props.uri, props.atlasUrl)}>
         {props.comparison}
       </a>
-      <ContrastTooltipLoader
+      <FetchLoaderContrastTooltip
         id={`${props.id}_contrast`}
-        atlasUrl={props.atlasUrl}
-        tooltipUrl={`rest/contrast-summary`}
-        tooltipUrlParams={{
-          experimentAccession: props.experimentAccession,
-          contrastId: props.contrastId,
-          accessKey: props.accessKey
-        }} />
+        host={props.atlasUrl}
+        resource={URI(`rest/contrast-summary`)
+            .addSearch(`experimentAccession`, props.experimentAccession)
+            .addSearch(`contrastId`, props.contrastId)
+            .addSearch(`accessKey`, props.accessKey)
+            .toString()}
+        fulfilledPayloadProvider={data => ({ result: data })}
+      />
     </Data>
     <Data>
       {props.factors ? props.factors.toString().replace(/,/g, `, `) : ``}
