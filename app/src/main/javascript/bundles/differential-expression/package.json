@@ -1,6 +1,7 @@
 {
   "main": "index.js",
   "dependencies": {
+    "@ebi-gene-expression-group/atlas-react-fetch-loader": "^3.7.0",
     "@ebi-gene-expression-group/expression-atlas-number-format": "^3.2.0",
     "@ebi-gene-expression-group/react-ebi-species": "^2.6.0",
     "prop-types": "^15.7.2",
