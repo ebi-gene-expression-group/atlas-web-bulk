@@ -6,7 +6,7 @@ const vendorsBundleName = `vendors`
 
 module.exports = {
   entry: {
-    differentialExpression: `./index.js`
+    differentialExpression: [`@babel/polyfill`, `./index.js`]
   },
 
   plugins: [
