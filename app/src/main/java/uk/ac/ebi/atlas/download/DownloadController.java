@@ -43,6 +43,7 @@ public class DownloadController extends HtmlExceptionHandlingController {
         try {
             ftpClient.connect(ftpHost);
             ftpClient.login("ftp", "anonymous");
+            ftpClient.enterLocalPassiveMode();
             FTPFile[] file = ftpClient.listFiles(FILEPATH);
             fileInfo.put("fileName", file[0].getName());
             fileInfo.put("fileSize", format(file[0].getSize(), 1));

@@ -2,6 +2,7 @@ package uk.ac.ebi.atlas.download;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -20,10 +21,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = TestConfig.class)
-class DownloadControllerTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class DownloadControllerWIT {
 
     @Autowired
     private WebApplicationContext wac;
+
     private MockMvc mockMvc;
 
     @BeforeEach
