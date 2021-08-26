@@ -22,7 +22,7 @@ dependencies {
     implementation project(':atlas-web-core')
 
     implementation 'javax.validation:validation-api:2.0.1.Final'
-    implementation 'commons-net:commons-net:3.3'
+    implementation 'commons-net:commons-net:3.8.0'
 
     implementation "org.cache2k:cache2k-api:${cache2kVersion}"
     runtimeOnly "org.cache2k:cache2k-core:${cache2kVersion}"
@@ -35,4 +35,10 @@ dependencies {
 
     testImplementation 'commons-beanutils:commons-beanutils:1.9.3'
     testImplementation 'javax.servlet.jsp:jsp-api:2.2'
+
+    testImplementation 'com.zaxxer:HikariCP:3.3.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.4.1'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.junit.vintage:junit-vintage-engine:5.4.1'
 }
