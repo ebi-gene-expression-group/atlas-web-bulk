@@ -93,13 +93,15 @@ docker cp tomcat-users.xml gxa-tomcat:/usr/local/tomcat/conf
 Run the Gradle task `war` in the `atlas-web-bulk` directory:
 ```bash
 cd atlas-web-bulk
-./gradlew -PbuildProfile=docker war
+./gradlew :app:war
 ```
 
 You should now have the file `build/libs/gxa.war` which by default Tomcat’s naming conventions will be served at
 `gxa`. Point your browser at `http://localhost:8080/gxa` and voilà!
 
 Every time you re-run the `war` task the web app will be automatically re-deployed by Tomcat.
+
+If you face issues in redeployment, stop all running containers and re-run them
 
 ## Backing up your data
 Eventually you’ll add new experiments to your development instance of GXA, or new, improved collections in Solr will
@@ -139,6 +141,162 @@ Remember to update the file and any new experiments added to the `filesystem` di
 ```bash
 rsync -ravz $ATLAS_DATA_PATH/* ebi-cli:/nfs/ftp/pub/databases/microarray/data/atlas/test/gxa/
 ```
+## Testing
+**Note: A few tests depend on the Solr suggesters, so don’t forget to build them in the SolrCloud container!**
+
+The project has a `docker-compose-gradle.yml` in the `docker` directory to run tests within a Gradle Docker container.
+It reuses the same SolrCloud service described earlier, and a Postgres container with minor variations: it doesn’t use
+volumes to ensure the database is clean before running any tests, and its name (and the dependency expressed in
+`docker-compose-gradle.yml`) has been changed to `gxa-postgres-test`; the reason is to avoid using `gxa-postgres` by
+mistake and wiping full tables when cleaning fixtures... such an unfortunate accident is known to have happened.
+
+Depending on your OS and Docker settings you might be able to run Gradle from your host machine without a container,
+and access Solr, ZooKeeper and Postgres via mapped ports on `localhost`. We know this is possible in Linux, but we’ve
+found it to be problematic in macOS. It’s probably due to the way DNS in Docker Compose works (i.e., ZooKeeper resolves
+`localhost` to an unknown IP address). As they say, networking is hard. YMMV.
+
+### Before you start
+Check with `docker ps` and `docker container ls -a` that no services used during tests are running or stopped,
+respectively. These are `gxa-solrcloud-1`, `gxa-solrcloud-2`, `gxa-zk-1`, `gxa-zk-2`, `gxa-zk-3`,
+`gxa-postgres-test`, `gxa-flyway-test` and `gxa-gradle`. We want to start with a clean application context every
+time we execute the test task. Here are two useful commands:
+```bash
+docker stop scxa-solrcloud-1 scxa-solrcloud-2 scxa-zk-1 scxa-zk-2 scxa-zk-3 scxa-postgres-test scxa-flyway-test scxa-gradle
+```
+
+```bash
+docker container prune
+```
+
+### Running tests
+As mentioned before, `docker-compose-gradle.yml` runs the Gradle `test` task and it depends on all the necessary
+services to run unit tests, integration tests and end-to-end tests. It splits the job in the following six phases:
+1. Clean the build directory
+2. Compile the test classes
+3. Run unit tests
+4. Run integration tests
+5. Run end-to-end tests
+6. Generate JaCoCo reports
+
+Bring it up like this (the Postgres variables can take any values, remember that the container will be removed):
+```bash
+ATLAS_DATA_PATH=/path/to/your/scxa/data \
+POSTGRES_HOST=gxa-postgres-test \
+POSTGRES_DB=gxpgxatest \
+POSTGRES_USER=gxa \
+POSTGRES_PASSWORD=gxa \
+docker-compose \
+-f docker-compose-postgres-test.yml \
+-f docker-compose-solrcloud.yml \
+-f docker-compose-gradle.yml \
+up
+```
+
+You will eventually see these log messages:
+```
+gxa-gradle         | BUILD SUCCESSFUL in 13s
+gxa-gradle         | 3 actionable tasks: 1 executed, 2 up-to-date
+gxa-gradle exited with code 0
+```
+
+Press Ctrl+C to stop the container and clean any leftovers:
+```bash
+docker stop gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test &&
+docker rm gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test gxa-gradle
+```
+Another way of removing all stopped containers in one line you can use following statement:
+
+```bash
+docker container prune
+```
+
+
+If you prefer, here’s a `docker-compose run` command to execute the tests:
+```bash
+ATLAS_DATA_PATH=/path/to/your/scxa/data \
+POSTGRES_HOST=gxa-postgres-test \
+POSTGRES_DB=gxpgxatest \
+POSTGRES_USER=gxa \
+POSTGRES_PASSWORD=gxa \
+docker-compose \
+-f docker-compose-postgres-test.yml \
+-f docker-compose-solrcloud.yml \
+-f docker-compose-gradle.yml \
+run --rm --service-ports \
+scxa-gradle bash -c '
+./gradlew :app:clean &&
+./gradlew -PdataFilesLocation=/root/gxa/integration-test-data -PexperimentFilesLocation=/root/gxa/integration-test-data/gxa -PjdbcUrl=jdbc:postgresql://$POSTGRES_HOST:5432/$POSTGRES_DB -PjdbcUsername=$POSTGRES_USER -PjdbcPassword=$POSTGRES_PASSWORD -PzkHost=gxa-zk-1 -PsolrHost=gxa-solrcloud-1 app:testClasses &&
+./gradlew -PtestResultsPath=ut :app:test --tests *Test &&
+./gradlew -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT &&
+./gradlew -PtestResultsPath=e2e :app:test --tests *WIT &&
+./gradlew :app:jacocoTestReport
+'
+``` 
+
+With `run` the control returns to your shell once the tasks have finished, but you’ll need to clean up the service
+containers anyway.
+
+In either case you may find all reports at `app/build/reports`.
+
+### Running a single test
+Many times you will find yourself working in a specific test case or class. Running all tests in such cases is
+impractical. In such situations you can use
+[Gradle’s continuous build execution](https://blog.gradle.org/introducing-continuous-build). See the example below for
+e.g. `SitemapDaoIT.java`:
+```bash
+ATLAS_DATA_PATH=/path/to/your/scxa/data \
+POSTGRES_HOST=gxa-postgres-test \
+POSTGRES_DB=gxpgxatest \
+POSTGRES_USER=gxa \
+POSTGRES_PASSWORD=gxa \
+docker-compose \
+-f docker-compose-postgres-test.yml \
+-f docker-compose-solrcloud.yml \
+-f docker-compose-gradle.yml \
+run --rm --service-ports \
+scxa-gradle bash -c '
+./gradlew :app:clean &&
+./gradlew -PdataFilesLocation=/root/gxa/integration-test-data -PexperimentFilesLocation=/root/gxa/integration-test-data/gxa -PjdbcUrl=jdbc:postgresql://$POSTGRES_HOST:5432/$POSTGRES_DB -PjdbcUsername=$POSTGRES_USER -PjdbcPassword=$POSTGRES_PASSWORD -PzkHost=gxa-zk-1 -PsolrHost=gxa-solrcloud-1 app:testClasses &&
+./gradlew --continuous :app:test --tests SitemapDaoIT
+'
+```
+
+After running the test Gradle stays idle and waits for any changes in the code. When it detects that the files in your
+project have been updated it will recompile them and run the tests again. Notice that you can specify multiple test
+files after `--tests` (by name or with wildcards).
+
+### Remote debugging
+If you want to use a debugger, add the option `-PremoteDebug` to the task test line. For instance:
+```bash
+./gradlew -PremoteDebug :app:test --tests SitemapDaoIT
+```
+
+Be aware that Gradle won’t execute the tests until you attach a remote debugger to port 5005. It will notify you when
+it’s ready with the following message:
+```
+> Task :app:test
+Listening for transport dt_socket at address: 5005
+<===========--> 90% EXECUTING [5s]
+> IDLE
+> IDLE
+> IDLE
+> IDLE
+> IDLE
+> IDLE
+> IDLE
+> :app:test > 0 tests completed
+> IDLE
+> IDLE
+> IDLE
+> IDLE
+```
+
+You can combine `--continuous` with `-PremoteDebug`, but the debugger will be disconnected at the end of the test. You
+will need to start and attach the remote debugger every time Gradle compiles and runs the specified test.
+
+To attach a remote debugger to your gradle test you can add following configuration in your IntelliJ:
+
+[![RMoIhF.md.png](https://iili.io/RMoIhF.md.png)](https://freeimage.host/i/RMoIhF)
 
 ## Troubleshooting
 
@@ -172,6 +330,7 @@ Read the important message after you run `gxa-solrlcoud-bootstrap`:
 > On another terminal, monitor the size of the suggester directory size:
 >
 > `docker exec -it gxa-solrcloud-1 bash -c 'watch du -sc server/solr/bioentities-v1*/data/*'`
+> `docker exec -it gxa-solrcloud-2 bash -c 'watch du -sc server/solr/bioentities-v1*/data/*'`
 >
 > The suggester will be built when the propertySuggester directory size stabilises.
 > Run the above procedure for each of your SolrCloud containers.
