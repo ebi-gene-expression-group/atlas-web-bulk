@@ -31,8 +31,6 @@ public class ExperimentFileLocationService {
                 return dataFileHub.getProteomicsBaselineExperimentFiles(experimentAccession).experimentFiles.condensedSdrf.getPath();
             case IDF:
                 return dataFileHub.getExperimentFiles(experimentAccession).idf.getPath();
-            case SUMMARY_PDF:
-                return dataFileHub.getExperimentFiles(experimentAccession).summaryPdf.getPath();
             case PROTEOMICS_B_MAIN:
                 return dataFileHub.getProteomicsBaselineExperimentFiles(experimentAccession).main.getPath();
             case BASELINE_FACTORS:

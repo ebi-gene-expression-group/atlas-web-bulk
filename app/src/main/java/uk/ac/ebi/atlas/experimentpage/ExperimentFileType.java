@@ -8,8 +8,6 @@ public enum ExperimentFileType {
     // Could include icon name (similar to Description class in ExternallyAvailableContent)
     CONFIGURATION(
             "configuration", "Experiment configuration file (XML format)", IconType.EXPERIMENT_DESIGN, false),
-    SUMMARY_PDF(
-            "summary pdf", "PRIDE summary file (PDF format)", IconType.EXPERIMENT_DESIGN, false),
     IDF(
             "idf", "IDF file (TSV format)", IconType.TSV, false),
     CONDENSE_SDRF(
