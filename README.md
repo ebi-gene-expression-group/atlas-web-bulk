@@ -161,11 +161,8 @@ respectively. These are `gxa-solrcloud-1`, `gxa-solrcloud-2`, `gxa-zk-1`, `gxa-z
 `gxa-postgres-test`, `gxa-flyway-test` and `gxa-gradle`. We want to start with a clean application context every
 time we execute the test task. Here are two useful commands:
 ```bash
-docker stop gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test gxa-gradle
-```
-
-```bash
-docker container prune
+docker stop gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test &&
+docker rm gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test gxa-gradle
 ```
 
 ### Running tests
@@ -203,11 +200,6 @@ Press Ctrl+C to stop the container and clean any leftovers:
 ```bash
 docker stop gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test &&
 docker rm gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test gxa-gradle
-```
-Another way of removing all stopped containers in one line you can use following statement:
-
-```bash
-docker container prune
 ```
 
 
