@@ -161,7 +161,7 @@ respectively. These are `gxa-solrcloud-1`, `gxa-solrcloud-2`, `gxa-zk-1`, `gxa-z
 `gxa-postgres-test`, `gxa-flyway-test` and `gxa-gradle`. We want to start with a clean application context every
 time we execute the test task. Here are two useful commands:
 ```bash
-docker stop scxa-solrcloud-1 scxa-solrcloud-2 scxa-zk-1 scxa-zk-2 scxa-zk-3 scxa-postgres-test scxa-flyway-test scxa-gradle
+docker stop gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test gxa-gradle
 ```
 
 ```bash
@@ -180,7 +180,7 @@ services to run unit tests, integration tests and end-to-end tests. It splits th
 
 Bring it up like this (the Postgres variables can take any values, remember that the container will be removed):
 ```bash
-ATLAS_DATA_PATH=/path/to/your/scxa/data \
+ATLAS_DATA_PATH=/path/to/your/gxa/data \
 POSTGRES_HOST=gxa-postgres-test \
 POSTGRES_DB=gxpgxatest \
 POSTGRES_USER=gxa \
@@ -213,7 +213,7 @@ docker container prune
 
 If you prefer, here’s a `docker-compose run` command to execute the tests:
 ```bash
-ATLAS_DATA_PATH=/path/to/your/scxa/data \
+ATLAS_DATA_PATH=/path/to/your/gxa/data \
 POSTGRES_HOST=gxa-postgres-test \
 POSTGRES_DB=gxpgxatest \
 POSTGRES_USER=gxa \
@@ -223,7 +223,7 @@ docker-compose \
 -f docker-compose-solrcloud.yml \
 -f docker-compose-gradle.yml \
 run --rm --service-ports \
-scxa-gradle bash -c '
+gxa-gradle bash -c '
 ./gradlew :app:clean &&
 ./gradlew -PdataFilesLocation=/root/gxa/integration-test-data -PexperimentFilesLocation=/root/gxa/integration-test-data/gxa -PjdbcUrl=jdbc:postgresql://$POSTGRES_HOST:5432/$POSTGRES_DB -PjdbcUsername=$POSTGRES_USER -PjdbcPassword=$POSTGRES_PASSWORD -PzkHost=gxa-zk-1 -PsolrHost=gxa-solrcloud-1 app:testClasses &&
 ./gradlew -PtestResultsPath=ut :app:test --tests *Test &&
@@ -244,7 +244,7 @@ impractical. In such situations you can use
 [Gradle’s continuous build execution](https://blog.gradle.org/introducing-continuous-build). See the example below for
 e.g. `SitemapDaoIT.java`:
 ```bash
-ATLAS_DATA_PATH=/path/to/your/scxa/data \
+ATLAS_DATA_PATH=/path/to/your/gxa/data \
 POSTGRES_HOST=gxa-postgres-test \
 POSTGRES_DB=gxpgxatest \
 POSTGRES_USER=gxa \
@@ -254,7 +254,7 @@ docker-compose \
 -f docker-compose-solrcloud.yml \
 -f docker-compose-gradle.yml \
 run --rm --service-ports \
-scxa-gradle bash -c '
+gxa-gradle bash -c '
 ./gradlew :app:clean &&
 ./gradlew -PdataFilesLocation=/root/gxa/integration-test-data -PexperimentFilesLocation=/root/gxa/integration-test-data/gxa -PjdbcUrl=jdbc:postgresql://$POSTGRES_HOST:5432/$POSTGRES_DB -PjdbcUsername=$POSTGRES_USER -PjdbcPassword=$POSTGRES_PASSWORD -PzkHost=gxa-zk-1 -PsolrHost=gxa-solrcloud-1 app:testClasses &&
 ./gradlew --continuous :app:test --tests SitemapDaoIT
