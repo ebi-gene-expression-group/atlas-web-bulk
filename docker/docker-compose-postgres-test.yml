@@ -7,7 +7,6 @@ services:
     networks:
       - gxa
     restart: always
-    command: -c max_wal_size=2GB
     environment:
       POSTGRES_HOST: $POSTGRES_HOST
       POSTGRES_USER: $POSTGRES_USER
