@@ -12,12 +12,16 @@ delete the old volume (e.g. for Postgres `docker volume rm gxa-pgdata`) and re-r
 initial state.
 
 ## Code
-Clone the repositories of both Atlas Web Core (common business logic for bulk Expression Atlas and Single Cell
-Expression Atlas) and Single Cell Expression Atlas proper:
+Clone the repository of Bulk Expression Atlas proper:
 ```bash
-git clone --recurse-submodules https://github.com/ebi-gene-expression-group/atlas-web-core.git && \
 git clone --recurse-submodules https://github.com/ebi-gene-expression-group/atlas-web-bulk.git
 ```
+If you have already cloned the project ensure it’s up-to-date:
+```bash
+  git pull
+  git submodule update --remote
+```
+
 
 ## Data
 Choose a suitable location for the experiment files, database and Solr backup data. Set the path in the variable
@@ -40,7 +44,7 @@ Notice that either way `ATLAS_DATA_PATH` will be created for you if the director
 Besides `ATLAS_DATA_PATH` you need to set some variables for the Postgres container. Use the settings below and replace
 `ATLAS_DATA_PATH` value to the directory you set up in the first step.
 
-In the `atlas-web-single-cell/docker` directory run the following:
+In the `atlas-web-bulk-cell/docker` directory run the following:
 ```bash
 ATLAS_DATA_PATH=/path/to/bulk/atlas/data \
 POSTGRES_HOST=gxa-postgres \
@@ -83,8 +87,7 @@ known state; however Solr will reply with an error if the collections can’t be
 Again, this step will take a few minutes.
 
 ### Tomcat
-Copy the Tomcat credentials file to the container. The `admin` role is used to access several admin endpoints in Single
-Cell Expression Atlas (e.g. `/admin/experiments/help`). Tomcat’s `conf` directory is persisted as a volume so that we
+Copy the Tomcat credentials file to the container. The `admin` role is used to access several admin endpoints in Bulk Expression Atlas (e.g. `/admin/experiments/help`). Tomcat’s `conf` directory is persisted as a volume so that we
 need to do this only once:
 ```bash
 docker cp tomcat-users.xml gxa-tomcat:/usr/local/tomcat/conf
