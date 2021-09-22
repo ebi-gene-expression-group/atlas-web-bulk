@@ -51,7 +51,7 @@ POSTGRES_HOST=gxa-postgres \
 POSTGRES_DB=gxpgxadev \
 POSTGRES_USER=atlasprd3 \
 POSTGRES_PASSWORD=atlasprd3 \
-docker-compose up
+docker-compose -f docker-compose-solrcloud.yml -f docker-compose-postgres.yml -f docker-compose-tomcat.yml up
 ```
 
 You can also set a Docker Compose *Run* configuration in IntelliJ IDEA with the environment variables from the command
