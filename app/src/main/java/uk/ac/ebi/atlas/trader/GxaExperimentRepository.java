@@ -89,6 +89,12 @@ public class GxaExperimentRepository implements ExperimentRepository {
                         experimentDesign,
                         idfParserOutput,
                         ImmutableSet.of("Microarray 2-colour mRNA"));
+            case PROTEOMICS_DIFFERENTIAL:
+                return rnaSeqDifferentialExperimentFactory.create(
+                        experimentDto,
+                        experimentDesign,
+                        idfParserOutput,
+                        ImmutableSet.of("Proteomics differential"));
             default:
                 throw new IllegalArgumentException(
                         "Unable to build experiment " + experimentDto.getExperimentAccession()
