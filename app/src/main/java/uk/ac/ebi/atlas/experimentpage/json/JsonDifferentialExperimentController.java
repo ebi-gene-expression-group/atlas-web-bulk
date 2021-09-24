@@ -125,4 +125,17 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
                 accessKey, preferences));
     }
+
+    @RequestMapping(value = "/json/experiments/{experimentAccession}",
+            produces = "application/json;charset=UTF-8",
+            params = "type=PROTEOMICS_DIFFERENTIAL")
+    @ResponseBody
+    public String differentialProteomicsExperimentData(
+            @ModelAttribute("preferences") @Valid MicroarrayRequestPreferences preferences,
+            @PathVariable String experimentAccession,
+            @RequestParam(defaultValue = "") String accessKey) {
+        return GSON.toJson(diffRnaSeqExperimentPageService.getResultsForExperiment(
+                (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
+                accessKey, preferences));
+    }
 }
