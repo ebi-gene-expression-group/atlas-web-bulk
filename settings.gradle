@@ -8,5 +8,5 @@
  */
 
 rootProject.name = 'atlas-web-bulk'
-include 'atlas-web-core', 'app'
+include 'atlas-web-core', 'app', 'cli'
 
