@@ -21,6 +21,9 @@ def cache2kVersion = '1.2.4.Final'
 dependencies {
     implementation project(':atlas-web-core')
 
+    implementation 'org.springframework:spring-context:5.1.5.RELEASE'
+    implementation 'org.springframework:spring-web:5.1.5.RELEASE'
+
     implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation 'commons-net:commons-net:3.3'
 
