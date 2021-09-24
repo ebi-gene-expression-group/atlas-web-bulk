@@ -40,9 +40,9 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
                                                      BaselineAnalyticsInputStreamFactory
                                                              baselineAnalyticsInputStreamFactory,
                                                      MicroarrayDifferentialAnalyticsInputStreamFactory
-                                                                 microarrayDifferentialAnalyticsInputStreamFactory,
+                                                             microarrayDifferentialAnalyticsInputStreamFactory,
                                                      RnaSeqDifferentialAnalyticsInputStreamFactory
-                                                                 rnaSeqDifferentialAnalyticsInputStreamFactory) {
+                                                             rnaSeqDifferentialAnalyticsInputStreamFactory) {
         this.experimentTrader = experimentTrader;
         this.baselineAnalyticsInputStreamFactory = baselineAnalyticsInputStreamFactory;
         this.microarrayDifferentialAnalyticsInputStreamFactory = microarrayDifferentialAnalyticsInputStreamFactory;
@@ -138,6 +138,7 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
 
     @Override
     public HashSet<String> getBioentityIdsFromExperiment(String experimentAccession) {
+        LOGGER.info("Reading gene IDs of {}", experimentAccession);
         Experiment experiment = experimentTrader.getExperimentForAnalyticsIndex(experimentAccession);
 
         HashSet<String> bioentityIdentifiers = new HashSet<>();

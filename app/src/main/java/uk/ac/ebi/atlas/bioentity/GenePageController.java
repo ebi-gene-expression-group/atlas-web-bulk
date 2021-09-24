@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import uk.ac.ebi.atlas.bioentity.properties.BioEntityCardModelFactory;
 import uk.ac.ebi.atlas.bioentity.properties.BioEntityPropertyDao;
 import uk.ac.ebi.atlas.search.SemanticQuery;
-import uk.ac.ebi.atlas.solr.BioentityPropertyName;
+import uk.ac.ebi.atlas.solr.bioentities.BioentityPropertyName;
 import uk.ac.ebi.atlas.solr.analytics.AnalyticsSearchService;
 import uk.ac.ebi.atlas.solr.analytics.baseline.BaselineAnalyticsSearchService;
 import uk.ac.ebi.atlas.species.Species;
