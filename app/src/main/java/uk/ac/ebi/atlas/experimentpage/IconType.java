@@ -1,7 +1,7 @@
 package uk.ac.ebi.atlas.experimentpage;
 
 public enum IconType {
-
+    PDF("icon-pdf"),
     TSV("icon-tsv"),
     ARRAY_EXPRESS("icon-ae"),
     GEO("icon-geo"),
