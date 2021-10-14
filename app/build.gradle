@@ -21,6 +21,9 @@ def cache2kVersion = '1.2.4.Final'
 dependencies {
     implementation project(':atlas-web-core')
 
+    implementation 'org.springframework:spring-context:5.1.5.RELEASE'
+    implementation 'org.springframework:spring-web:5.1.5.RELEASE'
+
     implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation 'commons-net:commons-net:3.8.0'
 
@@ -37,8 +40,4 @@ dependencies {
     testImplementation 'javax.servlet.jsp:jsp-api:2.2'
 
     testImplementation 'com.zaxxer:HikariCP:3.3.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.4.1'
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.junit.vintage:junit-vintage-engine:5.4.1'
 }
