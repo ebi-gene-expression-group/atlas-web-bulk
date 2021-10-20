@@ -5,10 +5,6 @@ A minimal Spring Boot wrapper to run (bulk) Expression Atlas tasks from the comm
 - Java 11
 - Expression Atlas environment (PostgreSQL server; SolrCloud cluster; bioentity annotation and experiment files)
 
-*IMPORTANT*: Review file paths in `cli/src/main/resources/configuration.properties`, Postgres host in
-`cli/src/main/resources/jdbc.properties`, and SolrCloud/ZooKeeper hosts in `cli/src/main/resources/solr.properties`
-before building and running the application.
-
 ## Usage
 There are two main ways to run the application: as an executable JAR or via Gradle. The latter is recommended on
 development environments and Java is preferred in production environments. Be aware that any changes made to the
@@ -31,27 +27,33 @@ java -jar ./cli/build/libs/atlas-cli-bulk.jar <task-name> <options>
 ```
 
 ## Configuration
-The following configuration variables can be set in their respective properties file or via the `-D` option. Changes in
-the properties file will be automatically picked up if the application is run with Gradle. If you run it with Java
-`-Doption=value` will override the setting in the compiled file.
+Configuration variables are set with `-Dproperty=value` if you run the application via `java -jar ...`, or by adding
+`-Pproperty=value` to the Gradle task (in the tables below: Java property name, and Gradle propery name, respectively).
 
-### Spring Boot options: `application.properties`
-- `server.port`
+**IMPORTANT**: At the very least you will need to set the environment variables described in the Default value columns
+to run/compile the application with Gradle. However, notice that the `-D` arguments will override whatever was set at
+compile time, so if you forget or your environment changes, you don’t need to recompile.
 
 ### Expression Atlas file options: `configuration.properties`
-- `data.files.location`
-- `experiment.files.location`
+| Java property name          | Gradle property name      | Default value            |
+|-----------------------------|---------------------------|--------------------------|
+| `data.files.location`       | `dataFilesLocation`       | `${ATLAS_DATA_PATH}`     |
+| `experiment.files.location` | `experimentFilesLocation` | `${ATLAS_DATA_PATH}/gxa` |
 
 ### Expression Atlas database options: `jdbc.properties`
-- `jdbc.url`
-- `jdbc.username`
-- `jdbc.password`
+| Java Property name | Gradle property name | Default value                                                       |
+|--------------------|----------------------|---------------------------------------------------------------------|
+| `jdbc.url`         | `jdbcUrl`            | `jdbc:postgresql://${ATLAS_POSTGRES_HOST}:5432/${ATLAS_POSTGRES_DB` |
+| `jdbc.username`    | `jdbcUsername`       | `${ATLAS_POSTGRES_USER}`                                            |
+| `jdbc.password`    | `jdbcPassword`       | `${ATLAS_POSTRES_PASSWORD}`                                         |
 
 ### Expression Atlas Solr options: `solr.properties`
-- `zk.host`
-- `zk.port`
-- `solr.host`
-- `solr.port`
+| Java property name | Gradle property name | Default value        |
+|--------------------|----------------------|----------------------|
+| `zk.host`          | `zkHost`             | `${ATLAS_ZK_HOST}`   |
+| `zk.port`          | `zkPort`             | `2181`               |
+| `solr.host`        | `solrHost`           | `${ATLAS_SOLR_HOST}` |
+| `solr.port`        | `solrPort`           | `8983`               |
 
 ## Tasks
 Run without any arguments to get a list of available tasks:
@@ -70,7 +72,7 @@ Commands:
 
 Pass the name of a task to obtain a detailed description of available options:
 ```bash
-$ java -Dserver.port=9001 -jar ./cli/build/libs/atlas-cli-bulk.jar bioentities-map
+$ java -jar ./cli/build/libs/atlas-cli-bulk.jar bioentities-map
 ...
 Missing required option: '--output=<outputFilePath>'
 Usage: <main class> bioentities-map -o=<outputFilePath>
@@ -233,23 +235,63 @@ because it eliminates the need to parse them as an array, a process which requir
 end of the file. Also, it usually reads the whole array in memory and such an  approach would be impractical, since 
 it’s commmon for the generated files to be several gigabytes in size and to consist of millions of Solr documents.
 JSONL files can also be easily broken up in chunks with command line utilities such as `split`, which we use in order
-to load   documents into Solr in blocks that can be easily consumed by the server nodes.
+to load documents into Solr in blocks that can be easily consumed by the server nodes.
 
 
 ## Troubleshooting
-### Application fails to start with the message “Web server failed to start. Port XXXX was already in use.”
-Since `atlas-web-bulk` needs a `ServletContext` to build the application context, this is technically a web
-application and Spring Boot’s embedded web server is started with the app. Make sure that no other web server is
-running and listening to the port specified in the `application.properties` file.
+### Gradle isn’t respecting my configuration properties
+Do not place configuration variables inside the `args` parameter.
+
+**Wrong**:
+```bash
+./gradlew :cli:bootRun --args="-PdataFilesLocation=/atlas-data -PexperimentFilesLocation=/atas-data/gxa bioentities-json"
+```
+
+**Right**:
+```bash
+./gradlew :cli:bootRun -PdataFilesLocation=/atlas-data -PexperimentFilesLocation=/atas-data/gxa --args="bioentities-json"
+```
+
+### Application fails to start with the message “bean of type 'javax.servlet.ServletContext' could not be found”
+If at any point you see the error messages below when running the application, it means that certain components/beans
+from the atlas-web-bulk `app` subproject (i.e. the web application) are instantiated at run time. It fails because they
+need a `ServletContext` (i.e. a web server) and Tomcat isn’t running:
+```
+...
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+2021-10-19 21:57:44.022 ERROR 579874 --- [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in uk.ac.ebi.atlas.controllers.page.StaticPageController required a bean of type 'javax.servlet.ServletContext' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'javax.servlet.ServletContext' in your configuration.
+```
+
+Classes `WebConfig` and `StaticPageController` are both being excluded at run time by activating the `cli` Spring 
+profile. The project by default includes this setting in `application.properties`; if you encounter the error above, 
+verify that the `spring_profiles_active` property is present in that file.
+
+Look for the following line in the app logs:
+```
+2021-10-20 10:11:05.755  INFO 591952 --- [           main] u.a.e.a.c.ExpressionAtlasCliApplication  : The following profiles are active: cli
+```
+
+Remember that you can override this setting when running the JAR file like this:
+```bash
+java -Dspring.profiles.active=cli -jar ./cli/build/libs/atlas-cli-bulk.jar 
+```
 
 ## TODO
-- Exclude `WebConfig` from the app context to delete the `webapp` directory. This will require changes in
-  `atlas-web-bulk` because `AppConfig` turns on component scanning which in turn adds `WebConfig` to the context. Also,
-  while Tomcat might not appear to be necessary to run the application, certain classes in `atlas-web-bulk` such as
-  `StaticPageController` need a `ServletContext`. I think getting rid of these dependencies will prove to be difficult.
 - Test Gradle task `bootBuildImage` and optionally add a `Dockerfile` to containerise the application.
   
 ## Final thoughts
-Spring Boot isn’t the right tool for this job, but it’s a quick and effective solution. Consider Spring Batch if this
-project is going to be maintained in the long term, but be aware of the first point mentioned in the *TODO* section 
-above.
+Spring Boot is a quick and effective solution to leverage our existing codebase. However, we should consider Spring 
+Batch if this project is going to be maintained in the long term.
