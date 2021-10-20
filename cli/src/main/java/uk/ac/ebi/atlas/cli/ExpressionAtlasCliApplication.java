@@ -5,9 +5,6 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import picocli.CommandLine;
-import uk.ac.ebi.atlas.configuration.WebConfig;
-
-import java.util.Arrays;
 
 @SpringBootApplication(scanBasePackages = "uk.ac.ebi.atlas")
 public class ExpressionAtlasCliApplication implements CommandLineRunner, ExitCodeGenerator {
