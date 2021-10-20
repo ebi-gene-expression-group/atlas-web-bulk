@@ -5,9 +5,7 @@ A minimal Spring Boot wrapper to run (bulk) Expression Atlas tasks from the comm
 - Java 11
 - Expression Atlas environment (PostgreSQL server; SolrCloud cluster; bioentity annotation and experiment files)
 
-*IMPORTANT*: Review file paths in `cli/src/main/resources/configuration.properties`, Postgres host in
-`cli/src/main/resources/jdbc.properties`, and SolrCloud/ZooKeeper hosts in `cli/src/main/resources/solr.properties`
-before building and running the application.
+*IMPORTANT*: Please, read Usage and Configuration before proceeding.
 
 ## Usage
 There are two main ways to run the application: as an executable JAR or via Gradle. The latter is recommended on
@@ -31,27 +29,29 @@ java -jar ./cli/build/libs/atlas-cli-bulk.jar <task-name> <options>
 ```
 
 ## Configuration
-The following configuration variables can be set in their respective properties file or via the `-D` option. Changes in
-the properties file will be automatically picked up if the application is run with Gradle. If you run it with Java
-`-Doption=value` will override the setting in the compiled file.
-
-### Spring Boot options: `application.properties`
-- `server.port`
+Configuration variables can be set with `-Dproperty=value` if you run the application via `java -jar ...`, or by adding
+`-Pproperty=value` to the Gradle task (in the tables below: Java property name, and Gradle propery name, respectively).
 
 ### Expression Atlas file options: `configuration.properties`
-- `data.files.location`
-- `experiment.files.location`
+| Java property name          | Gradle property name      | Default value            |
+|-----------------------------|---------------------------|--------------------------|
+| `data.files.location`       | `dataFilesLocation`       | `${ATLAS_DATA_PATH}`     |
+| `experiment.files.location` | `experimentFilesLocation` | `${ATLAS_DATA_PATH}/gxa` |
 
 ### Expression Atlas database options: `jdbc.properties`
-- `jdbc.url`
-- `jdbc.username`
-- `jdbc.password`
+| Java Property name | Gradle property name | Default value                                                       |
+|--------------------|----------------------|---------------------------------------------------------------------|
+| `jdbc.url`         | `jdbcUrl`            | `jdbc:postgresql://${ATLAS_POSTGRES_HOST}:5432/${ATLAS_POSTGRES_DB` |
+| `jdbc.username`    | `jdbcUsername`       | `${ATLAS_POSTGRES_USER}`                                            |
+| `jdbc.password`    | `jdbcPassword`       | `${ATLAS_POSTRES_PASSWORD}`                                         |
 
 ### Expression Atlas Solr options: `solr.properties`
-- `zk.host`
-- `zk.port`
-- `solr.host`
-- `solr.port`
+| Java property name | Gradle property name | Default value        |
+|--------------------|----------------------|----------------------|
+| `zk.host`          | `zkHost`             | `${ATLAS_ZK_HOST}`   |
+| `zk.port`          | `zkPort`             | `2181`               |
+| `solr.host`        | `solrHost`           | `${ATLAS_SOLR_HOST}` |
+| `solr.port`        | `solrPort`           | `8983`               |
 
 ## Tasks
 Run without any arguments to get a list of available tasks:
@@ -233,7 +233,7 @@ because it eliminates the need to parse them as an array, a process which requir
 end of the file. Also, it usually reads the whole array in memory and such an  approach would be impractical, since 
 it’s commmon for the generated files to be several gigabytes in size and to consist of millions of Solr documents.
 JSONL files can also be easily broken up in chunks with command line utilities such as `split`, which we use in order
-to load   documents into Solr in blocks that can be easily consumed by the server nodes.
+to load documents into Solr in blocks that can be easily consumed by the server nodes.
 
 
 ## Troubleshooting

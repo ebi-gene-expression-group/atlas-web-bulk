@@ -21,3 +21,29 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
+
+processResources {
+    filesMatching('configuration.properties') {
+        expand(
+                dataFilesLocation: project.hasProperty('dataFilesLocation') ? dataFilesLocation : "${System.env.ATLAS_DATA_PATH}",
+                experimentFilesLocation: project.hasProperty('experimentFilesLocation') ? experimentFilesLocation : "${System.env.ATLAS_DATA_PATH}/gxa",
+        )
+    }
+
+    filesMatching('jdbc.properties') {
+        expand(
+                jdbcUrl: project.hasProperty('jdbcUrl') ? jdbcUrl : "jdbc:postgresql://${System.env.ATLAS_POSTGRES_HOST}:5432/${System.env.ATLAS_POSTGRES_DB}",
+                jdbcUsername: project.hasProperty('jdbcUsername') ? jdbcUsername : "${System.env.ATLAS_POSTGRES_USER}",
+                jdbcPassword: project.hasProperty('jdbcPassword') ? jdbcPassword : "${System.env.ATLAS_POSTGRES_PASSWORD}"
+        )
+    }
+
+    filesMatching('solr.properties') {
+        expand(
+                zkHost: project.hasProperty('zkHost') ? zkHost : "${System.env.ATLAS_ZK_HOST}",
+                zkPort: project.hasProperty('zkPort') ? zkPort : '2181',
+                solrHost: project.hasProperty('solrHost') ? solrHost : "${System.env.ATLAS_SOLR_HOST}",
+                solrPort: project.hasProperty('solrPort') ? solrPort : '8983'
+        )
+    }
+}
