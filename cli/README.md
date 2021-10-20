@@ -70,7 +70,7 @@ Commands:
 
 Pass the name of a task to obtain a detailed description of available options:
 ```bash
-$ java -Dserver.port=9001 -jar ./cli/build/libs/atlas-cli-bulk.jar bioentities-map
+$ java -jar ./cli/build/libs/atlas-cli-bulk.jar bioentities-map
 ...
 Missing required option: '--output=<outputFilePath>'
 Usage: <main class> bioentities-map -o=<outputFilePath>
@@ -237,19 +237,59 @@ to load documents into Solr in blocks that can be easily consumed by the server 
 
 
 ## Troubleshooting
-### Application fails to start with the message “Web server failed to start. Port XXXX was already in use.”
-Since `atlas-web-bulk` needs a `ServletContext` to build the application context, this is technically a web
-application and Spring Boot’s embedded web server is started with the app. Make sure that no other web server is
-running and listening to the port specified in the `application.properties` file.
+### Gradle isn’t respecting my configuration properties
+Do not place configuration variables inside the `args` parameter.
+
+**Wrong**:
+```bash
+./gradlew :cli:bootRun --args="-PdataFilesLocation=/atlas-data -PexperimentFilesLocation=/atas-data/gxa bioentities-json"
+```
+
+**Right**:
+```bash
+./gradlew :cli:bootRun -PdataFilesLocation=/atlas-data -PexperimentFilesLocation=/atas-data/gxa --args="bioentities-json"
+```
+
+### Application fails to start with the message “bean of type 'javax.servlet.ServletContext' could not be found”
+If at any point you see the error messages below when running the application, it means that certain components/beans
+from the atlas-web-bulk `app` subproject (i.e. the web application) are instantiated at run time. It fails because they
+need a `ServletContext` (i.e. a web server) and Tomcat isn’t running:
+```
+...
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+2021-10-19 21:57:44.022 ERROR 579874 --- [           main] o.s.b.d.LoggingFailureAnalysisReporter   : 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 0 of constructor in uk.ac.ebi.atlas.controllers.page.StaticPageController required a bean of type 'javax.servlet.ServletContext' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'javax.servlet.ServletContext' in your configuration.
+```
+
+Classes `WebConfig` and `StaticPageController` are both being excluded at run time by activating the `cli` Spring 
+profile. The project by default includes this setting in `application.properties`; if you encounter the error above, 
+verify that the `spring_profiles_active` property is present in that file.
+
+Look for the following line in the app logs:
+```
+2021-10-20 10:11:05.755  INFO 591952 --- [           main] u.a.e.a.c.ExpressionAtlasCliApplication  : The following profiles are active: cli
+```
+
+Remember that you can override this setting when running the JAR file like this:
+```bash
+java -Dspring.profiles.active=cli -jar ./cli/build/libs/atlas-cli-bulk.jar 
+```
 
 ## TODO
-- Exclude `WebConfig` from the app context to delete the `webapp` directory. This will require changes in
-  `atlas-web-bulk` because `AppConfig` turns on component scanning which in turn adds `WebConfig` to the context. Also,
-  while Tomcat might not appear to be necessary to run the application, certain classes in `atlas-web-bulk` such as
-  `StaticPageController` need a `ServletContext`. I think getting rid of these dependencies will prove to be difficult.
 - Test Gradle task `bootBuildImage` and optionally add a `Dockerfile` to containerise the application.
   
 ## Final thoughts
-Spring Boot isn’t the right tool for this job, but it’s a quick and effective solution. Consider Spring Batch if this
-project is going to be maintained in the long term, but be aware of the first point mentioned in the *TODO* section 
-above.
+Spring Boot is a quick and effective solution to leverage our existing codebase. However, we should consider Spring 
+Batch if this project is going to be maintained in the long term.
