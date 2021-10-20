@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.bioentity;
 
 import com.google.common.collect.ImmutableSet;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ import java.util.Set;
 
 import static uk.ac.ebi.atlas.bioentity.properties.BioEntityCardProperties.BIOENTITY_PROPERTY_NAMES;
 
+@Profile("!cli")
 @Controller
 public class GenePageController extends BioentityPageController {
     private final BioEntityPropertyDao bioentityPropertyDao;
