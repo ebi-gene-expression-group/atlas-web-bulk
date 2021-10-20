@@ -5,8 +5,6 @@ A minimal Spring Boot wrapper to run (bulk) Expression Atlas tasks from the comm
 - Java 11
 - Expression Atlas environment (PostgreSQL server; SolrCloud cluster; bioentity annotation and experiment files)
 
-*IMPORTANT*: Please, read Usage and Configuration before proceeding.
-
 ## Usage
 There are two main ways to run the application: as an executable JAR or via Gradle. The latter is recommended on
 development environments and Java is preferred in production environments. Be aware that any changes made to the
@@ -29,8 +27,12 @@ java -jar ./cli/build/libs/atlas-cli-bulk.jar <task-name> <options>
 ```
 
 ## Configuration
-Configuration variables can be set with `-Dproperty=value` if you run the application via `java -jar ...`, or by adding
+Configuration variables are set with `-Dproperty=value` if you run the application via `java -jar ...`, or by adding
 `-Pproperty=value` to the Gradle task (in the tables below: Java property name, and Gradle propery name, respectively).
+
+**IMPORTANT**: At the very least you will need to set the environment variables described in the Default value columns
+to run/compile the application with Gradle. However, notice that the `-D` arguments will override whatever was set at
+compile time, so if you forget or your environment changes, you don’t need to recompile.
 
 ### Expression Atlas file options: `configuration.properties`
 | Java property name          | Gradle property name      | Default value            |
