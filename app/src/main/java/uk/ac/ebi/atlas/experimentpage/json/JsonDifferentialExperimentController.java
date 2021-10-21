@@ -46,7 +46,8 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
     private final
         DifferentialExperimentPageService<DifferentialExpression, DifferentialExperiment,
                 DifferentialRequestPreferences, RnaSeqProfile, RnaSeqRequestContext>
-            diffRnaSeqExperimentPageService;
+            differentialExperimentPageService;
+
     private final
         DifferentialExperimentPageService<MicroarrayExpression, MicroarrayExperiment, MicroarrayRequestPreferences,
                 MicroarrayProfile, MicroarrayRequestContext>
@@ -60,7 +61,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
                                                 ContrastImageTrader atlasResourceHub) {
         super(experimentTrader);
 
-        diffRnaSeqExperimentPageService =
+        differentialExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.RnaSeq(),
                         new DifferentialProfilesHeatMap<>(rnaSeqProfileStreamFactory, solrQueryService),
                         atlasResourceHub);
@@ -121,7 +122,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
             @ModelAttribute("preferences") @Valid DifferentialRequestPreferences preferences,
             @PathVariable String experimentAccession,
             @RequestParam(defaultValue = "") String accessKey) {
-        return GSON.toJson(diffRnaSeqExperimentPageService.getResultsForExperiment(
+        return GSON.toJson(differentialExperimentPageService.getResultsForExperiment(
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
                 accessKey, preferences));
     }
@@ -131,10 +132,10 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
             params = "type=PROTEOMICS_DIFFERENTIAL")
     @ResponseBody
     public String differentialProteomicsExperimentData(
-            @ModelAttribute("preferences") @Valid MicroarrayRequestPreferences preferences,
+            @ModelAttribute("preferences") @Valid DifferentialRequestPreferences preferences,
             @PathVariable String experimentAccession,
             @RequestParam(defaultValue = "") String accessKey) {
-        return GSON.toJson(diffRnaSeqExperimentPageService.getResultsForExperiment(
+        return GSON.toJson(differentialExperimentPageService.getResultsForExperiment(
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
                 accessKey, preferences));
     }

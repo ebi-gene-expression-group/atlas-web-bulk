@@ -11,6 +11,7 @@ import uk.ac.ebi.atlas.experimentimport.idf.IdfParser;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.trader.factory.BaselineExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.MicroarrayExperimentFactory;
+import uk.ac.ebi.atlas.trader.factory.ProteomicsDifferentialExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.RnaSeqDifferentialExperimentFactory;
 
 @Repository
@@ -23,19 +24,22 @@ public class GxaExperimentRepository implements ExperimentRepository {
     private final BaselineExperimentFactory baselineExperimentFactory;
     private final RnaSeqDifferentialExperimentFactory rnaSeqDifferentialExperimentFactory;
     private final MicroarrayExperimentFactory microarrayExperimentFactory;
+    private final ProteomicsDifferentialExperimentFactory proteomicsDifferentialExperimentFactory;
 
     public GxaExperimentRepository(ExperimentCrudDao experimentCrudDao,
                                    ExperimentDesignParser experimentDesignParser,
                                    IdfParser idfParser,
                                    BaselineExperimentFactory baselineExperimentFactory,
                                    RnaSeqDifferentialExperimentFactory rnaSeqDifferentialExperimentFactory,
-                                   MicroarrayExperimentFactory microarrayExperimentFactory) {
+                                   MicroarrayExperimentFactory microarrayExperimentFactory,
+                                   ProteomicsDifferentialExperimentFactory proteomicsDifferentialExperimentFactory) {
         this.experimentCrudDao = experimentCrudDao;
         this.experimentDesignParser = experimentDesignParser;
         this.idfParser = idfParser;
         this.baselineExperimentFactory = baselineExperimentFactory;
         this.rnaSeqDifferentialExperimentFactory = rnaSeqDifferentialExperimentFactory;
         this.microarrayExperimentFactory = microarrayExperimentFactory;
+        this.proteomicsDifferentialExperimentFactory = proteomicsDifferentialExperimentFactory;
     }
 
     @Override
@@ -90,7 +94,7 @@ public class GxaExperimentRepository implements ExperimentRepository {
                         idfParserOutput,
                         ImmutableSet.of("Microarray 2-colour mRNA"));
             case PROTEOMICS_DIFFERENTIAL:
-                return rnaSeqDifferentialExperimentFactory.create(
+                return proteomicsDifferentialExperimentFactory.create(
                         experimentDto,
                         experimentDesign,
                         idfParserOutput,
