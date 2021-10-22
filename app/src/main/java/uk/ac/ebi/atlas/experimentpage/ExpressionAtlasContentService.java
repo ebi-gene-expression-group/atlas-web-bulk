@@ -196,6 +196,7 @@ public class ExpressionAtlasContentService {
                 arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case RNASEQ_MRNA_DIFFERENTIAL:
+            case PROTEOMICS_DIFFERENTIAL:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqDifferentialExperimentExternallyAvailableContentService.list(
                         (DifferentialExperiment) experiment, contentType));
                 otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?

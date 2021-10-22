@@ -55,6 +55,7 @@ public class ExperimentDownloadController {
     private final ExperimentDownloadSupplier.Proteomics proteomicsExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.RnaSeqDifferential rnaSeqDifferentialExperimentDownloadSupplier;
+    private final ExperimentDownloadSupplier.ProteomicsDifferential proteomicsDifferentialExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier;
     private final ExperimentFileLocationService experimentFileLocationService;
 
@@ -70,10 +71,13 @@ public class ExperimentDownloadController {
                                                 rnaSeqDifferentialExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.Microarray
                                                 microarrayExperimentDownloadSupplier,
+                                        ExperimentDownloadSupplier.ProteomicsDifferential
+                                                    proteomicsDifferentialExperimentDownloadSupplier,
                                         ExperimentFileLocationService
                                                 experimentFileLocationService) {
         this.experimentTrader = experimentTrader;
         this.proteomicsExperimentDownloadSupplier = proteomicsExperimentDownloadSupplier;
+        this.proteomicsDifferentialExperimentDownloadSupplier = proteomicsDifferentialExperimentDownloadSupplier;
         this.rnaSeqBaselineExperimentDownloadSupplier = rnaSeqBaselineExperimentDownloadSupplier;
         this.rnaSeqDifferentialExperimentDownloadSupplier = rnaSeqDifferentialExperimentDownloadSupplier;
         this.microarrayExperimentDownloadSupplier = microarrayExperimentDownloadSupplier;
@@ -145,7 +149,19 @@ public class ExperimentDownloadController {
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
 
         rnaSeqDifferentialExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
+    }
 
+    @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=PROTEOMICS_DIFFERENTIAL")
+    public void
+    proteomicsDifferentialExperimentDownload(
+            @PathVariable String experimentAccession,
+            @RequestParam(value = "accessKey", required = false) String accessKey,
+            @ModelAttribute("preferences") @Valid DifferentialRequestPreferences preferences,
+            HttpServletResponse response) throws IOException {
+        DifferentialExperiment experiment =
+                (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
+
+        proteomicsDifferentialExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
     }
 
     void microarrayExperimentDownload(String experimentAccession,
