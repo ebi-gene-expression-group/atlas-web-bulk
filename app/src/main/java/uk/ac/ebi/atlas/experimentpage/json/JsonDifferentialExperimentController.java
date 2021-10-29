@@ -22,7 +22,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExpres
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayProfile;
 import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.RnaSeqProfile;
 import uk.ac.ebi.atlas.profiles.stream.MicroarrayProfileStreamFactory;
-import uk.ac.ebi.atlas.profiles.stream.RnaSeqProfileStreamFactory;
+import uk.ac.ebi.atlas.profiles.stream.RnaSeqAndProteomicsProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.ContrastImageTrader;
 import uk.ac.ebi.atlas.solr.bioentities.query.SolrQueryService;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
@@ -55,7 +55,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
 
     @Inject
     public JsonDifferentialExperimentController(ExperimentTrader experimentTrader,
-                                                RnaSeqProfileStreamFactory rnaSeqProfileStreamFactory,
+                                                RnaSeqAndProteomicsProfileStreamFactory rnaSeqAndProteomicsProfileStreamFactory,
                                                 MicroarrayProfileStreamFactory microarrayProfileStreamFactory,
                                                 SolrQueryService solrQueryService,
                                                 ContrastImageTrader atlasResourceHub) {
@@ -63,7 +63,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
 
         differentialExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.RnaSeq(),
-                        new DifferentialProfilesHeatMap<>(rnaSeqProfileStreamFactory, solrQueryService),
+                        new DifferentialProfilesHeatMap<>(rnaSeqAndProteomicsProfileStreamFactory, solrQueryService),
                         atlasResourceHub);
 
         diffMicroarrayExperimentPageService =

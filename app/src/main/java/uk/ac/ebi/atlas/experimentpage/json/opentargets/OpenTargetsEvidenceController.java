@@ -19,7 +19,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExpres
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayProfile;
 import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.RnaSeqProfile;
 import uk.ac.ebi.atlas.profiles.stream.MicroarrayProfileStreamFactory;
-import uk.ac.ebi.atlas.profiles.stream.RnaSeqProfileStreamFactory;
+import uk.ac.ebi.atlas.profiles.stream.RnaSeqAndProteomicsProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.DataFileHub;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
@@ -46,14 +46,14 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
 
     @Inject
     public OpenTargetsEvidenceController(ExperimentTrader experimentTrader,
-                                         RnaSeqProfileStreamFactory rnaSeqProfileStreamFactory,
+                                         RnaSeqAndProteomicsProfileStreamFactory rnaSeqandProteomicsProfileStreamFactory,
                                          MicroarrayProfileStreamFactory microarrayProfileStreamFactory,
                                          DataFileHub dataFileHub) {
         super(experimentTrader);
         String resourcesVersion = "prod.30";
 
         diffRnaSeqEvidenceService =
-                new EvidenceService<>(rnaSeqProfileStreamFactory, dataFileHub, resourcesVersion);
+                new EvidenceService<>(rnaSeqandProteomicsProfileStreamFactory, dataFileHub, resourcesVersion);
         diffMicroarrayEvidenceService =
                 new EvidenceService<>(microarrayProfileStreamFactory, dataFileHub, resourcesVersion);
     }
