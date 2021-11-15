@@ -55,7 +55,7 @@ public class ExpressionAtlasContentService {
     public ExpressionAtlasContentService(
             ExperimentDownloadSupplier.Proteomics proteomicsExperimentDownloadSupplier,
             ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier,
-            ExperimentDownloadSupplier.RnaSeqAndProteomicsDifferential rnaSeqAndProteomicsDifferentialExperimentDownloadSupplier,
+            ExperimentDownloadSupplier.BulkDifferential bulkDifferential,
             ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier,
             ContrastImageSupplier.RnaSeq rnaSeqDifferentialContrastImageSupplier,
             ContrastImageSupplier.Microarray microarrayContrastImageSupplier,
@@ -105,7 +105,7 @@ public class ExpressionAtlasContentService {
         this.rnaSeqDifferentialExperimentExternallyAvailableContentService =
                 new ExternallyAvailableContentService<>(
                         ImmutableList.of(
-                                rnaSeqAndProteomicsDifferentialExperimentDownloadSupplier,
+                                bulkDifferential,
                                 rnaSeqDifferentialSecondaryDataFiles,
                                 rnaSeqDifferentialStaticFilesDownload,
                                 rnaSeqDifferentialExperimentDesignFile,

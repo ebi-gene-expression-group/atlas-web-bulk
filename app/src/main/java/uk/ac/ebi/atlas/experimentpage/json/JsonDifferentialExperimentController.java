@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.ac.ebi.atlas.experimentpage.context.DifferentialRequestContextFactory;
 import uk.ac.ebi.atlas.experimentpage.context.MicroarrayRequestContext;
-import uk.ac.ebi.atlas.experimentpage.context.RnaSeqRequestContext;
+import uk.ac.ebi.atlas.experimentpage.context.BulkDifferentialRequestContext;
 import uk.ac.ebi.atlas.experimentpage.differential.DifferentialExperimentPageService;
 import uk.ac.ebi.atlas.experimentpage.differential.DifferentialProfilesHeatMap;
 import uk.ac.ebi.atlas.experimentpage.differential.DifferentialRequestPreferencesValidator;
@@ -20,9 +20,9 @@ import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExpression;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExpression;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayProfile;
-import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.RnaSeqProfile;
+import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.BulkDifferentialProfile;
 import uk.ac.ebi.atlas.profiles.stream.MicroarrayProfileStreamFactory;
-import uk.ac.ebi.atlas.profiles.stream.RnaSeqAndProteomicsProfileStreamFactory;
+import uk.ac.ebi.atlas.profiles.stream.BulkDifferentialProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.ContrastImageTrader;
 import uk.ac.ebi.atlas.solr.bioentities.query.SolrQueryService;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
@@ -45,7 +45,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
 
     private final
         DifferentialExperimentPageService<DifferentialExpression, DifferentialExperiment,
-                DifferentialRequestPreferences, RnaSeqProfile, RnaSeqRequestContext>
+                DifferentialRequestPreferences, BulkDifferentialProfile, BulkDifferentialRequestContext>
             differentialExperimentPageService;
 
     private final
@@ -55,7 +55,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
 
     @Inject
     public JsonDifferentialExperimentController(ExperimentTrader experimentTrader,
-                                                RnaSeqAndProteomicsProfileStreamFactory rnaSeqAndProteomicsProfileStreamFactory,
+                                                BulkDifferentialProfileStreamFactory bulkDifferentialProfileStreamFactory,
                                                 MicroarrayProfileStreamFactory microarrayProfileStreamFactory,
                                                 SolrQueryService solrQueryService,
                                                 ContrastImageTrader atlasResourceHub) {
@@ -63,7 +63,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
 
         differentialExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.RnaSeq(),
-                        new DifferentialProfilesHeatMap<>(rnaSeqAndProteomicsProfileStreamFactory, solrQueryService),
+                        new DifferentialProfilesHeatMap<>(bulkDifferentialProfileStreamFactory, solrQueryService),
                         atlasResourceHub);
 
         diffMicroarrayExperimentPageService =
