@@ -50,6 +50,7 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
             case PROTEOMICS_BASELINE:
                 checkProteomicsBaselineFiles(experimentAccession);
                 break;
+            case PROTEOMICS_DIFFERENTIAL:
             case RNASEQ_MRNA_DIFFERENTIAL:
                 checkDifferentialFiles(experimentAccession);
                 break;
@@ -145,8 +146,8 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
     }
 
     private void checkDifferentialFiles(String experimentAccession) {
-        DataFileHub.RnaSeqDifferentialExperimentFiles experimentFiles =
-                dataFileHub.getRnaSeqDifferentialExperimentFiles(experimentAccession);
+        DataFileHub.BulkDifferentialExperimentFiles experimentFiles =
+                dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession);
         checkResourceExistsAndIsReadable(experimentFiles.analytics);
         checkResourceExistsAndIsReadable(experimentFiles.rawCounts);
     }
