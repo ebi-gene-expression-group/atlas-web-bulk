@@ -18,6 +18,10 @@ public enum ExperimentFileType {
             "factors", "Experiment configuration file (XML format)", IconType.EXPERIMENT_DESIGN, false),
     PROTEOMICS_B_MAIN(
             "main", "Experiment file (TSV format)", IconType.TSV, false),
+    PROTEOMICS_RAW_QAUNT(
+            "raw-qaunt", "Unprocessed raw output file (TXT format)", IconType.TXT, false),
+    PROTEOMICS_PARAMETER_FILE(
+            "parameter-file", "Parameter file (XML format)", IconType.XML, false),
     RNASEQ_B_TPM(
             "tpm", "TPM file (TSV format)", IconType.TSV, false),
     RNASEQ_D_ANALYTICS(
