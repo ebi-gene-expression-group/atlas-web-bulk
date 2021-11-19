@@ -54,7 +54,7 @@ public class ExperimentDownloadController {
     private final ExperimentTrader experimentTrader;
     private final ExperimentDownloadSupplier.Proteomics proteomicsExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier;
-    private final ExperimentDownloadSupplier.BulkDifferential bulkDifferential;
+    private final ExperimentDownloadSupplier.BulkDifferential bulkDifferentialExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier;
     private final ExperimentFileLocationService experimentFileLocationService;
 
@@ -67,7 +67,7 @@ public class ExperimentDownloadController {
                                         ExperimentDownloadSupplier.RnaSeqBaseline
                                                 rnaSeqBaselineExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.BulkDifferential
-                                                    bulkDifferential,
+                                                    bulkDifferentialExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.Microarray
                                                 microarrayExperimentDownloadSupplier,
                                         ExperimentFileLocationService
@@ -75,7 +75,7 @@ public class ExperimentDownloadController {
         this.experimentTrader = experimentTrader;
         this.proteomicsExperimentDownloadSupplier = proteomicsExperimentDownloadSupplier;
         this.rnaSeqBaselineExperimentDownloadSupplier = rnaSeqBaselineExperimentDownloadSupplier;
-        this.bulkDifferential = bulkDifferential;
+        this.bulkDifferentialExperimentDownloadSupplier = bulkDifferentialExperimentDownloadSupplier;
         this.microarrayExperimentDownloadSupplier = microarrayExperimentDownloadSupplier;
         this.experimentFileLocationService = experimentFileLocationService;
     }
@@ -144,7 +144,7 @@ public class ExperimentDownloadController {
         DifferentialExperiment experiment =
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
 
-        bulkDifferential.write(response, preferences, experiment, "tsv");
+        bulkDifferentialExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
     }
 
     @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=PROTEOMICS_DIFFERENTIAL")
@@ -157,7 +157,7 @@ public class ExperimentDownloadController {
         DifferentialExperiment experiment =
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
 
-        bulkDifferential.write(response, preferences, experiment, "tsv");
+        bulkDifferentialExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
     }
 
     void microarrayExperimentDownload(String experimentAccession,

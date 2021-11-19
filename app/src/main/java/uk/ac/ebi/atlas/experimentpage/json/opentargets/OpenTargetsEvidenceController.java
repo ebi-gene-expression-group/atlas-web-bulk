@@ -39,7 +39,7 @@ import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 public class OpenTargetsEvidenceController extends JsonExperimentController {
     private final
     EvidenceService<DifferentialExpression, DifferentialExperiment, BulkDifferentialRequestContext, BulkDifferentialProfile>
-            diffRnaSeqEvidenceService;
+            bulkDifferentialEvidenceService;
     private final
     EvidenceService<MicroarrayExpression, MicroarrayExperiment, MicroarrayRequestContext, MicroarrayProfile>
             diffMicroarrayEvidenceService;
@@ -52,7 +52,7 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
         super(experimentTrader);
         String resourcesVersion = "prod.30";
 
-        diffRnaSeqEvidenceService =
+        bulkDifferentialEvidenceService =
                 new EvidenceService<>(bulkDifferentialProfileStreamFactory, dataFileHub, resourcesVersion);
         diffMicroarrayEvidenceService =
                 new EvidenceService<>(microarrayProfileStreamFactory, dataFileHub, resourcesVersion);
@@ -156,7 +156,7 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
         response.setHeader("content-type", "application/json-seq; charset=UTF-8");
         PrintWriter printWriter = response.getWriter();
-        diffRnaSeqEvidenceService.evidenceForExperiment(
+        bulkDifferentialEvidenceService.evidenceForExperiment(
                 experiment,
                 contrast -> {
                     DifferentialRequestPreferences requestPreferences = new DifferentialRequestPreferences();

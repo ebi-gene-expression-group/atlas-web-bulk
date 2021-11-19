@@ -47,7 +47,7 @@ public class FileDownloadControllerTest {
     private ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier;
 
     @Mock
-    private ExperimentDownloadSupplier.BulkDifferential bulkDifferential;
+    private ExperimentDownloadSupplier.BulkDifferential bulkDifferentialExperimentDownloadSupplier;
 
     @Mock
     private ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier;
@@ -60,7 +60,7 @@ public class FileDownloadControllerTest {
                 experimentTraderMock,
                 proteomicsExperimentDownloadSupplier,
                 rnaSeqBaselineExperimentDownloadSupplier,
-                bulkDifferential,
+                bulkDifferentialExperimentDownloadSupplier,
                 microarrayExperimentDownloadSupplier,
                 experimentFileLocationServiceMock);
     }
