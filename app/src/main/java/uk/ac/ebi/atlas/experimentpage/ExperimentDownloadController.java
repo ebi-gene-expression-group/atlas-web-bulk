@@ -52,6 +52,8 @@ import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 public class ExperimentDownloadController {
 
     private final ExperimentTrader experimentTrader;
+    //TODO: Proteomics class is only refering to proteomics-baseline, while proteomics-differential will go bulkDifferential class
+    //TODO: Refactor the Proteomics name properly
     private final ExperimentDownloadSupplier.Proteomics proteomicsExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.BulkDifferential bulkDifferentialExperimentDownloadSupplier;
