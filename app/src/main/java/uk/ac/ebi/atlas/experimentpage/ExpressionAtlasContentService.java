@@ -55,7 +55,7 @@ public class ExpressionAtlasContentService {
     public ExpressionAtlasContentService(
             ExperimentDownloadSupplier.Proteomics proteomicsExperimentDownloadSupplier,
             ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier,
-            ExperimentDownloadSupplier.RnaSeqDifferential rnaSeqDifferentialExperimentDownloadSupplier,
+            ExperimentDownloadSupplier.BulkDifferential bulkDifferential,
             ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier,
             ContrastImageSupplier.RnaSeq rnaSeqDifferentialContrastImageSupplier,
             ContrastImageSupplier.Microarray microarrayContrastImageSupplier,
@@ -105,7 +105,7 @@ public class ExpressionAtlasContentService {
         this.rnaSeqDifferentialExperimentExternallyAvailableContentService =
                 new ExternallyAvailableContentService<>(
                         ImmutableList.of(
-                                rnaSeqDifferentialExperimentDownloadSupplier,
+                                bulkDifferential,
                                 rnaSeqDifferentialSecondaryDataFiles,
                                 rnaSeqDifferentialStaticFilesDownload,
                                 rnaSeqDifferentialExperimentDesignFile,
@@ -196,6 +196,7 @@ public class ExpressionAtlasContentService {
                 arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case RNASEQ_MRNA_DIFFERENTIAL:
+            case PROTEOMICS_DIFFERENTIAL:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqDifferentialExperimentExternallyAvailableContentService.list(
                         (DifferentialExperiment) experiment, contentType));
                 otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?

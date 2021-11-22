@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.ac.ebi.atlas.experimentpage.context.BulkDifferentialRequestContext;
 import uk.ac.ebi.atlas.experimentpage.context.MicroarrayRequestContext;
-import uk.ac.ebi.atlas.experimentpage.context.RnaSeqRequestContext;
 import uk.ac.ebi.atlas.experimentpage.differential.DifferentialRequestPreferencesValidator;
 import uk.ac.ebi.atlas.experimentpage.json.JsonExperimentController;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
@@ -17,9 +17,9 @@ import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExpression;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExpression;
 import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayProfile;
-import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.RnaSeqProfile;
+import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.BulkDifferentialProfile;
+import uk.ac.ebi.atlas.profiles.stream.BulkDifferentialProfileStreamFactory;
 import uk.ac.ebi.atlas.profiles.stream.MicroarrayProfileStreamFactory;
-import uk.ac.ebi.atlas.profiles.stream.RnaSeqProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.DataFileHub;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
@@ -38,22 +38,22 @@ import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 @Scope("request")
 public class OpenTargetsEvidenceController extends JsonExperimentController {
     private final
-    EvidenceService<DifferentialExpression, DifferentialExperiment, RnaSeqRequestContext, RnaSeqProfile>
-            diffRnaSeqEvidenceService;
+    EvidenceService<DifferentialExpression, DifferentialExperiment, BulkDifferentialRequestContext, BulkDifferentialProfile>
+            bulkDifferentialEvidenceService;
     private final
     EvidenceService<MicroarrayExpression, MicroarrayExperiment, MicroarrayRequestContext, MicroarrayProfile>
             diffMicroarrayEvidenceService;
 
     @Inject
     public OpenTargetsEvidenceController(ExperimentTrader experimentTrader,
-                                         RnaSeqProfileStreamFactory rnaSeqProfileStreamFactory,
+                                         BulkDifferentialProfileStreamFactory bulkDifferentialProfileStreamFactory,
                                          MicroarrayProfileStreamFactory microarrayProfileStreamFactory,
                                          DataFileHub dataFileHub) {
         super(experimentTrader);
         String resourcesVersion = "prod.30";
 
-        diffRnaSeqEvidenceService =
-                new EvidenceService<>(rnaSeqProfileStreamFactory, dataFileHub, resourcesVersion);
+        bulkDifferentialEvidenceService =
+                new EvidenceService<>(bulkDifferentialProfileStreamFactory, dataFileHub, resourcesVersion);
         diffMicroarrayEvidenceService =
                 new EvidenceService<>(microarrayProfileStreamFactory, dataFileHub, resourcesVersion);
     }
@@ -156,7 +156,7 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
         response.setHeader("content-type", "application/json-seq; charset=UTF-8");
         PrintWriter printWriter = response.getWriter();
-        diffRnaSeqEvidenceService.evidenceForExperiment(
+        bulkDifferentialEvidenceService.evidenceForExperiment(
                 experiment,
                 contrast -> {
                     DifferentialRequestPreferences requestPreferences = new DifferentialRequestPreferences();
@@ -164,7 +164,7 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
                     requestPreferences.setCutoff(pValueCutoff);
                     requestPreferences.setHeatmapMatrixSize(maxGenesPerContrast);
                     requestPreferences.setSelectedColumnIds(ImmutableSet.of(contrast.getId()));
-                    return new RnaSeqRequestContext(requestPreferences, experiment);
+                    return new BulkDifferentialRequestContext(requestPreferences, experiment);
                 },
                 jsonObject -> printWriter.println(GSON.toJson(jsonObject)));
     }
