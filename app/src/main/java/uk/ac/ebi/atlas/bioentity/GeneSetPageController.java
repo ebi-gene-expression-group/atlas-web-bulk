@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.bioentity;
 
 import com.google.common.collect.ImmutableSet;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import uk.ac.ebi.atlas.species.Species;
 import uk.ac.ebi.atlas.species.SpeciesFactory;
 import uk.ac.ebi.atlas.species.SpeciesInferrer;
 
+@Profile("!cli")
 @Controller
 public class GeneSetPageController extends BioentityPageController {
     private GeneSetPropertyService geneSetPropertyService;

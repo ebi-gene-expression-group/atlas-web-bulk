@@ -21,8 +21,13 @@ def cache2kVersion = '1.2.4.Final'
 dependencies {
     implementation project(':atlas-web-core')
 
+    implementation 'org.springframework:spring-context:5.1.5.RELEASE'
+    implementation 'org.springframework:spring-web:5.1.5.RELEASE'
+    implementation 'org.springframework:spring-jdbc:5.1.5.RELEASE'
+    implementation 'org.springframework:spring-webmvc:5.1.5.RELEASE'
+
     implementation 'javax.validation:validation-api:2.0.1.Final'
-    implementation 'commons-net:commons-net:3.3'
+    implementation 'commons-net:commons-net:3.8.0'
 
     implementation "org.cache2k:cache2k-api:${cache2kVersion}"
     runtimeOnly "org.cache2k:cache2k-core:${cache2kVersion}"
@@ -35,4 +40,6 @@ dependencies {
 
     testImplementation 'commons-beanutils:commons-beanutils:1.9.3'
     testImplementation 'javax.servlet.jsp:jsp-api:2.2'
+
+    testImplementation 'com.zaxxer:HikariCP:3.3.1'
 }

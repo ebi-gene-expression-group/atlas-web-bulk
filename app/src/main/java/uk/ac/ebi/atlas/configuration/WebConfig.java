@@ -2,6 +2,7 @@ package uk.ac.ebi.atlas.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.CacheControl;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -21,6 +22,7 @@ import uk.ac.ebi.atlas.web.interceptors.TimingInterceptor;
 
 import java.util.concurrent.TimeUnit;
 
+@Profile("!cli")
 @Configuration
 @EnableWebMvc
 @ControllerAdvice

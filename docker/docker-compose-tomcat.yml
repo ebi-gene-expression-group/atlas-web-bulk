@@ -1,0 +1,31 @@
+version: "3.6"
+
+services:
+  gxa-tomcat:
+    image: tomcat:9-jdk11
+    container_name: gxa-tomcat
+    networks:
+      - gxa
+    environment:
+      JPDA_ADDRESS: "*:8000"
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    volumes:
+      - ../webapps:/usr/local/tomcat/webapps
+      - ./atlas-properties:/atlas-properties
+      - $ATLAS_DATA_PATH:/atlas-data
+      - gxa-tomcat-conf:/usr/local/tomcat/conf
+    depends_on:
+      - gxa-postgres
+      - gxa-solrcloud-1
+      - gxa-solrcloud-2
+    command: ["catalina.sh", "jpda", "run"]
+
+volumes:
+  gxa-tomcat-conf:
+    name: gxa-tomcat-conf
+
+networks:
+  gxa:
+    name: gxa

@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.bioentity;
 
 import com.google.common.collect.ImmutableSet;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import uk.ac.ebi.atlas.bioentity.properties.BioEntityCardModelFactory;
 import uk.ac.ebi.atlas.bioentity.properties.BioEntityPropertyDao;
 import uk.ac.ebi.atlas.search.SemanticQuery;
-import uk.ac.ebi.atlas.solr.BioentityPropertyName;
+import uk.ac.ebi.atlas.solr.bioentities.BioentityPropertyName;
 import uk.ac.ebi.atlas.solr.analytics.AnalyticsSearchService;
 import uk.ac.ebi.atlas.solr.analytics.baseline.BaselineAnalyticsSearchService;
 import uk.ac.ebi.atlas.species.Species;
@@ -21,6 +22,7 @@ import java.util.Set;
 
 import static uk.ac.ebi.atlas.bioentity.properties.BioEntityCardProperties.BIOENTITY_PROPERTY_NAMES;
 
+@Profile("!cli")
 @Controller
 public class GenePageController extends BioentityPageController {
     private final BioEntityPropertyDao bioentityPropertyDao;

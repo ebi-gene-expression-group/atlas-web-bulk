@@ -17,7 +17,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.experimentimport.analyticsindex.stream.SolrInputDocumentInputStream;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
-import uk.ac.ebi.atlas.solr.BioentityPropertyName;
+import uk.ac.ebi.atlas.solr.bioentities.BioentityPropertyName;
 import uk.ac.ebi.atlas.profiles.IterableObjectInputStream;
 import uk.ac.ebi.atlas.search.SemanticQuery;
 import uk.ac.ebi.atlas.search.SemanticQueryTerm;
