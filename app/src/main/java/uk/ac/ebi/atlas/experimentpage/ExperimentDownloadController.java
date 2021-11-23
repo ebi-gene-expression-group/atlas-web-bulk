@@ -120,6 +120,19 @@ public class ExperimentDownloadController {
         proteomicsExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
     }
 
+    @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=PROTEOMICS_BASELINE_DIA_SWATH")
+    public void
+    proteomicsDiaSwathExperimentDownload(
+            @PathVariable String experimentAccession,
+            @RequestParam(value = "accessKey", required = false) String accessKey,
+            @ModelAttribute("preferences") @Valid ProteomicsBaselineRequestPreferences preferences,
+            HttpServletResponse response) throws IOException {
+        BaselineExperiment experiment =
+                (BaselineExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
+
+        proteomicsExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
+    }
+
     @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=RNASEQ_MRNA_BASELINE")
     public void
     rnaSeqBaselineExperimentDownload(
@@ -253,6 +266,19 @@ public class ExperimentDownloadController {
                                 .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.RNASEQ_B_TPM));
                         break;
+
+                    case PROTEOMICS_BASELINE_DIA_SWATH:
+                        paths.add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.CONFIGURATION))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.BASELINE_FACTORS))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.IDF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.PROTEOMICS_B_MAIN));
+                        break;
                     //MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL, MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL, MICROARRAY_2COLOUR_MICRORNA_DIFFERENTIAL
                     default:
                         paths.addAll(experimentFileLocationService.getFilePathsForArchive(
@@ -331,6 +357,12 @@ public class ExperimentDownloadController {
                     ExperimentFileType.CONFIGURATION,
                     ExperimentFileType.MICROARRAY_D_ANALYTICS,
                     ExperimentFileType.IDF));
+            put(ExperimentType.PROTEOMICS_BASELINE_DIA_SWATH, ImmutableList.of(
+                    ExperimentFileType.CONDENSE_SDRF,
+                    ExperimentFileType.CONFIGURATION,
+                    ExperimentFileType.BASELINE_FACTORS,
+                    ExperimentFileType.IDF,
+                    ExperimentFileType.PROTEOMICS_B_MAIN));
         }};
 
         var filePaths = experiments.stream().map(experiment ->
