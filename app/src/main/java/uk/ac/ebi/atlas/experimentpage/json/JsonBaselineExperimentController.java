@@ -1,6 +1,5 @@
 package uk.ac.ebi.atlas.experimentpage.json;
 
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -89,7 +88,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
         return baselineExperimentData(preferences, experimentAccession, accessKey);
     }
 
-    @GetMapping(value = "/json/experiments/{experimentAccession}",
+    @RequestMapping(value = "/json/experiments/{experimentAccession}",
             produces = "application/json;charset=UTF-8",
             params = "type=PROTEOMICS_BASELINE_DIA_SWATH")
     public String baselineProteomicsDiaSwathExperimentData(@Valid ProteomicsBaselineRequestPreferences preferences,
@@ -164,5 +163,4 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
 
         return GSON.toJson(proteomicsHistograms.get(experimentAccession, accessKey, preferences).asJson());
     }
-
 }
