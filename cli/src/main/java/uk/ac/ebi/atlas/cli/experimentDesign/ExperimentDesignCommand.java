@@ -29,6 +29,7 @@ public class ExperimentDesignCommand implements Callable<Integer> {
     @Override
     public Integer call() {
 
+        LOGGER.info("Starting update experiment designs for accessions.");
         for(String accession : experimentAccessions) {
             experimentCrud.updateExperimentDesign(accession);
         }
