@@ -30,6 +30,9 @@ public class CoexpressionUpdateCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         LOGGER.info("Starting update coexpression for accessions.");
+        int deleteCount;
+        int loadCount;
+        
         for(String accession : experimentAccessions) {
             deleteCount = baselineCoexpressionProfileLoader.deleteCoexpressionsProfile(accession);
             loadCount = baselineCoexpressionProfileLoader.loadBaselineCoexpressionsProfile(accession);
