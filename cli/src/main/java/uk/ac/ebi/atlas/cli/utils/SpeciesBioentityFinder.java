@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static org.apache.solr.client.solrj.SolrQuery.ORDER.asc;
-import static uk.ac.ebi.atlas.solr.cloud.collections.BioentitiesCollectionProxy.BIOENTITY_IDENTIFIER_DV;
+import static uk.ac.ebi.atlas.solr.cloud.collections.BioentitiesCollectionProxy.BIOENTITY_IDENTIFIER;
 import static uk.ac.ebi.atlas.solr.cloud.collections.BioentitiesCollectionProxy.SPECIES;
 
 @Service
@@ -37,18 +37,18 @@ public class SpeciesBioentityFinder {
         var solrQueryBuilder =
                 new SolrQueryBuilder<BioentitiesCollectionProxy>()
                         .addQueryFieldByTerm(SPECIES, species)
-                        .setFieldList(ImmutableSet.of(BIOENTITY_IDENTIFIER_DV))
-                        .sortBy(BIOENTITY_IDENTIFIER_DV, asc);
+                        .setFieldList(ImmutableSet.of(BIOENTITY_IDENTIFIER))
+                        .sortBy(BIOENTITY_IDENTIFIER, asc);
 
         var searchStreamBuilder =
                 new SearchStreamBuilder<>(bioentitiesCollectionProxy, solrQueryBuilder)
                         .returnAllDocs();
-        var uniqueStreamBuilder = new UniqueStreamBuilder(searchStreamBuilder, BIOENTITY_IDENTIFIER_DV.name());
+        var uniqueStreamBuilder = new UniqueStreamBuilder(searchStreamBuilder, BIOENTITY_IDENTIFIER.name());
 
         LOGGER.info("Retrieving all bioentity identifiers of species " + species + "...");
         try (var tupleStreamer = TupleStreamer.of(uniqueStreamBuilder.build())) {
             return tupleStreamer.get()
-                    .map(tuple -> tuple.getString(BIOENTITY_IDENTIFIER_DV.name()))
+                    .map(tuple -> tuple.getString(BIOENTITY_IDENTIFIER.name()))
                     .collect(toImmutableSet());
         }
     }
