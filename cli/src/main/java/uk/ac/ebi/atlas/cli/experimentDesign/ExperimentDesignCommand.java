@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 @Component
 @Command(
-        name = "experiment-design-update",
+        name = "update-experiment-design",
         description = "Update experiment design for a set of accessions")
 public class ExperimentDesignCommand implements Callable<Integer> {
     private static final Logger LOGGER = Logger.getLogger(ExperimentDesignCommand.class.getName());

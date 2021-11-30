@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 @Component
 @Command(
-        name = "baseline-coexpression",
+        name = "update-baseline-coexpression",
         description = "Update coexpression for baseline experiments")
 public class CoexpressionUpdateCommand implements Callable<Integer> {
 
