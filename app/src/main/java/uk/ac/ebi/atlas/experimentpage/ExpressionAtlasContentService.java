@@ -29,7 +29,7 @@ public class ExpressionAtlasContentService {
     private final ExternallyAvailableContentService<BaselineExperiment>
             rnaSeqBaselineExperimentExternallyAvailableContentService;
     private final ExternallyAvailableContentService<DifferentialExperiment>
-            rnaSeqDifferentialExperimentExternallyAvailableContentService;
+            bulkDifferentialExperimentExternallyAvailableContentService;
     private final ExternallyAvailableContentService<MicroarrayExperiment>
             microarrayExperimentExternallyAvailableContentService;
     private final ExternallyAvailableContentService<BaselineExperiment>
@@ -41,13 +41,13 @@ public class ExpressionAtlasContentService {
     private final ExternallyAvailableContentService<BaselineExperiment>
             rnaSeqBaselineExperimentExternallyAvailableContentServiceEna;
     private final ExternallyAvailableContentService<DifferentialExperiment>
-            rnaSeqDifferentialExperimentExternallyAvailableContentServiceEna;
+            bulkDifferentialExperimentExternallyAvailableContentServiceEna;
     private final ExternallyAvailableContentService<MicroarrayExperiment>
             microarrayExperimentExternallyAvailableContentServiceEna;
     private final ExternallyAvailableContentService<BaselineExperiment>
-            rnaSeqBaselineExperimentExternallyAvailableContentServiceEga;
+            bulkBaselineExperimentExternallyAvailableContentServiceEga;
     private final ExternallyAvailableContentService<DifferentialExperiment>
-            rnaSeqDifferentialExperimentExternallyAvailableContentServiceEga;
+            bulkDifferentialExperimentExternallyAvailableContentServiceEga;
     private final ExternallyAvailableContentService<MicroarrayExperiment>
             microarrayExperimentExternallyAvailableContentServiceEga;
     private final ExperimentTrader experimentTrader;
@@ -102,7 +102,7 @@ public class ExpressionAtlasContentService {
                                 baselineExperimentDesignFile,
                                 rnaSeqBaselineLinkToArrayExpress));
 
-        this.rnaSeqDifferentialExperimentExternallyAvailableContentService =
+        this.bulkDifferentialExperimentExternallyAvailableContentService =
                 new ExternallyAvailableContentService<>(
                         ImmutableList.of(
                                 bulkDifferential,
@@ -135,16 +135,16 @@ public class ExpressionAtlasContentService {
         this.rnaSeqBaselineExperimentExternallyAvailableContentServiceEna =
                 new ExternallyAvailableContentService<>(ImmutableList.of(rnaSeqBaselineLinkToEna));
 
-        this.rnaSeqDifferentialExperimentExternallyAvailableContentServiceEna =
+        this.bulkDifferentialExperimentExternallyAvailableContentServiceEna =
                 new ExternallyAvailableContentService<>(ImmutableList.of(differentialLinkToEna));
 
         this.microarrayExperimentExternallyAvailableContentServiceEna =
                 new ExternallyAvailableContentService<>(ImmutableList.of(microarrayLinkToEna));
 
-        this.rnaSeqBaselineExperimentExternallyAvailableContentServiceEga =
+        this.bulkBaselineExperimentExternallyAvailableContentServiceEga =
                 new ExternallyAvailableContentService<>(ImmutableList.of(rnaSeqBaselineLinkToEga));
 
-        this.rnaSeqDifferentialExperimentExternallyAvailableContentServiceEga =
+        this.bulkDifferentialExperimentExternallyAvailableContentServiceEga =
                 new ExternallyAvailableContentService<>(ImmutableList.of(differentialLinkToEga));
 
         this.microarrayExperimentExternallyAvailableContentServiceEga =
@@ -160,8 +160,8 @@ public class ExpressionAtlasContentService {
         } else if (experiment.getType().isRnaSeqBaseline()) {
             return rnaSeqBaselineExperimentExternallyAvailableContentService.stream(
                     (BaselineExperiment) experiment, uri);
-        } else if (experiment.getType().isRnaSeqDifferential()) {
-            return rnaSeqDifferentialExperimentExternallyAvailableContentService.stream(
+        } else if (experiment.getType().isBulkDifferential()) {
+            return bulkDifferentialExperimentExternallyAvailableContentService.stream(
                     (DifferentialExperiment) experiment, uri);
         } else {
             return microarrayExperimentExternallyAvailableContentService.stream(
@@ -189,7 +189,7 @@ public class ExpressionAtlasContentService {
                         rnaSeqBaselineExperimentExternallyAvailableContentServiceGeo.list(
                                 (BaselineExperiment) experiment, contentType) :
                         externalResourceType.equals("ega") ?
-                                rnaSeqBaselineExperimentExternallyAvailableContentServiceEga.list(
+                                bulkBaselineExperimentExternallyAvailableContentServiceEga.list(
                                         (BaselineExperiment) experiment, contentType) :
                                 rnaSeqBaselineExperimentExternallyAvailableContentServiceEna.list(
                                         (BaselineExperiment) experiment, contentType));
@@ -197,15 +197,15 @@ public class ExpressionAtlasContentService {
                 break;
             case RNASEQ_MRNA_DIFFERENTIAL:
             case PROTEOMICS_DIFFERENTIAL:
-                arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqDifferentialExperimentExternallyAvailableContentService.list(
+                arrayExpressAndOtherExternalResourcesLinks.addAll(bulkDifferentialExperimentExternallyAvailableContentService.list(
                         (DifferentialExperiment) experiment, contentType));
                 otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?
                         rnaSeqDifferentialExperimentExternallyAvailableContentServiceGeo.list(
                                 (DifferentialExperiment) experiment, contentType) :
                         externalResourceType.equals("ega") ?
-                                rnaSeqDifferentialExperimentExternallyAvailableContentServiceEga.list(
+                                bulkDifferentialExperimentExternallyAvailableContentServiceEga.list(
                                         (DifferentialExperiment) experiment, contentType) :
-                                rnaSeqDifferentialExperimentExternallyAvailableContentServiceEna.list(
+                                bulkDifferentialExperimentExternallyAvailableContentServiceEna.list(
                                         (DifferentialExperiment) experiment, contentType));
                 arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
