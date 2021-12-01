@@ -30,9 +30,9 @@ public class ExperimentDesignCommand implements Callable<Integer> {
     public Integer call() {
 
         LOGGER.info("Starting update experiment designs for accessions.");
-        for(String accession : experimentAccessions) {
-            experimentCrud.updateExperimentDesign(accession);
-        }
+        experimentAccessions.stream()
+                .parallel()
+                .forEach(accession -> experimentCrud.updateExperimentDesign(accession));
 
         return 0;
     }

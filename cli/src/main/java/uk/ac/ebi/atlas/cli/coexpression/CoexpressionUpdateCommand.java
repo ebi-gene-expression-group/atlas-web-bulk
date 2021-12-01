@@ -36,28 +36,28 @@ public class CoexpressionUpdateCommand implements Callable<Integer> {
         int loadCount;
 
         int done=0;
-        List<String> failed_accessions = new ArrayList<>();
+        List<String> failedAccessions = new ArrayList<>();
         for(String accession : experimentAccessions) {
             deleteCount = baselineCoexpressionProfileLoader.deleteCoexpressionsProfile(accession);
             try {
                 loadCount = baselineCoexpressionProfileLoader.loadBaselineCoexpressionsProfile(accession, true);
                 done++;
                 LOGGER.info(String.format(
-                        " deleted %, d and loaded %, d coexpression profiles for accession %s", deleteCount, loadCount, accession));
+                        " deleted %,d and loaded %,d coexpression profiles for accession %s", deleteCount, loadCount, accession));
             } catch (IOException | IllegalStateException e) {
-                failed_accessions.add(accession);
+                failedAccessions.add(accession);
                 LOGGER.severe(String.format("%s FAILED", accession));
                 LOGGER.severe(e.getMessage());
             }
 
         }
-        int failed = failed_accessions.size();
-        LOGGER.warning(String.format("%s experiments failed", failed));
+        int failed = failedAccessions.size();
         if (failed > 0) {
-            LOGGER.info(String.format("Re-run with the following arguments to re-try failed accessions: %s", String.join(",", failed_accessions)));
+            LOGGER.warning(String.format("%s experiments failed", failed));
+            LOGGER.info(String.format("Re-run with the following arguments to re-try failed accessions: %s", String.join(",", failedAccessions)));
         }
         LOGGER.info(String.format("%s experiments done", done));
-        return failed_accessions.size();
+        return failedAccessions.size();
     }
 
 }
