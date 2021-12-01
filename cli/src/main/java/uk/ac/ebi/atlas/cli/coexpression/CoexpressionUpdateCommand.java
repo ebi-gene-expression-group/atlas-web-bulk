@@ -44,7 +44,7 @@ public class CoexpressionUpdateCommand implements Callable<Integer> {
                 done++;
                 LOGGER.info(String.format(
                         " deleted %, d and loaded %, d coexpression profiles for accession %s", deleteCount, loadCount, accession));
-            } catch (IOException e) {
+            } catch (IOException | IllegalStateException e) {
                 failed_accessions.add(accession);
                 LOGGER.severe(String.format("%s FAILED", accession));
                 LOGGER.severe(e.getMessage());
