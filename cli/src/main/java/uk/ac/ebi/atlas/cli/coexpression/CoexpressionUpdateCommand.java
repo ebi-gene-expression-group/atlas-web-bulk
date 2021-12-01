@@ -52,11 +52,11 @@ public class CoexpressionUpdateCommand implements Callable<Integer> {
 
         }
         int failed = failed_accessions.size();
-        LOGGER.warning(String.format("% experiments failed", failed));
+        LOGGER.warning(String.format("%s experiments failed", failed));
         if (failed > 0) {
             LOGGER.info(String.format("Re-run with the following arguments to re-try failed accessions: %s", String.join(",", failed_accessions)));
         }
-        LOGGER.info(String.format("% experiments done", done));
+        LOGGER.info(String.format("%s experiments done", done));
         return failed_accessions.size();
     }
 
