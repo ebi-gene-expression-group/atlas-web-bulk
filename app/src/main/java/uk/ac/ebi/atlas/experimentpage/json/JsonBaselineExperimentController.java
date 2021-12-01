@@ -89,11 +89,11 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
     }
 
     @RequestMapping(value = "/json/experiments/{experimentAccession}",
-            produces = "application/json;charset=UTF-8",
-            params = "type=PROTEOMICS_BASELINE_DIA_SWATH")
+                    produces = "application/json;charset=UTF-8",
+                    params = "type=PROTEOMICS_BASELINE_DIA_SWATH")
     public String baselineProteomicsDiaSwathExperimentData(@Valid ProteomicsBaselineRequestPreferences preferences,
-                                                   @PathVariable String experimentAccession,
-                                                   @RequestParam(defaultValue = "") String accessKey) {
+                                                           @PathVariable String experimentAccession,
+                                                           @RequestParam(defaultValue = "") String accessKey) {
         return baselineExperimentData(preferences, experimentAccession, accessKey);
     }
 
@@ -160,7 +160,6 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
                                               @RequestParam(defaultValue = "") String accessKey) {
         preferences.setCutoff(VERY_SMALL_NON_ZERO_VALUE);
         preferences.setGeneQuery(SemanticQuery.create());
-
         return GSON.toJson(proteomicsHistograms.get(experimentAccession, accessKey, preferences).asJson());
     }
 }
