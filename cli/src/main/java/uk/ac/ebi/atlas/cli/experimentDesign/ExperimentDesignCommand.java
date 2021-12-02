@@ -31,7 +31,6 @@ public class ExperimentDesignCommand implements Callable<Integer> {
 
         LOGGER.info("Starting update experiment designs for accessions.");
         experimentAccessions.stream()
-                .parallel()
                 .forEach(accession -> experimentCrud.updateExperimentDesign(accession));
 
         return 0;
