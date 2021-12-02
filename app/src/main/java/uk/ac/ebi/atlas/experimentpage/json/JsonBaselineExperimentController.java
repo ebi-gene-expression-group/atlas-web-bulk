@@ -63,6 +63,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
     private String baselineExperimentData(BaselineRequestPreferences<? extends ExpressionUnit.Absolute> preferences,
                                           String experimentAccession,
                                           String accessKey) {
+
         return GSON.toJson(
                 baselineExperimentPageService.getResultsForExperiment(
                         (BaselineExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
@@ -94,6 +95,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
     public String baselineProteomicsDiaSwathExperimentData(@Valid ProteomicsBaselineRequestPreferences preferences,
                                                            @PathVariable String experimentAccession,
                                                            @RequestParam(defaultValue = "") String accessKey) {
+        preferences.setUnit();
         return baselineExperimentData(preferences, experimentAccession, accessKey);
     }
 
