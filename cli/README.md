@@ -240,7 +240,7 @@ to load documents into Solr in blocks that can be easily consumed by the server 
 
 ## Troubleshooting
 ### Gradle isn’t respecting my configuration properties
-Do not place configuration variables inside the `args` parameter.
+Do not place configuration variables inside the `args` parameter. Also, remember to clean the project to remove any stale settings.
 
 **Wrong**:
 ```bash
@@ -249,7 +249,7 @@ Do not place configuration variables inside the `args` parameter.
 
 **Right**:
 ```bash
-./gradlew :cli:bootRun -PdataFilesLocation=/atlas-data -PexperimentFilesLocation=/atas-data/gxa --args="bioentities-json"
+./gradlew clean :cli:bootRun -PdataFilesLocation=/atlas-data -PexperimentFilesLocation=/atas-data/gxa --args="bioentities-json"
 ```
 
 ### Application fails to start with the message “bean of type 'javax.servlet.ServletContext' could not be found”
