@@ -20,7 +20,14 @@ import javax.inject.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.*;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE_DIA;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_DIFFERENTIAL;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELINE;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.testutils.RandomDataTestUtils.generateRandomExperimentAccession;
 
 @ExtendWith(SpringExtension.class)
@@ -84,6 +91,13 @@ class GxaExperimentRepositoryIT {
                 .hasNoNullFieldsOrProperties();
         assertThat(subject.getExperiment(jdbcUtils.fetchRandomExperimentAccession(MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL)))
                 .isInstanceOf(DifferentialExperiment.class)
+                .hasNoNullFieldsOrProperties();
+    }
+
+    @Test
+    void baselineProteomicsDiaExperiments() {
+        assertThat(subject.getExperiment(jdbcUtils.fetchRandomExperimentAccession(PROTEOMICS_BASELINE_DIA)))
+                .isInstanceOf(BaselineExperiment.class)
                 .hasNoNullFieldsOrProperties();
     }
 }
