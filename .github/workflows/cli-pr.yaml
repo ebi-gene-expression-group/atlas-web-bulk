@@ -1,0 +1,19 @@
+name: Build atlas-web-bulk cli
+on:
+  pull_request
+
+jobs:
+  compile_cli:
+    name: compile_cli
+    runs-on: ${{ matrix.os }} #ubuntu-latest
+    strategy:
+      fail-fast: false #  if one of the jobs in the matrix expansion fails, the rest of the jobs will be cancelled
+      matrix:
+        os: ["ubuntu-latest"]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Compile cli
+        run: ./gradlew --no-daemon :cli:bootJar
+

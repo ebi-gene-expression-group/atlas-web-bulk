@@ -14,6 +14,7 @@ import uk.ac.ebi.atlas.experimentimport.idf.IdfParserOutput;
 import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.trader.factory.BaselineExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.MicroarrayExperimentFactory;
+import uk.ac.ebi.atlas.trader.factory.ProteomicsDifferentialExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.RnaSeqDifferentialExperimentFactory;
 
 import java.sql.Timestamp;
@@ -53,6 +54,9 @@ class GxaExperimentRepositoryTest {
     @Mock
     private MicroarrayExperimentFactory microarrayExperimentFactoryMock;
 
+    @Mock
+    private ProteomicsDifferentialExperimentFactory proteomicsDifferentialExperimentFactoryMock;
+
     private GxaExperimentRepository subject;
 
     @BeforeEach
@@ -64,7 +68,8 @@ class GxaExperimentRepositoryTest {
                         idfParserMock,
                         baselineExperimentFactoryMock,
                         rnaSeqDifferentialExperimentFactoryMock,
-                        microarrayExperimentFactoryMock);
+                        microarrayExperimentFactoryMock,
+                        proteomicsDifferentialExperimentFactoryMock);
     }
 
     @Test

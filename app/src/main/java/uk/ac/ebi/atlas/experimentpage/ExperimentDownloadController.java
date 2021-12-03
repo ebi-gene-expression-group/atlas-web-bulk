@@ -52,9 +52,11 @@ import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 public class ExperimentDownloadController {
 
     private final ExperimentTrader experimentTrader;
+    //TODO: Proteomics class is only refering to proteomics-baseline, while proteomics-differential will go bulkDifferential class
+    //TODO: Refactor the Proteomics name properly
     private final ExperimentDownloadSupplier.Proteomics proteomicsExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier;
-    private final ExperimentDownloadSupplier.RnaSeqDifferential rnaSeqDifferentialExperimentDownloadSupplier;
+    private final ExperimentDownloadSupplier.BulkDifferential bulkDifferentialExperimentDownloadSupplier;
     private final ExperimentDownloadSupplier.Microarray microarrayExperimentDownloadSupplier;
     private final ExperimentFileLocationService experimentFileLocationService;
 
@@ -66,8 +68,8 @@ public class ExperimentDownloadController {
                                                 proteomicsExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.RnaSeqBaseline
                                                 rnaSeqBaselineExperimentDownloadSupplier,
-                                        ExperimentDownloadSupplier.RnaSeqDifferential
-                                                rnaSeqDifferentialExperimentDownloadSupplier,
+                                        ExperimentDownloadSupplier.BulkDifferential
+                                                    bulkDifferentialExperimentDownloadSupplier,
                                         ExperimentDownloadSupplier.Microarray
                                                 microarrayExperimentDownloadSupplier,
                                         ExperimentFileLocationService
@@ -75,7 +77,7 @@ public class ExperimentDownloadController {
         this.experimentTrader = experimentTrader;
         this.proteomicsExperimentDownloadSupplier = proteomicsExperimentDownloadSupplier;
         this.rnaSeqBaselineExperimentDownloadSupplier = rnaSeqBaselineExperimentDownloadSupplier;
-        this.rnaSeqDifferentialExperimentDownloadSupplier = rnaSeqDifferentialExperimentDownloadSupplier;
+        this.bulkDifferentialExperimentDownloadSupplier = bulkDifferentialExperimentDownloadSupplier;
         this.microarrayExperimentDownloadSupplier = microarrayExperimentDownloadSupplier;
         this.experimentFileLocationService = experimentFileLocationService;
     }
@@ -157,8 +159,20 @@ public class ExperimentDownloadController {
         DifferentialExperiment experiment =
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
 
-        rnaSeqDifferentialExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
+        bulkDifferentialExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
+    }
 
+    @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=PROTEOMICS_DIFFERENTIAL")
+    public void
+    proteomicsDifferentialExperimentDownload(
+            @PathVariable String experimentAccession,
+            @RequestParam(value = "accessKey", required = false) String accessKey,
+            @ModelAttribute("preferences") @Valid DifferentialRequestPreferences preferences,
+            HttpServletResponse response) throws IOException {
+        DifferentialExperiment experiment =
+                (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
+
+        bulkDifferentialExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
     }
 
     void microarrayExperimentDownload(String experimentAccession,
@@ -240,13 +254,16 @@ public class ExperimentDownloadController {
                                 .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.IDF))
                                 .add(experimentFileLocationService.getFilePath(
-                                        experiment.getAccession(), ExperimentFileType.PROTEOMICS_B_MAIN));
+                                        experiment.getAccession(), ExperimentFileType.PROTEOMICS_B_MAIN))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.SUMMARY_PDF));
                         break;
 
                     case RNASEQ_MRNA_DIFFERENTIAL:
                         paths.add(experimentFileLocationService.getFilePath(
                                 experiment.getAccession(), ExperimentFileType.CONFIGURATION))
                                 .add(experimentFileLocationService.getFilePath(
+
                                         experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
                                 .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.IDF))
@@ -330,6 +347,7 @@ public class ExperimentDownloadController {
                     ExperimentFileType.CONFIGURATION,
                     ExperimentFileType.BASELINE_FACTORS,
                     ExperimentFileType.IDF,
+                    ExperimentFileType.SUMMARY_PDF,
                     ExperimentFileType.PROTEOMICS_B_MAIN));
             put(ExperimentType.RNASEQ_MRNA_DIFFERENTIAL, ImmutableList.of(
                     ExperimentFileType.CONDENSE_SDRF,

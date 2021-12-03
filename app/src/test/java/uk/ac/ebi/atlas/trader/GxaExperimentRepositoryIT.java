@@ -74,6 +74,13 @@ class GxaExperimentRepositoryIT {
     }
 
     @Test
+    void differentialProteomicsExperiments() {
+        assertThat(subject.getExperiment(jdbcUtils.fetchRandomExperimentAccession(PROTEOMICS_DIFFERENTIAL)))
+                .isInstanceOf(DifferentialExperiment.class)
+                .hasNoNullFieldsOrProperties();
+    }
+
+    @Test
     void differentialMicroarrayExperiments() {
         assertThat(subject.getExperiment(jdbcUtils.fetchRandomExperimentAccession(MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL)))
                 .isInstanceOf(DifferentialExperiment.class)
