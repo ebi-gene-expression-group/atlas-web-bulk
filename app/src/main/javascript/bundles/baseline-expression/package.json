@@ -1,7 +1,7 @@
 {
   "main": "index.js",
   "dependencies": {
-    "@ebi-gene-expression-group/expression-atlas-heatmap-highcharts": "^5.4.0",
+    "@ebi-gene-expression-group/expression-atlas-heatmap-highcharts": "^5.5.0",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"

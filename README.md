@@ -91,6 +91,7 @@ Copy the Tomcat credentials file to the container. The `admin` role is used to a
 need to do this only once:
 ```bash
 docker cp tomcat-users.xml gxa-tomcat:/usr/local/tomcat/conf
+docker cp server.xml gxa-tomcat:/usr/local/tomcat/conf
 ```
 
 Run the Gradle task `war` in the `atlas-web-bulk` directory:

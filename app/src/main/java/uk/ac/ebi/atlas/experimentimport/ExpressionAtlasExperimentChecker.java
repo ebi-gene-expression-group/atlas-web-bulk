@@ -48,6 +48,7 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
                 checkRnaSeqBaselineFiles(experimentAccession);
                 break;
             case PROTEOMICS_BASELINE:
+            case PROTEOMICS_BASELINE_DIA_SWATH:
                 checkProteomicsBaselineFiles(experimentAccession);
                 break;
             case PROTEOMICS_DIFFERENTIAL:
