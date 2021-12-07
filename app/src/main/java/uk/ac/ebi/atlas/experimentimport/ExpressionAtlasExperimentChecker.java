@@ -145,8 +145,8 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
     }
 
     private void checkDifferentialFiles(String experimentAccession) {
-        DataFileHub.RnaSeqDifferentialExperimentFiles experimentFiles =
-                dataFileHub.getRnaSeqDifferentialExperimentFiles(experimentAccession);
+        DataFileHub.BulkDifferentialExperimentFiles experimentFiles =
+                dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession);
         checkResourceExistsAndIsReadable(experimentFiles.analytics);
         checkResourceExistsAndIsReadable(experimentFiles.rawCounts);
     }
