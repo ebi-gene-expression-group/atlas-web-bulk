@@ -18,8 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -39,6 +38,8 @@ public class BulkAnalyticsJsonWriter {
     private final ExperimentTrader experimentTrader;
     private final ExperimentDataPointStreamFactory experimentDataPointStreamFactory;
 
+    private List<String> failedAccessions;
+
     public BulkAnalyticsJsonWriter(BioentityPropertiesDao bioentityPropertiesDao,
                                    BioentityIdentifiersReader bioentityIdentifiersReader,
                                    ExperimentTrader experimentTrader,
@@ -47,6 +48,7 @@ public class BulkAnalyticsJsonWriter {
         this.bioentityIdentifiersReader = bioentityIdentifiersReader;
         this.experimentTrader = experimentTrader;
         this.experimentDataPointStreamFactory = experimentDataPointStreamFactory;
+        this.failedAccessions = new ArrayList<>();
     }
 
     /**
@@ -58,18 +60,28 @@ public class BulkAnalyticsJsonWriter {
      * @param outputDir             Path of output directory where the file will be written to
      */
     public void writeJsonLFiles(ImmutableCollection<String> experimentAccessions, String outputDir) {
-        var bioentityIdentifiers =
-                experimentAccessions.stream()
-                        .flatMap(
-                                experimentAccession ->
-                                        bioentityIdentifiersReader
-                                                .getBioentityIdsFromExperiment(experimentAccession).stream())
-                        .collect(toImmutableSet());
+        var bioentityIdentifiers = new HashSet<String>();
+        for (String accession : experimentAccessions) {
+            try {
+                bioentityIdentifiers.addAll(bioentityIdentifiersReader.getBioentityIdsFromExperiment(accession, true));
+            } catch (Exception e) {
+                failedAccessions.add(accession);
+                LOGGER.severe("Failed to add bioentity mappings for "+accession);
+            }
+        }
         var bioentityIdToProperties = bioentityPropertiesDao.getMap(bioentityIdentifiers);
 
-        experimentAccessions.forEach(
-                experimentAccession ->
-                        writeBulkAnalyticsFile(experimentAccession, outputDir, bioentityIdToProperties));
+        for (String accession : experimentAccessions) {
+            if (failedAccessions.contains(accession)) {
+                continue;
+            }
+            try {
+                writeBulkAnalyticsFile(accession, outputDir, bioentityIdToProperties);
+            } catch (IOException e) {
+                failedAccessions.add(accession);
+                LOGGER.severe("Failed to write analytics JSONL file "+accession);
+            }
+        }
     }
 
     /**
@@ -89,9 +101,14 @@ public class BulkAnalyticsJsonWriter {
                     (ImmutableMap<String, Map<BioentityPropertyName, Set<String>>>) objectInputStream.readObject();
             LOGGER.info("Map read: " + bioentityIdToProperties.size() + " entries found");
 
-            experimentAccessions.forEach(
-                    experimentAccession ->
-                            writeBulkAnalyticsFile(experimentAccession, outputDir, bioentityIdToProperties));
+            for (String accession : experimentAccessions) {
+                try {
+                    writeBulkAnalyticsFile(accession, outputDir, bioentityIdToProperties);
+                } catch (IOException e) {
+                    failedAccessions.add(accession);
+                    LOGGER.severe("Failed to write analytics JSONL file "+accession);
+                }
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ClassNotFoundException e) {
@@ -108,28 +125,28 @@ public class BulkAnalyticsJsonWriter {
      */
     private void writeBulkAnalyticsFile(String experimentAccession,
                                         String outputDir,
-                                        Map<String, Map<BioentityPropertyName, Set<String>>> bioentityIdToProperties) {
+                                        Map<String, Map<BioentityPropertyName, Set<String>>> bioentityIdToProperties) throws IOException {
         var outputFilename = experimentAccession + ".jsonl";
         var targetFilePath = Paths.get(outputDir).resolve(outputFilename);
 
         LOGGER.info("Building Solr document stream for " + experimentAccession);
-        try (
-                var solrInputDocumentInputStream =
-                        new SolrInputDocumentInputStream(
-                                experimentDataPointStreamFactory.stream(
-                                        experimentTrader.getExperimentForAnalyticsIndex(experimentAccession)),
-                                bioentityIdToProperties);
-                var seq = OBJECT_WRITER.writeValues(targetFilePath.toFile())) {
-            var nextDoc = solrInputDocumentInputStream.readNext();
+        var solrInputDocumentInputStream =
+                new SolrInputDocumentInputStream(
+                        experimentDataPointStreamFactory.stream(
+                                experimentTrader.getExperimentForAnalyticsIndex(experimentAccession)),
+                        bioentityIdToProperties);
+        var seq = OBJECT_WRITER.writeValues(targetFilePath.toFile());
+        var nextDoc = solrInputDocumentInputStream.readNext();
 
-            LOGGER.info("Writing records of " + experimentAccession + " to JSON file...");
-            while (nextDoc != null) {
-                seq.write(SolrInputDocumentMapper.transformToMap(nextDoc));
-                nextDoc = solrInputDocumentInputStream.readNext();
-            }
-            LOGGER.info(experimentAccession + " finished");
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        LOGGER.info("Writing records of " + experimentAccession + " to JSON file...");
+        while (nextDoc != null) {
+            seq.write(SolrInputDocumentMapper.transformToMap(nextDoc));
+            nextDoc = solrInputDocumentInputStream.readNext();
         }
+        LOGGER.info(experimentAccession + " finished");
+    }
+
+    public List<String> getFailedAccessions() {
+        return failedAccessions;
     }
 }

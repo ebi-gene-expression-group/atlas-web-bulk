@@ -4,8 +4,11 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import uk.ac.ebi.atlas.cli.utils.FailedAccessionWriter;
 import uk.ac.ebi.atlas.experimentimport.GxaExperimentCrud;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -19,6 +22,8 @@ public class ExperimentDesignCommand implements Callable<Integer> {
 
     @Option(names = {"-e", "--experiment"}, split = ",", description = "one or more experiment accessions", required = true)
     private List<String> experimentAccessions;
+    @Option(names = {"-f", "--failed-accessions-path"}, description = "File to write failed accessions to.", required = false)
+    private String failedOutputPath;
 
     private final GxaExperimentCrud experimentCrud;
 
@@ -30,9 +35,28 @@ public class ExperimentDesignCommand implements Callable<Integer> {
     public Integer call() {
 
         LOGGER.info("Starting update experiment designs for accessions.");
-        experimentAccessions.stream()
-                .forEach(accession -> experimentCrud.updateExperimentDesign(accession));
+        List<String> failedAccessions = new ArrayList<>();
+        for(String accession : experimentAccessions) {
+            try {
+                experimentCrud.updateExperimentDesign(accession);
+            } catch (Exception | Error e) {
+                failedAccessions.add(accession);
+                LOGGER.severe(String.format("%s failed: %s",accession ,e.getMessage() ));
+            }
+        }
 
-        return 0;
+        int failed = failedAccessions.size();
+        int status = 0;
+        if (failed > 0) {
+            LOGGER.warning(String.format("%s experiments failed", failed));
+            LOGGER.info(String.format("Re-run with the following arguments to re-try failed accessions: %s", String.join(",", failedAccessions)));
+            if (failedOutputPath != null) {
+                FailedAccessionWriter writer = new FailedAccessionWriter(failedOutputPath, failedAccessions);
+                writer.write();
+            }
+            status = 1;
+        }
+
+        return status;
     }
 }

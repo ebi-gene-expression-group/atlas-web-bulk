@@ -136,8 +136,7 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
         return bioentityIdentifiers.size() - bioentityIdentifiersSizeWithoutNewElements;
     }
 
-    @Override
-    public HashSet<String> getBioentityIdsFromExperiment(String experimentAccession) {
+    public HashSet<String> getBioentityIdsFromExperiment(String experimentAccession, boolean throwError) throws Exception {
         LOGGER.info("Reading gene IDs of {}", experimentAccession);
         Experiment experiment = experimentTrader.getExperimentForAnalyticsIndex(experimentAccession);
 
@@ -154,6 +153,9 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
                 }
             } catch (Exception exception) {
                 LOGGER.error(exception.getMessage());
+                if (throwError) {
+                    throw exception;
+                }
             }
 
         } else {  //if (experimentType.isDifferential()) {
@@ -171,6 +173,9 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
                         }
                     } catch (IOException exception) {
                         LOGGER.error(exception.getMessage());
+                        if (throwError) {
+                            throw exception;
+                        }
                     }
                 }
 
@@ -185,11 +190,26 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
                     }
                 } catch (IOException exception) {
                     LOGGER.error(exception.getMessage());
+                    if (throwError) {
+                        throw exception;
+                    }
                 }
             }
 
         }
 
         return bioentityIdentifiers;
+    }
+
+    @Override
+    public HashSet<String> getBioentityIdsFromExperiment(String experimentAccession) {
+        HashSet<String> bioentityIds = new HashSet<>();
+        try {
+            return getBioentityIdsFromExperiment(experimentAccession, false);
+        } catch (Exception e) {
+            // this will never be reached.
+            LOGGER.error("This should have not been reached:" + e.getMessage());
+        }
+        return bioentityIds;
     }
 }

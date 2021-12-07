@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import uk.ac.ebi.atlas.cli.utils.FailedAccessionWriter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,6 +30,9 @@ public class BulkAnalyticsJsonCommand implements Callable<Integer> {
     @Option(names = {"-i", "--input"}, description = "optional path of bioentitiy-to-bioentity properties map file", required = false)
     private Optional<String> inputFile;
 
+    @Option(names = {"-f", "--failed-accessions-path"}, description = "File to write failed accessions to.", required = false)
+    private String failedOutputPath;
+
     private final BulkAnalyticsJsonWriter bulkAnalyticsJsonWriter;
 
     public BulkAnalyticsJsonCommand(BulkAnalyticsJsonWriter bulkAnalyticsJsonWriter) {
@@ -52,6 +56,14 @@ public class BulkAnalyticsJsonCommand implements Callable<Integer> {
                 inputFile -> bulkAnalyticsJsonWriter.writeJsonLFiles(ImmutableList.copyOf(experimentAccessions), outputDir, inputFile),
                 () -> bulkAnalyticsJsonWriter.writeJsonLFiles(ImmutableList.copyOf(experimentAccessions), outputDir));
 
-        return 0;
+        List<String> failedAccessions = bulkAnalyticsJsonWriter.getFailedAccessions();
+        int status = 0;
+        if (failedOutputPath != null && !failedAccessions.isEmpty()) {
+            FailedAccessionWriter writer = new FailedAccessionWriter(failedOutputPath, failedAccessions);
+            writer.write();
+            status = 1;
+        }
+
+        return status;
     }
 }
