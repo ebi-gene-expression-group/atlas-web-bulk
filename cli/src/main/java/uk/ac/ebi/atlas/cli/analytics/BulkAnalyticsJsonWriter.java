@@ -66,7 +66,7 @@ public class BulkAnalyticsJsonWriter {
                 bioentityIdentifiers.addAll(bioentityIdentifiersReader.getBioentityIdsFromExperiment(accession, true));
             } catch (Exception e) {
                 failedAccessions.add(accession);
-                LOGGER.severe("Failed to add bioentity mappings for "+accession);
+                LOGGER.severe("Failed to add bioentity mappings for "+accession+" "+e.getMessage());
             }
         }
         var bioentityIdToProperties = bioentityPropertiesDao.getMap(bioentityIdentifiers);
@@ -75,12 +75,7 @@ public class BulkAnalyticsJsonWriter {
             if (failedAccessions.contains(accession)) {
                 continue;
             }
-            try {
-                writeBulkAnalyticsFile(accession, outputDir, bioentityIdToProperties);
-            } catch (IOException e) {
-                failedAccessions.add(accession);
-                LOGGER.severe("Failed to write analytics JSONL file "+accession);
-            }
+            handledWriteBulkAnalyticsFile(outputDir, bioentityIdToProperties, accession);
         }
     }
 
@@ -102,17 +97,24 @@ public class BulkAnalyticsJsonWriter {
             LOGGER.info("Map read: " + bioentityIdToProperties.size() + " entries found");
 
             for (String accession : experimentAccessions) {
-                try {
-                    writeBulkAnalyticsFile(accession, outputDir, bioentityIdToProperties);
-                } catch (IOException e) {
-                    failedAccessions.add(accession);
-                    LOGGER.severe("Failed to write analytics JSONL file "+accession);
-                }
+                handledWriteBulkAnalyticsFile(outputDir, bioentityIdToProperties, accession);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void handledWriteBulkAnalyticsFile(String outputDir, ImmutableMap<String, Map<BioentityPropertyName, Set<String>>> bioentityIdToProperties, String accession) {
+        try {
+            writeBulkAnalyticsFile(accession, outputDir, bioentityIdToProperties);
+        } catch (RuntimeException e) {
+            failedAccessions.add(accession);
+            LOGGER.severe("Failed to write analytics JSONL file "+accession+" "+e.getMessage());
+        } catch (Exception e) {
+            failedAccessions.add(accession);
+            LOGGER.severe("Failed to write analytics JSONL file "+accession+" "+e.getMessage());
         }
     }
 
