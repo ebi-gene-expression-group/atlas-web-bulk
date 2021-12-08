@@ -42,9 +42,6 @@ public class ExperimentDesignCommand implements Callable<Integer> {
             } catch (RuntimeException e) {
                 failedAccessions.add(accession);
                 LOGGER.severe(String.format("%s failed: %s",accession, e.getMessage() ));
-            } catch (Exception | Error e) {
-                failedAccessions.add(accession);
-                LOGGER.severe(String.format("%s failed: %s",accession, e.getMessage() ));
             }
         }
 
