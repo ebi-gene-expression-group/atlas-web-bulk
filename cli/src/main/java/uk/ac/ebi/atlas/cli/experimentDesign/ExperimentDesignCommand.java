@@ -39,9 +39,12 @@ public class ExperimentDesignCommand implements Callable<Integer> {
         for(String accession : experimentAccessions) {
             try {
                 experimentCrud.updateExperimentDesign(accession);
+            } catch (RuntimeException e) {
+                failedAccessions.add(accession);
+                LOGGER.severe(String.format("%s failed: %s",accession, e.getMessage() ));
             } catch (Exception | Error e) {
                 failedAccessions.add(accession);
-                LOGGER.severe(String.format("%s failed: %s",accession ,e.getMessage() ));
+                LOGGER.severe(String.format("%s failed: %s",accession, e.getMessage() ));
             }
         }
 
