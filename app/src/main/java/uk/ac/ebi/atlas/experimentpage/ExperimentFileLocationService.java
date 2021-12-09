@@ -35,12 +35,16 @@ public class ExperimentFileLocationService {
                 return dataFileHub.getExperimentFiles(experimentAccession).summaryPdf.getPath();
             case PROTEOMICS_B_MAIN:
                 return dataFileHub.getProteomicsBaselineExperimentFiles(experimentAccession).main.getPath();
+            case PROTEOMICS_PARAMETER_FILE:
+                return dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession).parameterFile.getPath();
+            case PROTEOMICS_RAW_QUANT:
+                return dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession).rawMaxQuant.getPath();
             case BASELINE_FACTORS:
                 return dataFileHub.getBaselineExperimentFiles(experimentAccession).factors.getPath();
             case RNASEQ_B_TPM:
                 return dataFileHub.getRnaSeqBaselineExperimentFiles(experimentAccession).tpms.getPath();
             case RNASEQ_D_ANALYTICS:
-                return dataFileHub.getRnaSeqDifferentialExperimentFiles(experimentAccession).analytics.getPath();
+                return dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession).analytics.getPath();
            default:
                 return null;
         }
