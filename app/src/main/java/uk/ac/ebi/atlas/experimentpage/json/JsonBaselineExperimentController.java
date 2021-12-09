@@ -86,6 +86,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
     public String baselineProteomicsExperimentData(@Valid ProteomicsBaselineRequestPreferences preferences,
                                                    @PathVariable String experimentAccession,
                                                    @RequestParam(defaultValue = "") String accessKey) {
+        preferences.setUnit(ExpressionUnit.Absolute.Protein.PPB);
         return baselineExperimentData(preferences, experimentAccession, accessKey);
     }
 
@@ -95,7 +96,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
     public String baselineProteomicsDiaSwathExperimentData(@Valid ProteomicsBaselineRequestPreferences preferences,
                                                            @PathVariable String experimentAccession,
                                                            @RequestParam(defaultValue = "") String accessKey) {
-        preferences.setUnit();
+        preferences.setUnit(ExpressionUnit.Absolute.Protein.RA);
         return baselineExperimentData(preferences, experimentAccession, accessKey);
     }
 
