@@ -181,7 +181,8 @@ public class ExpressionAtlasContentService {
         switch (experiment.getType()) {
             case PROTEOMICS_BASELINE:
             case PROTEOMICS_BASELINE_DIA_SWATH:
-                arrayExpressAndOtherExternalResourcesLinks.addAll(proteomicsBaselineExperimentExternallyAvailableContentService.list((BaselineExperiment) experiment, contentType));
+                arrayExpressAndOtherExternalResourcesLinks.addAll(
+                        proteomicsBaselineExperimentExternallyAvailableContentService.list((BaselineExperiment) experiment, contentType));
                 break;
             case RNASEQ_MRNA_BASELINE:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqBaselineExperimentExternallyAvailableContentService.list(
