@@ -1,23 +1,23 @@
 package uk.ac.ebi.atlas.cli;
 
 import picocli.CommandLine;
-import uk.ac.ebi.atlas.cli.experimentDesign.ExperimentDesignCommand;
 import uk.ac.ebi.atlas.cli.utils.AccessionsWriter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class AbstractPerAccessionCommand {
 
-    protected static Logger LOGGER;
+    private static final Logger LOGGER = Logger.getLogger(AbstractPerAccessionCommand.class.getName());;
 
     @CommandLine.Option(names = {"-f", "--failed-accessions-path"}, description = "File to write failed accessions to.", required = false)
-    private String failedOutputPath;
+    protected String failedOutputPath;
 
     @CommandLine.Option(names = {"-e", "--experiment"}, split = ",", description = "one or more experiment accessions", required = true)
     protected List<String> experimentAccessions;
 
-    protected int handleFailedAccessions(List<String> failedAccessions) {
+    protected int handleFailedAccessions(Collection<String> failedAccessions) {
         int status = 0;
         if (failedOutputPath != null && !failedAccessions.isEmpty()) {
             LOGGER.warning(String.format("%s experiments failed", failedAccessions.size()));
