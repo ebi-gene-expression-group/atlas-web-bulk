@@ -5,7 +5,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import uk.ac.ebi.atlas.cli.utils.FailedAccessionWriter;
+import uk.ac.ebi.atlas.cli.utils.AccessionsWriter;
 import uk.ac.ebi.atlas.experimentimport.coexpression.BaselineCoexpressionProfileLoader;
 
 import java.io.IOException;

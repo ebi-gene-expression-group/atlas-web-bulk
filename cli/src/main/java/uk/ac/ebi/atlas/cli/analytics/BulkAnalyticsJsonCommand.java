@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import uk.ac.ebi.atlas.cli.utils.FailedAccessionWriter;
+import uk.ac.ebi.atlas.cli.utils.AccessionsWriter;
 
 import java.io.IOException;
 import java.nio.file.Files;

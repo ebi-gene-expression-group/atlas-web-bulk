@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import uk.ac.ebi.atlas.cli.utils.FailedAccessionWriter;
+import uk.ac.ebi.atlas.cli.utils.AccessionsWriter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class BioentityPropertiesMapCommand implements Callable<Integer> {
         List<String> failedAccessions = bioentityPropertiesMapWriter.getFailedAccessions();
         int status = 0;
         if (failedOutputPath != null && !failedAccessions.isEmpty()) {
-            FailedAccessionWriter writer = new FailedAccessionWriter(failedOutputPath, failedAccessions);
+            AccessionsWriter writer = new AccessionsWriter(failedOutputPath, failedAccessions);
             writer.write();
             status = 1;
         }
