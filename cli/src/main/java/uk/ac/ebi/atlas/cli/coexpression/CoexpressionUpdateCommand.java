@@ -1,14 +1,12 @@
 package uk.ac.ebi.atlas.cli.coexpression;
 
-import com.google.gson.JsonPrimitive;
-import org.apache.commons.lang.ObjectUtils;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import uk.ac.ebi.atlas.cli.AbstractPerAccessionCommand;
 import uk.ac.ebi.atlas.cli.utils.AccessionsWriter;
 import uk.ac.ebi.atlas.experimentimport.coexpression.BaselineCoexpressionProfileLoader;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -18,15 +16,9 @@ import java.util.logging.Logger;
 @Command(
         name = "update-baseline-coexpression",
         description = "Update coexpression for baseline experiments")
-public class CoexpressionUpdateCommand implements Callable<Integer> {
+public class CoexpressionUpdateCommand extends AbstractPerAccessionCommand implements Callable<Integer> {
 
     private static final Logger LOGGER = Logger.getLogger(CoexpressionUpdateCommand.class.getName());
-
-    @Option(names = {"-e", "--experiment"}, split = ",", description = "one or more experiment accessions, comma separated", required = true)
-    private List<String> experimentAccessions;
-
-    @Option(names = {"-f", "--failed-accessions-path"}, description = "File to write failed accessions to.", required = false)
-    private String failedOutputPath;
 
     private final BaselineCoexpressionProfileLoader baselineCoexpressionProfileLoader;
 
@@ -57,19 +49,9 @@ public class CoexpressionUpdateCommand implements Callable<Integer> {
             }
 
         }
-        int failed = failedAccessions.size();
-        int status = 0;
-        if (failed > 0) {
-            status = 1;
-            LOGGER.warning(String.format("%s experiments failed", failed));
-            LOGGER.info(String.format("Re-run with the following arguments to re-try failed accessions: %s", String.join(",", failedAccessions)));
-            if (failedOutputPath != null) {
-                AccessionsWriter writer = new AccessionsWriter(failedOutputPath, failedAccessions);
-                writer.write();
-            }
-        }
         LOGGER.info(String.format("%s experiments done", done));
-        return status;
+
+        return handleFailedAccessions(failedAccessions);
     }
 
 }
