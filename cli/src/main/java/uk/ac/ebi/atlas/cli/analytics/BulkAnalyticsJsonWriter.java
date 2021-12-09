@@ -64,7 +64,7 @@ public class BulkAnalyticsJsonWriter {
         for (String accession : experimentAccessions) {
             try {
                 bioentityIdentifiers.addAll(bioentityIdentifiersReader.getBioentityIdsFromExperiment(accession, true));
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 failedAccessions.add(accession);
                 LOGGER.severe("Failed to add bioentity mappings for "+accession+" "+e.getMessage());
             }
