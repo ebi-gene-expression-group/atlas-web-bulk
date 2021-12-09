@@ -59,7 +59,7 @@ public class BulkAnalyticsJsonCommand implements Callable<Integer> {
         List<String> failedAccessions = bulkAnalyticsJsonWriter.getFailedAccessions();
         int status = 0;
         if (failedOutputPath != null && !failedAccessions.isEmpty()) {
-            FailedAccessionWriter writer = new FailedAccessionWriter(failedOutputPath, failedAccessions);
+            AccessionsWriter writer = new AccessionsWriter(failedOutputPath, failedAccessions);
             writer.write();
             status = 1;
         }

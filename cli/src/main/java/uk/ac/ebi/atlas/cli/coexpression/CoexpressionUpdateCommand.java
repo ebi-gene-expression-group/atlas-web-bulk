@@ -64,7 +64,7 @@ public class CoexpressionUpdateCommand implements Callable<Integer> {
             LOGGER.warning(String.format("%s experiments failed", failed));
             LOGGER.info(String.format("Re-run with the following arguments to re-try failed accessions: %s", String.join(",", failedAccessions)));
             if (failedOutputPath != null) {
-                FailedAccessionWriter writer = new FailedAccessionWriter(failedOutputPath, failedAccessions);
+                AccessionsWriter writer = new AccessionsWriter(failedOutputPath, failedAccessions);
                 writer.write();
             }
         }
