@@ -180,7 +180,7 @@ public class ExpressionAtlasContentService {
 
         switch (experiment.getType()) {
             case PROTEOMICS_BASELINE:
-            case PROTEOMICS_BASELINE_DIA_SWATH:
+            case PROTEOMICS_BASELINE_DIA:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(
                         proteomicsBaselineExperimentExternallyAvailableContentService.list((BaselineExperiment) experiment, contentType));
                 break;
