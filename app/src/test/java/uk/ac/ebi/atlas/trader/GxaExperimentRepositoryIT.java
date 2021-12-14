@@ -24,7 +24,7 @@ import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE_DIA_SWATH;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE_DIA;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELINE;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
@@ -96,7 +96,7 @@ class GxaExperimentRepositoryIT {
 
     @Test
     void baselineProteomicsDiaSwathExperiments() {
-        assertThat(subject.getExperiment(jdbcUtils.fetchRandomExperimentAccession(PROTEOMICS_BASELINE_DIA_SWATH)))
+        assertThat(subject.getExperiment(jdbcUtils.fetchRandomExperimentAccession(PROTEOMICS_BASELINE_DIA)))
                 .isInstanceOf(BaselineExperiment.class)
                 .hasNoNullFieldsOrProperties();
     }
