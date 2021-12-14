@@ -37,7 +37,7 @@ import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE_DIA_SWATH;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE_DIA;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELINE;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
 
@@ -114,7 +114,7 @@ class ExperimentPageJsonWIT {
                 MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
                 MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
                 MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL,
-                PROTEOMICS_BASELINE_DIA_SWATH)
+                PROTEOMICS_BASELINE_DIA)
                 .map(
                         experimentType ->
                                 Arguments.of(

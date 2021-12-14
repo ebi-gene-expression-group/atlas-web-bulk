@@ -144,7 +144,7 @@ class ExperimentDownloadControllerWIT {
         var paths = ImmutableList.<Path>builder();
         switch (experimentType) {
             case PROTEOMICS_BASELINE:
-            case PROTEOMICS_BASELINE_DIA_SWATH:
+            case PROTEOMICS_BASELINE_DIA:
                 paths.add(experimentFileLocationService.getFilePath(
                         experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
                         .add(experimentFileLocationService.getFilePath(
