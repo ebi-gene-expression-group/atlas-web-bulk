@@ -122,7 +122,7 @@ public class ExperimentDownloadController {
         proteomicsExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
     }
 
-    @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=PROTEOMICS_BASELINE_DIA_SWATH")
+    @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=PROTEOMICS_BASELINE_DIA")
     public void
     proteomicsDiaSwathExperimentDownload(
             @PathVariable String experimentAccession,
@@ -284,7 +284,7 @@ public class ExperimentDownloadController {
                                         experiment.getAccession(), ExperimentFileType.RNASEQ_B_TPM));
                         break;
 
-                    case PROTEOMICS_BASELINE_DIA_SWATH:
+                    case PROTEOMICS_BASELINE_DIA:
                         paths.add(experimentFileLocationService.getFilePath(
                                 experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
                                 .add(experimentFileLocationService.getFilePath(
@@ -375,7 +375,7 @@ public class ExperimentDownloadController {
                     ExperimentFileType.CONFIGURATION,
                     ExperimentFileType.MICROARRAY_D_ANALYTICS,
                     ExperimentFileType.IDF));
-            put(ExperimentType.PROTEOMICS_BASELINE_DIA_SWATH, ImmutableList.of(
+            put(ExperimentType.PROTEOMICS_BASELINE_DIA, ImmutableList.of(
                     ExperimentFileType.CONDENSE_SDRF,
                     ExperimentFileType.CONFIGURATION,
                     ExperimentFileType.BASELINE_FACTORS,

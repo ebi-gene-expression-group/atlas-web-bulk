@@ -92,7 +92,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
 
     @RequestMapping(value = "/json/experiments/{experimentAccession}",
                     produces = "application/json;charset=UTF-8",
-                    params = "type=PROTEOMICS_BASELINE_DIA_SWATH")
+                    params = "type=PROTEOMICS_BASELINE_DIA")
     public String baselineProteomicsDiaSwathExperimentData(@Valid ProteomicsBaselineRequestPreferences preferences,
                                                            @PathVariable String experimentAccession,
                                                            @RequestParam(defaultValue = "") String accessKey) {
@@ -157,7 +157,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
 
     @RequestMapping(value = GENE_DISTRIBUTION_URL,
             produces = "application/json;charset=UTF-8",
-            params = "type=PROTEOMICS_BASELINE_DIA_SWATH")
+            params = "type=PROTEOMICS_BASELINE_DIA")
     public String baselineProteomicsDiaSwathHistogram(@Valid ProteomicsBaselineRequestPreferences preferences,
                                               @PathVariable String experimentAccession,
                                               @RequestParam(defaultValue = "") String accessKey) {
