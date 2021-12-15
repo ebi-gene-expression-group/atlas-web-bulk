@@ -95,7 +95,7 @@ class GxaExperimentRepositoryIT {
     }
 
     @Test
-    void baselineProteomicsDiaSwathExperiments() {
+    void baselineProteomicsDiaExperiments() {
         assertThat(subject.getExperiment(jdbcUtils.fetchRandomExperimentAccession(PROTEOMICS_BASELINE_DIA)))
                 .isInstanceOf(BaselineExperiment.class)
                 .hasNoNullFieldsOrProperties();

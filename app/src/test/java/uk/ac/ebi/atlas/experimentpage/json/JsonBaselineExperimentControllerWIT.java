@@ -65,10 +65,10 @@ class JsonBaselineExperimentControllerWIT {
     }
 
     @Test
-    void getsBaselineProteomicsDiaSwathExperimentData() throws Exception {
+    void getsBaselineProteomicsDiaExperimentData() throws Exception {
         var sb = new StringBuilder();
         this.mockMvc.perform(get("/json/experiments/{experimentAccession}", "E-PROT-28")
-                .param("type", "PROTEOMICS_BASELINE_DIA_SWATH"))
+                .param("type", "PROTEOMICS_BASELINE_DIA"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(mvcResult -> sb.append(mvcResult.getResponse().getContentAsString()));

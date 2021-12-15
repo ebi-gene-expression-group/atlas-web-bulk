@@ -51,7 +51,7 @@ class ExperimentDownloadControllerWIT {
             "E-MTAB-3834", //RNASEQ_MRNA_DIFFERENTIAL
             "E-PROT-1", //PROTEOMICS_BASELINE
             "E-TABM-713",//MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL
-            "E-PROT-28"); //PROTEOMICS_BASELINE_DIA_SWATH
+            "E-PROT-28"); //PROTEOMICS_BASELINE_DIA
     private static final List<String> INVALID_EXPERIMENT_ACCESSION_LIST = ImmutableList.of("E-ERAD", "E-GEOD");
     private static final String ARCHIVE_NAME = "{0}-{1}-files.zip";
     private static final String ARCHIVE_DOWNLOAD_LIST_URL = "/experiments/download/zip";
