@@ -1,10 +1,10 @@
 package uk.ac.ebi.atlas.experimentpage;
 
 public enum IconType {
-    PDF("icon-pdf"),
+    PDF("icon-PDF"),
     TSV("icon-tsv"),
-    XML("icon-xml"),
-    TXT("icon-txt"),
+    XML("icon-XML"),
+    TXT("icon-TXT"),
     ARRAY_EXPRESS("icon-ae"),
     GEO("icon-geo"),
     ENA("icon-ena"),
