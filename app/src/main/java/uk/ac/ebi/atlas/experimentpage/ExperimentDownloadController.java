@@ -123,15 +123,12 @@ public class ExperimentDownloadController {
     }
 
     @RequestMapping(value = DOWNLOAD_URL_TEMPLATE, params = "type=PROTEOMICS_BASELINE_DIA")
-    public void
-    proteomicsDiaSwathExperimentDownload(
+    public void proteomicsDiaExperimentDownload(
             @PathVariable String experimentAccession,
             @RequestParam(value = "accessKey", required = false) String accessKey,
             @ModelAttribute("preferences") @Valid ProteomicsBaselineRequestPreferences preferences,
             HttpServletResponse response) throws IOException {
-        BaselineExperiment experiment =
-                (BaselineExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
-
+            var experiment = (BaselineExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
         proteomicsExperimentDownloadSupplier.write(response, preferences, experiment, "tsv");
     }
 
