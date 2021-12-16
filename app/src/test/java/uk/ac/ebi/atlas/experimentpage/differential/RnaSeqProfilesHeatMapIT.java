@@ -14,14 +14,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import uk.ac.ebi.atlas.configuration.TestConfig;
-import uk.ac.ebi.atlas.experimentpage.context.RnaSeqRequestContext;
+import uk.ac.ebi.atlas.experimentpage.context.BulkDifferentialRequestContext;
 import uk.ac.ebi.atlas.model.Profile;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExpression;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialProfilesList;
 import uk.ac.ebi.atlas.model.experiment.differential.Regulation;
-import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.RnaSeqProfile;
-import uk.ac.ebi.atlas.profiles.stream.RnaSeqProfileStreamFactory;
+import uk.ac.ebi.atlas.model.experiment.differential.rnaseq.BulkDifferentialProfile;
+import uk.ac.ebi.atlas.profiles.stream.BulkDifferentialProfileStreamFactory;
 import uk.ac.ebi.atlas.solr.bioentities.query.SolrQueryService;
 import uk.ac.ebi.atlas.testutils.JdbcUtils;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
 
 @ExtendWith(SpringExtension.class)
@@ -53,7 +53,7 @@ class RnaSeqProfilesHeatMapIT {
     private ExperimentTrader experimentTrader;
 
     @Inject
-    private RnaSeqProfileStreamFactory rnaSeqProfileStreamFactory;
+    private BulkDifferentialProfileStreamFactory bulkDifferentialProfileStreamFactory;
 
     @Inject
     private SolrQueryService solrQueryService;
@@ -61,7 +61,7 @@ class RnaSeqProfilesHeatMapIT {
     private DifferentialRequestPreferences requestPreferences;
 
     private
-    DifferentialProfilesHeatMap<DifferentialExpression, DifferentialExperiment, RnaSeqProfile, RnaSeqRequestContext>
+    DifferentialProfilesHeatMap<DifferentialExpression, DifferentialExperiment, BulkDifferentialProfile, BulkDifferentialRequestContext>
             subject;
 
     @BeforeAll
@@ -81,21 +81,21 @@ class RnaSeqProfilesHeatMapIT {
     @BeforeEach
     void setUp() {
         requestPreferences = new DifferentialRequestPreferences();
-        subject = new DifferentialProfilesHeatMap<>(rnaSeqProfileStreamFactory, solrQueryService);
+        subject = new DifferentialProfilesHeatMap<>(bulkDifferentialProfileStreamFactory, solrQueryService);
     }
 
-    private RnaSeqRequestContext populateRequestContext(String experimentAccession) {
+    private BulkDifferentialRequestContext populateRequestContext(String experimentAccession) {
         return populateRequestContext(experimentAccession, 1.0, 0.0);
     }
 
-    private RnaSeqRequestContext populateRequestContext(
+    private BulkDifferentialRequestContext populateRequestContext(
             String experimentAccession, double cutoff, double logFoldCutoff) {
         requestPreferences.setFoldChangeCutoff(logFoldCutoff);
         requestPreferences.setCutoff(cutoff);
         DifferentialExperiment experiment =
                 (DifferentialExperiment) experimentTrader.getPublicExperiment(experimentAccession);
 
-        return new RnaSeqRequestContext(requestPreferences, experiment);
+        return new BulkDifferentialRequestContext(requestPreferences, experiment);
     }
 
     @ParameterizedTest
@@ -108,33 +108,33 @@ class RnaSeqProfilesHeatMapIT {
     }
 
      private void testDefaultParameters(String accession) {
-        RnaSeqRequestContext requestContext = populateRequestContext(accession);
+         BulkDifferentialRequestContext requestContext = populateRequestContext(accession);
         DifferentialExperiment experiment = requestContext.getExperiment();
 
-        DifferentialProfilesList<RnaSeqProfile> profiles = subject.fetch(requestContext);
+        DifferentialProfilesList<BulkDifferentialProfile> profiles = subject.fetch(requestContext);
 
         assertAbout(experiment, profiles);
     }
 
      private void testNotSpecific(String accession) {
         requestPreferences.setSpecific(false);
-        RnaSeqRequestContext requestContext = populateRequestContext(accession);
+         BulkDifferentialRequestContext requestContext = populateRequestContext(accession);
         DifferentialExperiment experiment = requestContext.getExperiment();
 
-        DifferentialProfilesList<RnaSeqProfile> profiles = subject.fetch(requestContext);
+        DifferentialProfilesList<BulkDifferentialProfile> profiles = subject.fetch(requestContext);
 
         assertAbout(experiment, profiles);
     }
 
     private void testUpAndDownRegulated(String accession) {
-        RnaSeqRequestContext requestContext = populateRequestContext(accession);
+        BulkDifferentialRequestContext requestContext = populateRequestContext(accession);
 
-        DifferentialProfilesList<RnaSeqProfile> profilesAll = subject.fetch(requestContext);
+        DifferentialProfilesList<BulkDifferentialProfile> profilesAll = subject.fetch(requestContext);
 
         requestPreferences.setRegulation(Regulation.UP);
         requestContext = populateRequestContext(accession);
 
-        DifferentialProfilesList<RnaSeqProfile> profilesUp = subject.fetch(requestContext);
+        DifferentialProfilesList<BulkDifferentialProfile> profilesUp = subject.fetch(requestContext);
 
         assertThat(
                 profilesAll.size() == 50 || extractGeneNames(profilesAll).containsAll(extractGeneNames(profilesUp)),
@@ -143,7 +143,7 @@ class RnaSeqProfilesHeatMapIT {
         requestPreferences.setRegulation(Regulation.DOWN);
         requestContext = populateRequestContext(accession);
 
-        DifferentialProfilesList<RnaSeqProfile> profilesDown = subject.fetch(requestContext);
+        DifferentialProfilesList<BulkDifferentialProfile> profilesDown = subject.fetch(requestContext);
         assertThat(
                 profilesAll.size() == 50 || extractGeneNames(profilesAll).containsAll(extractGeneNames(profilesDown)),
                 is(true));
@@ -153,17 +153,17 @@ class RnaSeqProfilesHeatMapIT {
 
 
     private void testNoResultsWithStrictCutoff(String accession) {
-        RnaSeqRequestContext requestContext = populateRequestContext(accession, 0.0, 1E90d);
+        BulkDifferentialRequestContext requestContext = populateRequestContext(accession, 0.0, 1E90d);
 
-        DifferentialProfilesList<RnaSeqProfile> profiles = subject.fetch(requestContext);
+        DifferentialProfilesList<BulkDifferentialProfile> profiles = subject.fetch(requestContext);
 
         assertThat(extractGeneNames(profiles).size(), is(0));
     }
 
 
-    private void assertAbout(DifferentialExperiment experiment, List<RnaSeqProfile> profiles) {
+    private void assertAbout(DifferentialExperiment experiment, List<BulkDifferentialProfile> profiles) {
 
-        for (RnaSeqProfile profile: profiles) {
+        for (BulkDifferentialProfile profile: profiles) {
             assertThat(profile.getSpecificity(experiment.getDataColumnDescriptors()) > 0, is(true));
             assertThat(profile.getId().isEmpty(), is(false));
             assertThat(profile.getName().isEmpty(), is(false));
