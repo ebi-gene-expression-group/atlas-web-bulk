@@ -19,8 +19,9 @@ import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import java.util.function.Function;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 @Component
 public class ExpressionAtlasContentService {
@@ -179,8 +180,9 @@ public class ExpressionAtlasContentService {
 
         switch (experiment.getType()) {
             case PROTEOMICS_BASELINE:
-                arrayExpressAndOtherExternalResourcesLinks.addAll(proteomicsBaselineExperimentExternallyAvailableContentService.list(
-                        (BaselineExperiment) experiment, contentType));
+            case PROTEOMICS_BASELINE_DIA:
+                arrayExpressAndOtherExternalResourcesLinks.addAll(
+                        proteomicsBaselineExperimentExternallyAvailableContentService.list((BaselineExperiment) experiment, contentType));
                 break;
             case RNASEQ_MRNA_BASELINE:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqBaselineExperimentExternallyAvailableContentService.list(
