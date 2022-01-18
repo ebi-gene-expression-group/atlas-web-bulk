@@ -1,13 +1,12 @@
 package uk.ac.ebi.atlas.experimentimport;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.commons.streams.ObjectInputStream;
 import uk.ac.ebi.atlas.model.experiment.sample.BiologicalReplicate;
 import uk.ac.ebi.atlas.model.experiment.sample.ReportsGeneExpression;
-import uk.ac.ebi.atlas.model.ExpressionUnit;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.resource.AtlasResource;
 import uk.ac.ebi.atlas.resource.DataFileHub;
@@ -15,7 +14,6 @@ import uk.ac.ebi.atlas.trader.ConfigurationTrader;
 import uk.ac.ebi.atlas.utils.StringArrayUtil;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.MessageFormat;
@@ -24,7 +22,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 
-@Named
+@Component
 public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
     private final DataFileHub dataFileHub;
     private final ConfigurationTrader configurationTrader;
@@ -48,11 +46,14 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
                 checkRnaSeqBaselineFiles(experimentAccession);
                 break;
             case PROTEOMICS_BASELINE:
+            case PROTEOMICS_BASELINE_DIA:
                 checkProteomicsBaselineFiles(experimentAccession);
                 break;
             case PROTEOMICS_DIFFERENTIAL:
+                checkDifferentialFiles(experimentAccession, false);
+                break;
             case RNASEQ_MRNA_DIFFERENTIAL:
-                checkDifferentialFiles(experimentAccession);
+                checkDifferentialFiles(experimentAccession, true);
                 break;
             case MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL:
             case MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL:
@@ -71,20 +72,19 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
     }
 
     void checkRnaSeqBaselineFiles(String experimentAccession) {
-        DataFileHub.RnaSeqBaselineExperimentFiles experimentFiles =
-                dataFileHub.getRnaSeqBaselineExperimentFiles(experimentAccession);
+        var experimentFiles = dataFileHub.getRnaSeqBaselineExperimentFiles(experimentAccession);
         checkBaselineFiles(experimentFiles.baselineExperimentFiles);
-        ImmutableList<ExpressionUnit.Absolute.Rna> dataFiles = experimentFiles.dataFiles();
+        var dataFiles = experimentFiles.dataFiles();
         Preconditions.checkState(
                 dataFiles.size() > 0,
                 MessageFormat.format("No data files (FPKM/TPM) present for {0}!", experimentAccession));
-        for (ExpressionUnit.Absolute.Rna dataFile: dataFiles) {
+        for (var dataFile: dataFiles) {
             checkResourceExistsAndIsReadable(experimentFiles.dataFile(dataFile));
             assayGroupIdsInHeaderMatchConfigurationXml(
                     rnaSeqIdsFromHeader(extractFirstElement(experimentFiles.dataFile(dataFile))), experimentAccession);
         }
 
-        AtlasResource<ObjectInputStream<String[]>> transcripts = experimentFiles.transcriptsTpms;
+        var transcripts = experimentFiles.transcriptsTpms;
         if (transcripts.exists()) {
             biologicalReplicateIdsInHeaderMatchConfigurationXml(
                     transcriptIdsFromHeader(extractFirstElement(transcripts)), experimentAccession);
@@ -100,8 +100,7 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
     }
 
     void checkProteomicsBaselineFiles(String experimentAccession) {
-        DataFileHub.ProteomicsBaselineExperimentFiles experimentFiles =
-                dataFileHub.getProteomicsBaselineExperimentFiles(experimentAccession);
+        var experimentFiles = dataFileHub.getProteomicsBaselineExperimentFiles(experimentAccession);
         checkBaselineFiles(experimentFiles.baselineExperimentFiles);
         checkResourceExistsAndIsReadable(experimentFiles.main);
         assayGroupIdsInHeaderMatchConfigurationXml(
@@ -114,7 +113,7 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
 
     private void biologicalReplicateIdsInHeaderMatchConfigurationXml(String[] biologicalReplicateIds,
                                                                      String experimentAccession) {
-        Set<String> idsInConfiguration =
+        var idsInConfiguration =
                 configurationTrader.getExperimentConfiguration(experimentAccession).getAssayGroups().stream()
                         .flatMap(a -> a.getAssays().stream())
                         .map(BiologicalReplicate::getId)
@@ -128,7 +127,7 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
     }
 
     private void assayGroupIdsInHeaderMatchConfigurationXml(String[] assayGroupIds, String experimentAccession) {
-        Set<String> idsInConfiguration =
+        var idsInConfiguration =
                 configurationTrader.getExperimentConfiguration(experimentAccession).getAssayGroups().stream()
                         .map(ReportsGeneExpression::getId)
                         .collect(Collectors.toSet());
@@ -145,17 +144,17 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
         checkResourceExistsAndIsReadable(experimentFiles.factors);
     }
 
-    private void checkDifferentialFiles(String experimentAccession) {
-        DataFileHub.BulkDifferentialExperimentFiles experimentFiles =
-                dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession);
+    private void checkDifferentialFiles(String experimentAccession, boolean checkRawCounts) {
+        var experimentFiles = dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession);
         checkResourceExistsAndIsReadable(experimentFiles.analytics);
-        checkResourceExistsAndIsReadable(experimentFiles.rawCounts);
+        if (checkRawCounts) {
+            checkResourceExistsAndIsReadable(experimentFiles.rawCounts);
+        }
     }
 
     private void checkMicroarray1ColourFiles(String experimentAccession, Set<String> arrayDesigns) {
-        for (String arrayDesign : arrayDesigns) {
-            DataFileHub.MicroarrayExperimentFiles experimentFiles =
-                    dataFileHub.getMicroarrayExperimentFiles(experimentAccession, arrayDesign);
+        for (var arrayDesign : arrayDesigns) {
+            var experimentFiles = dataFileHub.getMicroarrayExperimentFiles(experimentAccession, arrayDesign);
 
             checkResourceExistsAndIsReadable(experimentFiles.analytics);
             checkResourceExistsAndIsReadable(experimentFiles.normalizedExpressions);
@@ -163,9 +162,8 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
     }
 
     private void checkMicroarray2ColourFiles(String experimentAccession, Set<String> arrayDesigns) {
-        for (String arrayDesign : arrayDesigns) {
-            DataFileHub.MicroarrayExperimentFiles experimentFiles =
-                    dataFileHub.getMicroarrayExperimentFiles(experimentAccession, arrayDesign);
+        for (var arrayDesign : arrayDesigns) {
+            var experimentFiles = dataFileHub.getMicroarrayExperimentFiles(experimentAccession, arrayDesign);
 
             checkResourceExistsAndIsReadable(experimentFiles.analytics);
             checkResourceExistsAndIsReadable(experimentFiles.logFoldChanges);

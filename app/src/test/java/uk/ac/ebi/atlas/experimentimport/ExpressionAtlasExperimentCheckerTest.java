@@ -2,10 +2,8 @@ package uk.ac.ebi.atlas.experimentimport;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.testutils.MockDataFileHub;
 import uk.ac.ebi.atlas.trader.ConfigurationTrader;
@@ -16,27 +14,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ExpressionAtlasExperimentCheckerTest {
+class ExpressionAtlasExperimentCheckerTest {
     private static final String ACCESSION = "E-MOCK-1";
 
     private MockDataFileHub dataFileHub;
 
     private ExpressionAtlasExperimentChecker subject;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         dataFileHub = MockDataFileHub.create();
         subject = new ExpressionAtlasExperimentChecker(dataFileHub, new ConfigurationTrader(dataFileHub));
     }
 
     @Test
-    public void extractAssayGroupIdsProteomics() {
-        String[] tsvFileHeader =
+    void extractAssayGroupIdsProteomics() {
+        var tsvFileHeader =
                 ("GeneID\tg1.SpectralCount\tg2.SpectralCount\tg3.SpectralCount\tg4.SpectralCount\tg5.SpectralCount\t" +
                         "g6.SpectralCount\tg7.SpectralCount\tg8.SpectralCount\tg9.SpectralCount\tg10.SpectralCount\t" +
                         "g11.SpectralCount\tg12.SpectralCount\tg13.SpectralCount\tg14.SpectralCount\t" +
@@ -54,46 +50,47 @@ public class ExpressionAtlasExperimentCheckerTest {
                         "g22.WithInSampleAbundance\tg23.WithInSampleAbundance\tg24.WithInSampleAbundance\t" +
                         "g25.WithInSampleAbundance\tg26.WithInSampleAbundance\tg27.WithInSampleAbundance\t" +
                         "g28.WithInSampleAbundance\tg29.WithInSampleAbundance\tg30.WithInSampleAbundance").split("\t");
-        assertThat(subject.proteomicsIdsFromHeader(tsvFileHeader), is(new String[]{"g1", "g2",
-                "g3", "g4", "g5",
-                "g6", "g7", "g8", "g9",
-                "g10", "g11", "g12", "g13", "g14", "g15", "g16", "g17", "g18", "g19", "g20", "g21", "g22", "g23",
-                "g24", "g25", "g26", "g27", "g28", "g29", "g30"}));
+        assertThat(subject.proteomicsIdsFromHeader(tsvFileHeader))
+                .isEqualTo(
+                        new String[]{
+                                "g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8", "g9", "g10", "g11", "g12", "g13",
+                                "g14", "g15", "g16", "g17", "g18", "g19", "g20", "g21", "g22", "g23", "g24", "g25",
+                                "g26", "g27", "g28", "g29", "g30"});
     }
 
     private Collection<String> configurationWithAssayGroups(Collection<String> assayGroupList) {
-        ExperimentType experimentType = ExperimentType.RNASEQ_MRNA_BASELINE;
-        ImmutableList.Builder<String> b = ImmutableList.builder();
-        b.add(
+        var experimentType = ExperimentType.RNASEQ_MRNA_BASELINE;
+        var builder = ImmutableList.<String>builder();
+        builder.add(
                 MessageFormat.format(
                         "<configuration experimentType=\"{0}\" r_data=\"1\">", experimentType.getDescription()),
                 "<analytics>",
                 "<assay_groups>");
 
-        b.addAll(assayGroupList);
-        b.add("</assay_groups>", "</analytics>", "</configuration>");
+        builder.addAll(assayGroupList);
+        builder.add("</assay_groups>", "</analytics>", "</configuration>");
 
-        return b.build();
+        return builder.build();
     }
 
-    private void setup(String assayGroupXml, String[] fileHeader, BiConsumer<String, List<String[]>> addFile,
-                            String[] fileHeader2, BiConsumer<String, List<String[]>> addFile2) {
-        dataFileHub.addConfigurationFile(ACCESSION, configurationWithAssayGroups(ImmutableList.of(
-                assayGroupXml
-        )));
+    private void setup(String assayGroupXml,
+                       String[] fileHeader,
+                       BiConsumer<String, List<String[]>> addFile,
+                       String[] fileHeader2,
+                       BiConsumer<String, List<String[]>> addFile2) {
+        dataFileHub.addConfigurationFile(ACCESSION, configurationWithAssayGroups(ImmutableList.of(assayGroupXml)));
         dataFileHub.addFactorsFile(ACCESSION, ImmutableList.of("<factors-definition>", "</factors-definition>"));
+
         addFile.accept(ACCESSION, ImmutableList.of(fileHeader));
         addFile2.accept(ACCESSION, ImmutableList.of(fileHeader2));
 
     }
 
     private void setup(String assayGroupXml, String[] fileHeader, BiConsumer<String, List<String[]>> addFile) {
-        dataFileHub.addConfigurationFile(ACCESSION, configurationWithAssayGroups(ImmutableList.of(
-                assayGroupXml
-        )));
+        dataFileHub.addConfigurationFile(ACCESSION, configurationWithAssayGroups(ImmutableList.of(assayGroupXml)));
         dataFileHub.addFactorsFile(ACCESSION, ImmutableList.of("<factors-definition>", "</factors-definition>"));
-        addFile.accept(ACCESSION, ImmutableList.of(fileHeader));
 
+        addFile.accept(ACCESSION, ImmutableList.of(fileHeader));
     }
     private void assertPasses(String assayGroupXml, String[] fileHeader, BiConsumer<String, List<String[]>> addFile) {
         setup(assayGroupXml, fileHeader, addFile);
@@ -102,29 +99,25 @@ public class ExpressionAtlasExperimentCheckerTest {
 
     private void assertFails(String assayGroupXml, String[] fileHeader, BiConsumer<String, List<String[]>> addFile) {
         setup(assayGroupXml, fileHeader, addFile);
-        try {
-            subject.checkRnaSeqBaselineFiles(ACCESSION);
-            fail("Should fail with IllegalStateException");
-        } catch (IllegalStateException e) {
-            //yum
-        }
+        assertThatIllegalStateException().isThrownBy(() -> subject.checkRnaSeqBaselineFiles(ACCESSION));
     }
 
-    private void assertPasses(String assayGroupXml, String[] fileHeader, BiConsumer<String, List<String[]>> addFile,
-                      String[] fileHeader2, BiConsumer<String, List<String[]>> addFile2) {
+    private void assertPasses(String assayGroupXml,
+                              String[] fileHeader,
+                              BiConsumer<String, List<String[]>> addFile,
+                              String[] fileHeader2,
+                              BiConsumer<String, List<String[]>> addFile2) {
         setup(assayGroupXml, fileHeader, addFile, fileHeader2, addFile2);
         subject.checkRnaSeqBaselineFiles(ACCESSION);
     }
 
-    private void assertFails(String assayGroupXml, String[] fileHeader, BiConsumer<String, List<String[]>> addFile,
-                     String[] fileHeader2, BiConsumer<String, List<String[]>> addFile2) {
+    private void assertFails(String assayGroupXml,
+                             String[] fileHeader,
+                             BiConsumer<String, List<String[]>> addFile,
+                             String[] fileHeader2,
+                             BiConsumer<String, List<String[]>> addFile2) {
         setup(assayGroupXml, fileHeader, addFile, fileHeader2, addFile2);
-        try {
-            subject.checkRnaSeqBaselineFiles(ACCESSION);
-            fail("Should fail with IllegalStateException");
-        } catch (IllegalStateException e) {
-            //yum
-        }
+        assertThatIllegalStateException().isThrownBy(() -> subject.checkRnaSeqBaselineFiles(ACCESSION));
     }
 
     @Test
@@ -134,7 +127,9 @@ public class ExpressionAtlasExperimentCheckerTest {
 
     private void fileMatchesHeaderBasedOnAssayGroups(BiConsumer<String, List<String[]>> addFile) {
         assertPasses(
-                "<assay_group id=\"g1\"><assay>A</assay></assay_group>",
+                "<assay_group id=\"g1\">" +
+                        "<assay>A</assay>" +
+                "</assay_group>",
                 new String[] {"", "", "g1"},
                 addFile);
 
@@ -160,7 +155,9 @@ public class ExpressionAtlasExperimentCheckerTest {
                 addFile);
 
         assertFails(
-                "<assay_group id=\"g1\"><assay>A</assay></assay_group>",
+                "<assay_group id=\"g1\">" +
+                        "<assay>A</assay>" +
+                "</assay_group>",
                 new String[] {"", "", "g1", "g2"},
                 addFile);
     }
