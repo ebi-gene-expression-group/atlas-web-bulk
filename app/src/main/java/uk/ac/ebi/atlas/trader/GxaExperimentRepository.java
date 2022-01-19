@@ -58,6 +58,7 @@ public class GxaExperimentRepository implements ExperimentRepository {
         var idfParserOutput = idfParser.parse(experimentDto.getExperimentAccession());
         switch (experimentDto.getExperimentType()) {
             case PROTEOMICS_BASELINE:
+            case PROTEOMICS_BASELINE_DIA:
                 return baselineExperimentFactory.create(
                         experimentDto,
                         experimentDesign,

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -20,7 +19,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
-import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperiment;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.inject.Inject;
@@ -31,22 +29,15 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.doesNotHave;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.isA;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import static uk.ac.ebi.atlas.testutils.RandomDataTestUtils.generateRandomExperimentAccession;
 
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
@@ -59,7 +50,8 @@ class ExperimentDownloadControllerWIT {
             "E-MEXP-1968", //MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL
             "E-MTAB-3834", //RNASEQ_MRNA_DIFFERENTIAL
             "E-PROT-1", //PROTEOMICS_BASELINE
-            "E-TABM-713"); //MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL
+            "E-TABM-713",//MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL
+            "E-PROT-28"); //PROTEOMICS_BASELINE_DIA
     private static final List<String> INVALID_EXPERIMENT_ACCESSION_LIST = ImmutableList.of("E-ERAD", "E-GEOD");
     private static final String ARCHIVE_NAME = "{0}-{1}-files.zip";
     private static final String ARCHIVE_DOWNLOAD_LIST_URL = "/experiments/download/zip";
@@ -116,6 +108,7 @@ class ExperimentDownloadControllerWIT {
                 .param("accession", EXPERIMENT_ACCESSION_LIST.get(3))
                 .param("accession", EXPERIMENT_ACCESSION_LIST.get(4))
                 .param("accession", EXPERIMENT_ACCESSION_LIST.get(5))
+                .param("accession", EXPERIMENT_ACCESSION_LIST.get(5))
                 .param("accession", INVALID_EXPERIMENT_ACCESSION_LIST.get(0))
                 .param("accession", INVALID_EXPERIMENT_ACCESSION_LIST.get(1)));
 
@@ -151,6 +144,7 @@ class ExperimentDownloadControllerWIT {
         var paths = ImmutableList.<Path>builder();
         switch (experimentType) {
             case PROTEOMICS_BASELINE:
+            case PROTEOMICS_BASELINE_DIA:
                 paths.add(experimentFileLocationService.getFilePath(
                         experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
                         .add(experimentFileLocationService.getFilePath(
