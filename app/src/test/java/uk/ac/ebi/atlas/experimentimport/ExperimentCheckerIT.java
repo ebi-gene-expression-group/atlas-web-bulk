@@ -24,6 +24,8 @@ import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE_DIA;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELINE;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
 
@@ -66,6 +68,8 @@ class ExperimentCheckerIT {
         return Stream.of(
                 RNASEQ_MRNA_BASELINE,
                 PROTEOMICS_BASELINE,
+                PROTEOMICS_DIFFERENTIAL,
+                PROTEOMICS_BASELINE_DIA,
                 RNASEQ_MRNA_DIFFERENTIAL,
                 MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
                 MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
