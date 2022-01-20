@@ -47,10 +47,13 @@ public class BioentityPropertiesMapCommand implements Callable<Integer> {
         }
         List<String> failedAccessions = bioentityPropertiesMapWriter.getFailedAccessions();
         int status = 0;
-        if (failedOutputPath != null && !failedAccessions.isEmpty()) {
-            AccessionsWriter writer = new AccessionsWriter(failedOutputPath, failedAccessions);
-            writer.write();
+        if (!failedAccessions.isEmpty()) {
+            // we fail if we have failed accessions, regardless of whether we were asked for those accessions or not.
             status = 1;
+            if (failedOutputPath != null) {
+                AccessionsWriter writer = new AccessionsWriter(failedOutputPath, failedAccessions);
+                writer.write();
+            }
         }
 
         return status;

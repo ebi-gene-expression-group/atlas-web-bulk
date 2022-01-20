@@ -19,12 +19,14 @@ public abstract class AbstractPerAccessionCommand {
 
     protected int handleFailedAccessions(Collection<String> failedAccessions) {
         int status = 0;
-        if (failedOutputPath != null && !failedAccessions.isEmpty()) {
+        if (!failedAccessions.isEmpty()) {
+            status = 1;
             LOGGER.warning(String.format("%s experiments failed", failedAccessions.size()));
             LOGGER.info(String.format("Re-run with the following arguments to re-try failed accessions: %s", String.join(",", failedAccessions)));
-            AccessionsWriter writer = new AccessionsWriter(failedOutputPath, failedAccessions);
-            writer.write();
-            status = 1;
+            if (failedOutputPath != null) {
+                AccessionsWriter writer = new AccessionsWriter(failedOutputPath, failedAccessions);
+                writer.write();
+            }
         }
         return status;
     }
