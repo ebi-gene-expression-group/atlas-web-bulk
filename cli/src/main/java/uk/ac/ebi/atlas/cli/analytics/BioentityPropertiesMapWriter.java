@@ -63,7 +63,7 @@ public class BioentityPropertiesMapWriter {
                     bioentityIdentifiers.addAll(bioentityIdentifiersReader.getBioentityIdsFromExperiment(accession, true));
                 } catch (RuntimeException e) {
                     failedAccessions.add(accession);
-                    LOGGER.severe("Failed to add bioentity mappings for "+accession);
+                    LOGGER.severe("Failed to add bioentity mappings for "+accession+": "+e.getMessage());
                 }
             }
             objectOutputStream.writeObject(bioentityPropertiesDao.getMap(bioentityIdentifiers));
