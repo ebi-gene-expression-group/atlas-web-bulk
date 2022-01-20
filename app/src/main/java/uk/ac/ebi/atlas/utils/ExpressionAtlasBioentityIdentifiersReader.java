@@ -17,6 +17,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.microarray.MicroarrayExperi
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashSet;
 
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL;
@@ -136,12 +137,12 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
         return bioentityIdentifiers.size() - bioentityIdentifiersSizeWithoutNewElements;
     }
 
-    @Override
-    public HashSet<String> getBioentityIdsFromExperiment(String experimentAccession) {
+    public HashSet<String> getBioentityIdsFromExperiment(String experimentAccession, boolean throwError) {
         LOGGER.info("Reading gene IDs of {}", experimentAccession);
         Experiment experiment = experimentTrader.getExperimentForAnalyticsIndex(experimentAccession);
 
         HashSet<String> bioentityIdentifiers = new HashSet<>();
+        IOException e = null;
 
         if (experiment.getType().isBaseline()) {
 
@@ -152,8 +153,9 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
                     bioentityIdentifiers.add(analytics.geneId());
                     analytics = inputStream.readNext();
                 }
-            } catch (Exception exception) {
+            } catch (IOException exception) {
                 LOGGER.error(exception.getMessage());
+                e = exception;
             }
 
         } else {  //if (experimentType.isDifferential()) {
@@ -171,6 +173,7 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
                         }
                     } catch (IOException exception) {
                         LOGGER.error(exception.getMessage());
+                        e = exception;
                     }
                 }
 
@@ -185,11 +188,21 @@ public class ExpressionAtlasBioentityIdentifiersReader extends BioentityIdentifi
                     }
                 } catch (IOException exception) {
                     LOGGER.error(exception.getMessage());
+                    e = exception;
                 }
             }
 
         }
 
+        if (e != null && throwError) {
+            throw new UncheckedIOException(e);
+        }
+
         return bioentityIdentifiers;
+    }
+
+    @Override
+    public HashSet<String> getBioentityIdsFromExperiment(String experimentAccession) {
+        return getBioentityIdsFromExperiment(experimentAccession, false);
     }
 }

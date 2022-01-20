@@ -2,6 +2,7 @@ package uk.ac.ebi.atlas.cli.analytics;
 
 import com.google.common.collect.ImmutableCollection;
 import org.springframework.stereotype.Service;
+import uk.ac.ebi.atlas.cli.experimentDesign.ExperimentDesignCommand;
 import uk.ac.ebi.atlas.cli.utils.SpeciesBioentityFinder;
 import uk.ac.ebi.atlas.experimentimport.analyticsindex.BioentityPropertiesDao;
 import uk.ac.ebi.atlas.utils.BioentityIdentifiersReader;
@@ -10,6 +11,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
@@ -30,6 +36,8 @@ public class BioentityPropertiesMapWriter {
     private final SpeciesBioentityFinder speciesBioentityFinder;
     private final BioentityPropertiesDao bioentityPropertiesDao;
     private final BioentityIdentifiersReader bioentityIdentifiersReader;
+    private List<String> failedAccessions;
+    private static final Logger LOGGER = Logger.getLogger(BioentityPropertiesMapWriter.class.getName());
 
     public BioentityPropertiesMapWriter(SpeciesBioentityFinder speciesBioentityFinder,
                                         BioentityPropertiesDao bioentityPropertiesDao,
@@ -37,6 +45,7 @@ public class BioentityPropertiesMapWriter {
         this.speciesBioentityFinder = speciesBioentityFinder;
         this.bioentityPropertiesDao = bioentityPropertiesDao;
         this.bioentityIdentifiersReader = bioentityIdentifiersReader;
+        this.failedAccessions = new ArrayList<>();
     }
 
     /**
@@ -48,12 +57,15 @@ public class BioentityPropertiesMapWriter {
      */
     public void writeMap(ImmutableCollection<String> experimentAccessions, String outputFile) {
         try (var objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
-            var bioentityIdentifiers =
-                    experimentAccessions.stream()
-                            .flatMap(experimentAccession ->
-                                    bioentityIdentifiersReader
-                                            .getBioentityIdsFromExperiment(experimentAccession).stream())
-                            .collect(toImmutableSet());
+            var bioentityIdentifiers = new HashSet<String>();
+            for(String accession : experimentAccessions) {
+                try {
+                    bioentityIdentifiers.addAll(bioentityIdentifiersReader.getBioentityIdsFromExperiment(accession, true));
+                } catch (RuntimeException e) {
+                    failedAccessions.add(accession);
+                    LOGGER.severe("Failed to add bioentity mappings for "+accession+": "+e.getMessage());
+                }
+            }
             objectOutputStream.writeObject(bioentityPropertiesDao.getMap(bioentityIdentifiers));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -76,5 +88,9 @@ public class BioentityPropertiesMapWriter {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public List<String> getFailedAccessions() {
+        return failedAccessions;
     }
 }
