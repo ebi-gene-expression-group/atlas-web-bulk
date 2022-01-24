@@ -17,6 +17,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -118,12 +121,22 @@ public class ExpressionAtlasExperimentChecker implements ExperimentChecker {
                         .flatMap(a -> a.getAssays().stream())
                         .map(BiologicalReplicate::getId)
                         .collect(Collectors.toSet());
+        var idsInConfigOnly = new HashSet<>(idsInConfiguration);
+        var biologicalReplicateIdsSetOnly = new HashSet<>(Arrays.asList(biologicalReplicateIds));
+        idsInConfigOnly.removeAll(biologicalReplicateIdsSetOnly);
+        biologicalReplicateIdsSetOnly.removeAll(idsInConfiguration);
+        var nonMatchedElementsMessage = "";
+        if (idsInConfigOnly.size() > 0)
+            nonMatchedElementsMessage = String.format("Only in XML configuration file: %s; ", String.join(", ", idsInConfigOnly));
+        if (biologicalReplicateIdsSetOnly.size() > 0)
+            nonMatchedElementsMessage += String.format("Only in -transcripts-tpms.tsv file: %s", String.join(", ", biologicalReplicateIdsSetOnly));
+
         Preconditions.checkState(
                 ImmutableSet.copyOf(biologicalReplicateIds).equals(idsInConfiguration),
                 MessageFormat.format(
                         "Biological replicate IDs in data file (#:{1}) not matching ids in " +
-                        "{0}-configuration.xml (#:{2})",
-                        experimentAccession, biologicalReplicateIds.length, idsInConfiguration.size()));
+                        "{0}-configuration.xml (#:{2}). {3}",
+                        experimentAccession, biologicalReplicateIds.length, idsInConfiguration.size(), nonMatchedElementsMessage));
     }
 
     private void assayGroupIdsInHeaderMatchConfigurationXml(String[] assayGroupIds, String experimentAccession) {
