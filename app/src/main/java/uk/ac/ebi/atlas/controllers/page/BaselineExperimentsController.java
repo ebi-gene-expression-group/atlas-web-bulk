@@ -55,7 +55,7 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
 
         var publicBaselineExperiments =
                 experimentTrader.getPublicExperiments(
-                        ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE);
+                        ExperimentType.RNASEQ_MRNA_BASELINE, ExperimentType.PROTEOMICS_BASELINE, ExperimentType.PROTEOMICS_BASELINE_DIA);
 
         for (var experiment : publicBaselineExperiments) {
             experimentDisplayNames.put(
