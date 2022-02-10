@@ -241,7 +241,10 @@ public class ExperimentDownloadController {
                 var experimentType = experiment.getType();
                 var paths = ImmutableList.<Path>builder();
                 switch (experimentType) {
-                    // do we lack here a proteomics differential case?
+                    /*
+                       There is another RequestMapping for proteomicsDifferentialExperimentDownload
+                       so no need to have one here.
+                     */
                     case PROTEOMICS_BASELINE:
                         paths.add(experimentFileLocationService.getFilePath(
                                 experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
