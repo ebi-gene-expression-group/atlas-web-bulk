@@ -15,10 +15,11 @@ import java.io.UncheckedIOException;
 import java.util.function.Function;
 
 import static java.lang.String.join;
-import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE;
+import static uk.ac.ebi.atlas.model.experiment.ExperimentType.PROTEOMICS_BASELINE_DIA;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_BASELINE;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFERENTIAL;
 
@@ -37,7 +38,8 @@ public class ExperimentsConditionsDetailsController {
                 response,
                 experiment -> new BaselineExperimentAssayGroupsLines((BaselineExperiment) experiment),
                 RNASEQ_MRNA_BASELINE,
-                PROTEOMICS_BASELINE);
+                PROTEOMICS_BASELINE,
+                PROTEOMICS_BASELINE_DIA);
     }
 
     @GetMapping("/api/contrastdetails.tsv")

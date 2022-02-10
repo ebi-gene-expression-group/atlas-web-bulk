@@ -44,6 +44,7 @@ public class DifferentialFacetsReader {
                 .put("rnaseq_mrna_baseline", "RNA-seq mRNA baseline")
                 .put("rnaseq_mrna_differential", "RNA-seq mRNA differential")
                 .put("proteomics_baseline", "proteomics baseline")
+                .put("proteomics_baseline_dia", "proteomics baseline") // assuming this is just the label to show.
                 .put("microarray_1colour_microrna_differential", "Microarray 1-colour microRNA differential")
                 .put("microarray_1colour_mrna_differential", "Microarray 1-colour mRNA differential")
                 .put("microarray_2colour_mrna_differential", "Microarray 2-colour mRNA differential")
