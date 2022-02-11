@@ -3,6 +3,7 @@
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/experiment.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/alt-customized-bootstrap-3.3.5.css">
+<link rel="stylesheet" href="https://ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.3/fonts.css" type="text/css" media="all" />
 
 <div class="row expanded margin-top-large">
     <div class="small-12 columns">
