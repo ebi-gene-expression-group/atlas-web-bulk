@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
 <div id="experiments"></div>
-<link rel="stylesheet" href="https://ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.3/fonts.css" type="text/css" media="all" />
 
 <script defer src="${pageContext.request.contextPath}/resources/js-bundles/experimentTable.bundle.js"></script>
 
