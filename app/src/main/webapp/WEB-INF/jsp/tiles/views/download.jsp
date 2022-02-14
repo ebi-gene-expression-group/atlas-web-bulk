@@ -1,35 +1,14 @@
-<%--@elvariable id="fileName" type="java.lang.String"--%>
-<%--@elvariable id="fileTimestamp" type="java.lang.String"--%>
-<%--@elvariable id="fileSize" type="java.lang.String"--%>
-
 <%@ page pageEncoding="UTF-8" contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <div class="row">
     <div class="12 columns">
         <h2>Download</h2>
-
-        <c:if test="${!empty fileName}">
         <h3>Via FTP</h3>
-        <table style="border: 1px #cdd4d2 solid;">
-            <thead>
-            <tr style="background-color: #E1EEE9">
-                <th style="border: 1px #cdd4d2 solid; padding: 0.5em 1em; text-align: center; background-color: #E1EEE9;">File</th>
-                <th style="border: 1px #cdd4d2 solid; text-align: center; background-color: #E1EEE9;">Description</th>
-                <th style="border: 1px #cdd4d2 solid; text-align: center; background-color: #E1EEE9;">Date</th>
-                <th style="border: 1px #cdd4d2 solid; text-align: center; background-color: #E1EEE9;">Size</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td style="text-align: center; border: 1px #cdd4d2 solid;"><a href="ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/atlas-latest-data.tar.gz"><pre>${fileName}</pre></a></td>
-                <td style="text-align: center; border: 1px #cdd4d2 solid;">gzipped tar archive of all Expression Atlas analysis results</td>
-                <td style="text-align: center; border: 1px #cdd4d2 solid;">${fileTimestamp}</td>
-                <td style="text-align: center; border: 1px #cdd4d2 solid;">${fileSize}</td>
-            </tr>
-            </tbody>
-        </table>
-        </c:if>
+        <p>
+            You can download data for every dataset individually in Expression Atlas through our
+            <a href="http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/" target="_blank">FTP site</a>.
+        </p>
 
         <h3>From experiment pages</h3>
         <p>
