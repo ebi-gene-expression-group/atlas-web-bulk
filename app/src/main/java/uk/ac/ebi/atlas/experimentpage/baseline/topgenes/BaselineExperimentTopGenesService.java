@@ -37,6 +37,8 @@ public class BaselineExperimentTopGenesService {
                      baselineExperimentTopGenesDao.aggregateGeneIdsAndSortBySpecificity(
                              experimentAccession, preferences)) {
             return mapBySpecifictyAndSortByAverageExpression(tupleStreamer.get(), preferences.getHeatmapMatrixSize());
+        } catch (Exception e) {
+            throw new RuntimeException("The Expression Atlas Solr server could not be reached.");
         }
     }
 
@@ -48,6 +50,8 @@ public class BaselineExperimentTopGenesService {
             return tupleStreamer.get()
                     .map(tuple -> tuple.getString(GENE_KEY))
                     .collect(toList());
+        } catch (Exception e) {
+            throw new RuntimeException("The Expression Atlas Solr server could not be reached.");
         }
     }
 
