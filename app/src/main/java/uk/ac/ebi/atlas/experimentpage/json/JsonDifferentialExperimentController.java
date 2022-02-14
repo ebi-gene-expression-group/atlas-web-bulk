@@ -28,6 +28,7 @@ import uk.ac.ebi.atlas.solr.bioentities.query.SolrQueryService;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
 import uk.ac.ebi.atlas.web.MicroarrayRequestPreferences;
+import uk.ac.ebi.atlas.web.ProteomicsDifferentialRequestPreferences;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -132,7 +133,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
             params = "type=PROTEOMICS_DIFFERENTIAL")
     @ResponseBody
     public String differentialProteomicsExperimentData(
-            @ModelAttribute("preferences") @Valid DifferentialRequestPreferences preferences,
+            @ModelAttribute("preferences") @Valid ProteomicsDifferentialRequestPreferences preferences,
             @PathVariable String experimentAccession,
             @RequestParam(defaultValue = "") String accessKey) {
         return GSON.toJson(differentialExperimentPageService.getResultsForExperiment(
