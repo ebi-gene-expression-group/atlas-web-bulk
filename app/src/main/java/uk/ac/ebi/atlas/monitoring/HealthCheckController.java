@@ -15,7 +15,7 @@ public class HealthCheckController {
     public HealthCheckController(HealthCheckService healthCheckService) {
         healthChecker = new HealthChecker(
                 healthCheckService,
-                ImmutableSet.of("bioentities"),
+                ImmutableSet.of("atlas-bioentities"),
                 ImmutableSet.of("bulk-analytics"));
     }
 
