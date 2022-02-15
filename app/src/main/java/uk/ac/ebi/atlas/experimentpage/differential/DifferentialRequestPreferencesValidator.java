@@ -6,13 +6,15 @@ import org.springframework.validation.Validator;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
 import uk.ac.ebi.atlas.web.ExperimentPageRequestPreferences;
 import uk.ac.ebi.atlas.web.MicroarrayRequestPreferences;
+import uk.ac.ebi.atlas.web.ProteomicsDifferentialRequestPreferences;
 
 public class DifferentialRequestPreferencesValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> aClass) {
         return MicroarrayRequestPreferences.class.equals(aClass)
-                || DifferentialRequestPreferences.class.equals(aClass);
+                || DifferentialRequestPreferences.class.equals(aClass)
+                || ProteomicsDifferentialRequestPreferences.class.equals(aClass);
     }
 
     @Override
