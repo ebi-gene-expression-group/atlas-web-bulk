@@ -4,10 +4,7 @@
   "description": "Disclaimers for Expression Atlas experiments",
   "main": "lib/disclaimers.js",
   "scripts": {
-    "prepack": "rm -rf lib && babel src -d lib --copy-files",
-    "test": "jest --coverage",
-    "posttest": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "postversion": "npm publish"
+    "prepare": "rm -rf lib && babel src -d lib --copy-files"
   },
   "jest": {
     "moduleNameMapper": {

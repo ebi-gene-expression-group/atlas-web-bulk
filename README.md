@@ -12,11 +12,11 @@ delete the old volume (e.g. for Postgres `docker volume rm gxa-pgdata`) and re-r
 initial state.
 
 ## Code
-Clone the repository of Bulk Expression Atlas proper:
+Clone the repository of bulk Expression Atlas:
 ```bash
 git clone --recurse-submodules https://github.com/ebi-gene-expression-group/atlas-web-bulk.git
 ```
-If you have already cloned the project ensure it’s up-to-date:
+If you have already cloned the project ensure modules are up-to-date:
 ```bash
   git pull
   git submodule update --remote
@@ -169,7 +169,7 @@ docker rm gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgre
 ```
 
 ### Running tests
-As mentioned before, `docker-compose-gradle.yml` runs the Gradle `test` task and it depends on all the necessary
+As mentioned before, `docker-compose-gradle.yml` runs the Gradle `test` task, and it depends on all the necessary
 services to run unit tests, integration tests and end-to-end tests. It splits the job in the following six phases:
 1. Clean the build directory
 2. Compile the test classes

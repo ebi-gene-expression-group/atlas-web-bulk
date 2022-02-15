@@ -10,9 +10,13 @@ services:
       - "5005:5005"
     working_dir: /root/project
     volumes:
-      - ..:/root/project
+      - gradle-ro-dep-cache:/gradle-ro-dep-cache
+      - $ATLAS_EXPERIMENTS_PATH:/bulk-experiments
+      - $ATLAS_BIOENTITY_PROPERTIES_PATH:/atlas-data/bioentity_properties
+      - $ATLAS_ONTOLOGY_PATH:/atlas-data/ontology
       - ./packages:/root/.m2
-      - $ATLAS_DATA_PATH:/atlas-data
+      - ..:/root/project
+
     depends_on:
       - gxa-solrcloud-1
       - gxa-solrcloud-2
@@ -22,24 +26,29 @@ services:
       POSTGRES_DB: $POSTGRES_DB
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      GRADLE_RO_DEP_CACHE: /gradle-ro-dep-cache
     command:
       - sh
       - -c
       - >
-        ./gradlew :app:clean &&
+        ./gradlew :atlas-web-core:clean &&
         ./gradlew
         -PdataFilesLocation=/atlas-data
-        -PexperimentFilesLocation=/atlas-data/gxa
+        -PexperimentFilesLocation=/bulk-experiments
         -PjdbcUrl=jdbc:postgresql://$POSTGRES_HOST:5432/$POSTGRES_DB
         -PjdbcUsername=$POSTGRES_USER
         -PjdbcPassword=$POSTGRES_PASSWORD
         -PzkHost=gxa-zk-1
         -PsolrHost=gxa-solrcloud-1
-        :app:testClasses &&
-        ./gradlew -PtestResultsPath=ut :app:test --tests *Test &&
-        ./gradlew -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT &&
-        ./gradlew -PtestResultsPath=e2e :app:test --tests *WIT &&
+        :atlas-web-core:testClasses &&
+        ./gradlew -PtestResultsPath=ut :atlas-web-core:test --tests *Test &&
+        ./gradlew -PtestResultsPath=it -PexcludeTests=**/*WIT.class :atlas-web-core:test --tests *IT &&
+        ./gradlew -PtestResultsPath=e2e :atlas-web-core:test --tests *WIT &&
         ./gradlew :app:jacocoTestReport
+
+volumes:
+  gradle-ro-dep-cache:
+
 networks:
   gxa:
     name: gxa

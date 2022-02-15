@@ -1,34 +1,30 @@
 package uk.ac.ebi.atlas.experimentpage.baseline.grouping;
 
-import com.google.common.collect.ImmutableList;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.google.common.collect.ImmutableSet;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import uk.ac.ebi.atlas.configuration.TestConfig;
 import uk.ac.ebi.atlas.model.OntologyTerm;
 
 import javax.inject.Inject;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = TestConfig.class)
-public class OrganismPartGroupingServiceIT {
+class OrganismPartGroupingServiceIT {
     @Inject
     private OrganismPartGroupingService subject;
 
     @Test
-    public void testGetAnatomicalSystems() {
-        assertThat(
-                subject.getAnatomicalSystemsGrouping(ImmutableList.of(OntologyTerm.create("UBERON_0000006"))).keySet(),
-                contains(ColumnGroup.create("UBERON_0000949", "endocrine system")));
+    void testGetAnatomicalSystems() {
+        assertThat(subject.getAnatomicalSystemsGrouping(ImmutableSet.of(OntologyTerm.create("UBERON_0000006"))))
+                .containsKey(ColumnGroup.create("UBERON_0000949", "endocrine system"));
     }
 
     /*
@@ -43,29 +39,26 @@ public class OrganismPartGroupingServiceIT {
         2 8
     */
     @Test
-    public void someIdsAreInMultipleTissues() {
-        assertThat(
-                subject.getAnatomicalSystemsGrouping(ImmutableList.of(OntologyTerm.create("UBERON_0022292"))).size(),
-                greaterThan(4));
+    void someIdsAreInMultipleTissues() {
+//        assertThat(subject.getAnatomicalSystemsGrouping(ImmutableSet.of(OntologyTerm.create("UBERON_0022292"))).size())
+//                .isGreaterThan(4);
+        assertThat(subject.getAnatomicalSystemsGrouping(ImmutableSet.of(OntologyTerm.create("UBERON_0022292"))))
+                .size().isGreaterThan(4);
+
     }
 
     @Test
-    public void nonexistentIdsAreInNoTissues() {
-        assertThat(
-                subject.getAnatomicalSystemsGrouping(
-                        ImmutableList.of(OntologyTerm.create("UBERON_1234567"))).entrySet(),
-                empty());
+    void nonexistentIdsAreInNoTissues() {
+        assertThat(subject.getAnatomicalSystemsGrouping(ImmutableSet.of(OntologyTerm.create("UBERON_1234567"))))
+                .isEmpty();
     }
 
     @Test
-    public void gotYourNose() {
+    void gotYourNose() {
         assertThat(
-                subject.getAnatomicalSystemsGrouping(
-                        ImmutableList.of(OntologyTerm.create("UBERON_0000004", "nose"))).entrySet(),
-                not(empty()));
-        assertThat(
-                subject.getOrgansGrouping(
-                        ImmutableList.of(OntologyTerm.create("UBERON_0000004", "nose"))).entrySet(),
-                not(empty()));
+                subject.getAnatomicalSystemsGrouping(ImmutableSet.of(OntologyTerm.create("UBERON_0000004", "nose"))))
+                .isNotEmpty();
+        assertThat(subject.getOrgansGrouping(ImmutableSet.of(OntologyTerm.create("UBERON_0000004", "nose"))))
+                .isNotEmpty();
     }
 }

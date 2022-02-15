@@ -23,7 +23,7 @@
     "@ebi-gene-expression-group/atlas-feedback-form": "^1.4.0",
     "@ebi-gene-expression-group/atlas-homepage-cards": "^2.5.1",
     "@ebi-gene-expression-group/atlas-react-fetch-loader": "^3.7.0",
-    "@ebi-gene-expression-group/expression-atlas-experiment-page": "1.17.0",
+    "@ebi-gene-expression-group/expression-atlas-experiment-page": "1.19.0",
     "@ebi-gene-expression-group/expression-atlas-heatmap-highcharts": "^5.7.0",
     "@ebi-gene-expression-group/expression-atlas-number-format": "^3.2.0",
     "@ebi-gene-expression-group/react-ebi-species": "^2.6.1",
