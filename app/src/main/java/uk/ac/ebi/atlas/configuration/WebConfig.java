@@ -14,6 +14,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesView;
+import uk.ac.ebi.atlas.model.ExpressionUnit;
+import uk.ac.ebi.atlas.model.ExpressionUnitPropertyEditor;
 import uk.ac.ebi.atlas.resource.DataFileHub;
 import uk.ac.ebi.atlas.search.SemanticQuery;
 import uk.ac.ebi.atlas.search.SemanticQueryPropertyEditor;
@@ -70,5 +72,6 @@ public class WebConfig implements WebMvcConfigurer {
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(SemanticQuery.class, new SemanticQueryPropertyEditor());
+        binder.registerCustomEditor(ExpressionUnit.Absolute.Protein.class, new ExpressionUnitPropertyEditor());
     }
 }
