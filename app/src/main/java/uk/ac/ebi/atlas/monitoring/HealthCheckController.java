@@ -15,8 +15,8 @@ public class HealthCheckController {
     public HealthCheckController(HealthCheckService healthCheckService) {
         healthChecker = new HealthChecker(
                 healthCheckService,
-                ImmutableSet.of("atlas-bioentities"),
-                ImmutableSet.of("bulk-analytics"));
+                ImmutableSet.of(), // still needs to receive a collection of 'solr collections'
+                ImmutableSet.of("bulk-analytics", "atlas-bioentities")); // collectio of 'solr aliases'
     }
 
     @RequestMapping(value = "/json/health",
