@@ -266,6 +266,8 @@ public class ExperimentDownloadController {
                                 .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.IDF))
                                 .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.RNASEQ_D_ANALYTICS))
+                                .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.SUMMARY_PDF));
                         break;
 
