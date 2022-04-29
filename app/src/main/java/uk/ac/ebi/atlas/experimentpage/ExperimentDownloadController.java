@@ -365,6 +365,7 @@ public class ExperimentDownloadController {
                     ExperimentFileType.CONDENSE_SDRF,
                     ExperimentFileType.CONFIGURATION,
                     ExperimentFileType.PROTEOMICS_RAW_QUANT,
+                    ExperimentFileType.RNASEQ_D_ANALYTICS,
                     ExperimentFileType.IDF,
                     ExperimentFileType.SUMMARY_PDF));
             put(ExperimentType.RNASEQ_MRNA_DIFFERENTIAL, ImmutableList.of(
