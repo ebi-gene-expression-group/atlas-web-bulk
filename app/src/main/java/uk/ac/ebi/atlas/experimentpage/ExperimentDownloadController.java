@@ -266,7 +266,7 @@ public class ExperimentDownloadController {
                                 .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.IDF))
                                 .add(experimentFileLocationService.getFilePath(
-                                        experiment.getAccession(), ExperimentFileType.RNASEQ_D_ANALYTICS))
+                                        experiment.getAccession(), ExperimentFileType.PROTEOMICS_D_ANALYTICS))
                                 .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.SUMMARY_PDF));
                         break;
@@ -365,7 +365,7 @@ public class ExperimentDownloadController {
                     ExperimentFileType.CONDENSE_SDRF,
                     ExperimentFileType.CONFIGURATION,
                     ExperimentFileType.PROTEOMICS_RAW_QUANT,
-                    ExperimentFileType.RNASEQ_D_ANALYTICS,
+                    ExperimentFileType.PROTEOMICS_D_ANALYTICS,
                     ExperimentFileType.IDF,
                     ExperimentFileType.SUMMARY_PDF));
             put(ExperimentType.RNASEQ_MRNA_DIFFERENTIAL, ImmutableList.of(
