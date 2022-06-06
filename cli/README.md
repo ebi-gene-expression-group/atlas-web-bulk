@@ -60,14 +60,15 @@ Run without any arguments to get a list of available tasks:
 ```
 Usage: <main class> [COMMAND]
 Commands:
-  bulk-analytics-json  Write JSONL files for the bulk-analytics collection for
-                         the
-  bioentities-json     Write JSONL files for the bioentities collection
-  bioentities-map      Write a bioentity-to-bioentity properties map to file;
-                         the source of bioentity (i.e. gene) IDs can be either
-                         expression experiment matrices specified by their
-                         accessions or a single species from the bioentities
-                         collection
+  bulk-analytics-json       Write JSONL files for the bulk-analytics collection for
+                              the
+  bioentities-json          Write JSONL files for the bioentities collection
+  bioentities-map           Write a bioentity-to-bioentity properties map to file;
+                              the source of bioentity (i.e. gene) IDs can be either
+                              expression experiment matrices specified by their
+                              accessions or a single species from the bioentities
+                              collection
+  create-update-experiment  Creates or updates an experiment
 ```
 
 Pass the name of a task to obtain a detailed description of available options:
