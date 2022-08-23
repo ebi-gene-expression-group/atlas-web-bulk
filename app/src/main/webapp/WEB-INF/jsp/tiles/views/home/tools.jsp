@@ -6,7 +6,7 @@
     <a href="https://github.com/nunofonseca/irap" target="_blank">
         <div class="media-object">
             <div class="media-object-section middle">
-                <h3><span class="icon icon-generic" data-icon=":"></span></h3>
+                <h3 class="icon icon-generic" data-icon=":" />
             </div>
             <div class="media-object-section middle">
                 <p>
@@ -22,7 +22,7 @@
     <a href="https://www.ebi.ac.uk/fg/rnaseq/api/" target="_blank">
         <div class="media-object">
             <div class="media-object-section middle">
-                <h3><span class="icon icon-functional" data-icon="A"></span></h3>
+                <h3 class="icon icon-functional" data-icon="A" />
             </div>
             <div class="media-object-section middle">
                 <p>
@@ -39,7 +39,7 @@
     <a href="https://www.bioconductor.org/packages/release/bioc/html/ExpressionAtlas.html" target="_blank">
         <div class="media-object">
             <div class="media-object-section middle">
-                <h3><span class="icon icon-functional" data-icon="t"></span></h3>
+                <h3 class="icon icon-functional" data-icon="t" />
             </div>
             <div class="media-object-section middle">
                 <p>
@@ -56,7 +56,7 @@
     <a href="https://github.com/ebi-gene-expression-group/atlas-heatmap" target="_blank">
         <div class="media-object">
             <div class="media-object-section middle">
-                <h3><span class="icon icon-conceptual" data-icon="g"></span></h3>
+                <h3 class="icon icon-conceptual" data-icon="g" />
             </div>
             <div class="media-object-section middle">
                 <p>
