@@ -24,7 +24,7 @@
             </div>
             <div class="media-object-section middle">
                 <p>
-                    <strong>The RNASeq-er API—a gateway to systematically updated analysis of public RNA-seq data</strong><br>
+                    <strong>The RNASeq-er API – A gateway to systematically updated analysis of public RNA-seq data</strong><br>
                     <em>Bioinformatics</em>, 22 March 2017.
                 </p>
             </div>
