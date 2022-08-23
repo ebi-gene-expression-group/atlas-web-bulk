@@ -10,8 +10,8 @@
             </div>
             <div class="media-object-section middle">
                 <p>
-                    <strong>Expression Atlas update: from tissues to single cells</strong><br>
-                    <em>Nucleic Acids Research</em>, 30 October 2019.
+                    <strong>Expression Atlas update: gene and protein expression in multiple species</strong><br>
+                    <em>Nucleic Acids Research</em>, 24 November 2021.
                 </p>
             </div>
         </div>
