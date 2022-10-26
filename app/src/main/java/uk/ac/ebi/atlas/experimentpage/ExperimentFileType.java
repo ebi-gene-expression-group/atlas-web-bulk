@@ -24,6 +24,8 @@ public enum ExperimentFileType {
             "parameter-file", "Parameter file (XML format)", IconType.XML, false),
     RNASEQ_B_TPM(
             "tpm", "TPM file (TSV format)", IconType.TSV, false),
+    PROTEOMICS_D_ANALYTICS(
+            "proteomics-analytics", "Proteomics differential analytics files (TSV format)", IconType.TSV, false),
     RNASEQ_D_ANALYTICS(
             "rnaseq-analytics", "RNASeq analytics files (TSV format)", IconType.TSV, false),
     MICROARRAY_D_ANALYTICS(

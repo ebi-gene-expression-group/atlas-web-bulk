@@ -45,6 +45,8 @@ public class ExperimentFileLocationService {
                 return dataFileHub.getRnaSeqBaselineExperimentFiles(experimentAccession).tpms.getPath();
             case RNASEQ_D_ANALYTICS:
                 return dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession).analytics.getPath();
+            case PROTEOMICS_D_ANALYTICS:
+                return dataFileHub.getBulkDifferentialExperimentFiles(experimentAccession).analytics.getPath();
            default:
                 return null;
         }

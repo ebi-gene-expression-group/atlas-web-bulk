@@ -241,10 +241,6 @@ public class ExperimentDownloadController {
                 var experimentType = experiment.getType();
                 var paths = ImmutableList.<Path>builder();
                 switch (experimentType) {
-                    /*
-                       There is another RequestMapping for proteomicsDifferentialExperimentDownload
-                       so no need to have one here.
-                     */
                     case PROTEOMICS_BASELINE:
                         paths.add(experimentFileLocationService.getFilePath(
                                 experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
@@ -256,6 +252,21 @@ public class ExperimentDownloadController {
                                         experiment.getAccession(), ExperimentFileType.IDF))
                                 .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.PROTEOMICS_B_MAIN))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.SUMMARY_PDF));
+                        break;
+
+                    case PROTEOMICS_DIFFERENTIAL:
+                        paths.add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.CONFIGURATION))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.PROTEOMICS_RAW_QUANT))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.IDF))
+                                .add(experimentFileLocationService.getFilePath(
+                                        experiment.getAccession(), ExperimentFileType.PROTEOMICS_D_ANALYTICS))
                                 .add(experimentFileLocationService.getFilePath(
                                         experiment.getAccession(), ExperimentFileType.SUMMARY_PDF));
                         break;
@@ -350,6 +361,13 @@ public class ExperimentDownloadController {
                     ExperimentFileType.IDF,
                     ExperimentFileType.SUMMARY_PDF,
                     ExperimentFileType.PROTEOMICS_B_MAIN));
+            put(ExperimentType.PROTEOMICS_DIFFERENTIAL, ImmutableList.of(
+                    ExperimentFileType.CONDENSE_SDRF,
+                    ExperimentFileType.CONFIGURATION,
+                    ExperimentFileType.PROTEOMICS_RAW_QUANT,
+                    ExperimentFileType.PROTEOMICS_D_ANALYTICS,
+                    ExperimentFileType.IDF,
+                    ExperimentFileType.SUMMARY_PDF));
             put(ExperimentType.RNASEQ_MRNA_DIFFERENTIAL, ImmutableList.of(
                     ExperimentFileType.CONDENSE_SDRF,
                     ExperimentFileType.CONFIGURATION,
