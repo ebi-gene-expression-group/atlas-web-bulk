@@ -548,7 +548,7 @@ $.Autocompleter = function(input, options) {
 				dataType: options.dataType,
 				url: options.url,
 				data: $.extend({
-					q: text,
+					query: text,
                     field: field,
 					limit: options.max
 				}, extraParams),
