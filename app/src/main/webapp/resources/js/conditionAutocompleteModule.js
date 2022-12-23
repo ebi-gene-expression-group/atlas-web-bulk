@@ -23,12 +23,12 @@ var conditionAutocompleteModule = (function ($) {
             .jsonTagEditor({
                 autocomplete: {
                     plugin: 'arrayExpressAutocomplete',
-                    urlOrData:  'https://www.ebi.ac.uk/arrayexpress/efowords.txt',
+                    urlOrData:  'https://www.ebi.ac.uk/biostudies/api/v1/autocomplete/keywords',
                     matchContains: false,
                     selectFirst: false,
                     scroll: true,
                     max: 50,
-                    requestTreeUrl: 'https://www.ebi.ac.uk/arrayexpress/efotree.txt',
+                    requestTreeUrl: 'https://www.ebi.ac.uk/biostudies/api/v1/autocomplete/efotree',
                     width: 300
                 },
                 onChange: onChange,

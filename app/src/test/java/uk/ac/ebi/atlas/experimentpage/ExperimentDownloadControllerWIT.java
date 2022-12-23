@@ -51,7 +51,8 @@ class ExperimentDownloadControllerWIT {
             "E-MTAB-3834", //RNASEQ_MRNA_DIFFERENTIAL
             "E-PROT-1", //PROTEOMICS_BASELINE
             "E-TABM-713",//MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL
-            "E-PROT-28"); //PROTEOMICS_BASELINE_DIA
+            "E-PROT-28", //PROTEOMICS_BASELINE_DIA
+            "E-PROT-39"); //PROTEOMICS_DIFFERENTIAL
     private static final List<String> INVALID_EXPERIMENT_ACCESSION_LIST = ImmutableList.of("E-ERAD", "E-GEOD");
     private static final String ARCHIVE_NAME = "{0}-{1}-files.zip";
     private static final String ARCHIVE_DOWNLOAD_LIST_URL = "/experiments/download/zip";
@@ -108,7 +109,8 @@ class ExperimentDownloadControllerWIT {
                 .param("accession", EXPERIMENT_ACCESSION_LIST.get(3))
                 .param("accession", EXPERIMENT_ACCESSION_LIST.get(4))
                 .param("accession", EXPERIMENT_ACCESSION_LIST.get(5))
-                .param("accession", EXPERIMENT_ACCESSION_LIST.get(5))
+                .param("accession", EXPERIMENT_ACCESSION_LIST.get(6))
+                .param("accession", EXPERIMENT_ACCESSION_LIST.get(7))
                 .param("accession", INVALID_EXPERIMENT_ACCESSION_LIST.get(0))
                 .param("accession", INVALID_EXPERIMENT_ACCESSION_LIST.get(1)));
 
@@ -166,6 +168,21 @@ class ExperimentDownloadControllerWIT {
                                 experiment.getAccession(), ExperimentFileType.IDF))
                         .add(experimentFileLocationService.getFilePath(
                                 experiment.getAccession(), ExperimentFileType.RNASEQ_D_ANALYTICS));
+                break;
+
+            case PROTEOMICS_DIFFERENTIAL:
+                paths.add(experimentFileLocationService.getFilePath(
+                        experiment.getAccession(), ExperimentFileType.CONDENSE_SDRF))
+                        .add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.CONFIGURATION))
+                        .add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.PROTEOMICS_RAW_QUANT))
+                        .add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.IDF))
+                        .add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.PROTEOMICS_D_ANALYTICS))
+                        .add(experimentFileLocationService.getFilePath(
+                                experiment.getAccession(), ExperimentFileType.SUMMARY_PDF));
                 break;
 
             case RNASEQ_MRNA_BASELINE:
