@@ -14,14 +14,14 @@ docker-compose \
 -f docker/docker-compose-solrcloud.yml \
 -f docker/docker-compose-gradle.yml \
 run --rm --service-ports \
-scxa-gradle bash -c "
+gxa-gradle bash -c "
 set -e
 
 ./gradlew clean
 
 ./gradlew \
 -PdataFilesLocation=/atlas-data \
--PexperimentFilesLocation=/atlas-data/scxa \
+-PexperimentFilesLocation=/atlas-data/gxa \
 -PexperimentDesignLocation=/atlas-data/expdesign \
 -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
 -PjdbcUsername=${POSTGRES_USER} \
