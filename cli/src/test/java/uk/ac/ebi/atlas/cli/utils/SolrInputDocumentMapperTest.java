@@ -14,7 +14,7 @@ class SolrInputDocumentMapperTest {
     @DisplayName("SolrInputDocumentMapper is a utility class that cannot be instantiated")
     void utilityClassCannotBeInstantiated() {
         assertThatExceptionOfType(UnsupportedOperationException.class)
-                .isThrownBy(() -> new SolrInputDocumentMapper());
+                .isThrownBy(SolrInputDocumentMapper::new);
     }
 
     @Test
@@ -38,7 +38,7 @@ class SolrInputDocumentMapperTest {
         solrInputDocument.addField(fieldName, value);
 
         assertThat(SolrInputDocumentMapper.transformToMap(solrInputDocument))
-                .containsEntry(fieldName, ImmutableList.of(value))
+                .containsEntry(fieldName, value)
                 .hasSize(1);
     }
 }
