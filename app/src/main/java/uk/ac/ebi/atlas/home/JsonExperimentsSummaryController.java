@@ -149,6 +149,12 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
                                 getExperimentLink("Prenatal brain development", "E-MTAB-4840"))),
                 CardModel.create(
                         IMAGE,
+                        getExperimentsSummaryImageUrl("edtl"),
+                        getLinkWithEmptyLabel(getCustomUrl("/edtl/experiments")),
+                        ImmutableList.of(
+                                Pair.of("European Diagnostic Transcriptomic Library", Optional.of(getCustomUrl("/edtl/experiments"))))),
+                CardModel.create(
+                        IMAGE,
                         getExperimentsSummaryImageUrl("baseline"),
                         getLinkWithEmptyLabel(getCustomUrl("/baseline/experiments")),
                         ImmutableList.of(
