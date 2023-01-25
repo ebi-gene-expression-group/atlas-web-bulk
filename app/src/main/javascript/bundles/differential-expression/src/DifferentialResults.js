@@ -68,16 +68,19 @@ const DifferentialResultsRow = (props) => {
                    onMouseEnter={() => setHover(true)}>
                     {props.comparison}
                 </a>
-                {inHover && <FetchLoaderContrastTooltip
+                {
+                  inHover &&
+                  <FetchLoaderContrastTooltip 
                     id={`${props.id}_contrast`}
                     host={props.atlasUrl}
-                    resource={URI(`rest/contrast-summary`)
-                        .addSearch(`experimentAccession`, props.experimentAccession)
-                        .addSearch(`contrastId`, props.contrastId)
-                        .addSearch(`accessKey`, props.accessKey)
-                        .toString()}
+                    resource={URI(`rest/contrast-summary`)}
+                    query={{
+                      experimentAccession: props.experimentAccession,
+                      contrastId: props.contrastId,
+                      accessKey: props.accessKey
+                    }}
                     fulfilledPayloadProvider={data => ({result: data})}
-                />
+                  />
                 }
             </Data>
             <Data>
