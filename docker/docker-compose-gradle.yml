@@ -5,7 +5,7 @@ services:
     image: openjdk:11
     container_name: gxa-gradle
     networks:
-      - gxa
+      - atlas-test-net
     ports:
       - "5005:5005"
     working_dir: /root/project
@@ -41,5 +41,5 @@ services:
         ./gradlew -PtestResultsPath=e2e :app:test --tests *WIT &&
         ./gradlew :app:jacocoTestReport
 networks:
-  gxa:
-    name: gxa
+  atlas-test-net:
+    name: atlas-test-net
