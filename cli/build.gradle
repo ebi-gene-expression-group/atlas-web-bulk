@@ -43,7 +43,7 @@ processResources {
                 zkHosts: project.hasProperty('zkHosts') ? zkHosts : 'localhost',
                 solrHosts: project.hasProperty('solrHosts') ? solrHosts : 'localhost',
                 solrUser: project.hasProperty('solrUser') ? solrUser : '',
-                solrPass: project.hasProperty('solrPass') ? solrPass : '',
+                solrPassword: project.hasProperty('solrPassword') ? solrPassword : '',
         )
     }
 }
