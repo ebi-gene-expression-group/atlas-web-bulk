@@ -81,6 +81,7 @@ processTestResources {
     expand(
             dataFilesLocation: project.hasProperty('dataFilesLocation') ? dataFilesLocation : "${System.env.ATLAS_DATA_PATH}",
             experimentFilesLocation: project.hasProperty('experimentFilesLocation') ? experimentFilesLocation : "${System.env.ATLAS_DATA_PATH}/gxa",
+            experimentDesignLocation: experimentDesignLocation,
             buildNumber: project.hasProperty('buildNumber') ? buildNumber : '42',
             buildBranch: project.hasProperty('buildBranch') ? buildBranch : 'dev',
             buildRevision: project.hasProperty('buildRevision') ? buildRevision : 'dev',
