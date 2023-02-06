@@ -45,6 +45,7 @@
     "react-refetch": "^3.0.1",
     "react-svg": "^7.2.14",
     "styled-components": "^5.1.0",
+    "react-is": "^18.2.0",
     "transform-props-with": "^2.2.0",
     "urijs": "^1.19.2",
     "whatwg-fetch": "^3.0.0"
