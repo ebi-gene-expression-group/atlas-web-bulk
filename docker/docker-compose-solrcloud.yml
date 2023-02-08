@@ -1,83 +1,94 @@
 version: "3.6"
 
 services:
-  gxa-zk-1:
-    image: zookeeper:3.4.14
-    container_name: gxa-zk-1
+  gxa-solrcloud-zookeeper-0:
+    container_name: ${SOLR_CLOUD_ZK_CONTAINER_1_NAME}
+    image: zookeeper:3.7.0
     networks:
-      - gxa
+      - atlas-test-net
     ports:
-      - "2181:2181"
+      - 2181:2181
+      - 7000:7000
     volumes:
       - gxa-zk-1-data:/data
       - gxa-zk-1-datalog:/datalog
     environment:
       ZOO_MY_ID: 1
-      ZOO_SERVERS: server.1=0.0.0.0:2888:3888 server.2=gxa-zk-2:2888:3888 server.3=gxa-zk-3:2888:3888
+      ZOO_SERVERS: server.1=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2888:3888;2181 server.2=${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2888:3888;2181 server.3=${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true
 
-  gxa-zk-2:
-    image: zookeeper:3.4.14
-    container_name: gxa-zk-2
+  gxa-solrcloud-zookeeper-1:
+    container_name: ${SOLR_CLOUD_ZK_CONTAINER_2_NAME}
+    image: zookeeper:3.7.0
     networks:
-      - gxa
+      - atlas-test-net
     ports:
-      - "2182:2181"
+      - 2182:2181
+      - 7001:7000
     volumes:
       - gxa-zk-2-data:/data
       - gxa-zk-2-datalog:/datalog
     environment:
       ZOO_MY_ID: 2
-      ZOO_SERVERS: server.1=gxa-zk-1:2888:3888 server.2=0.0.0.0:2888:3888 server.3=gxa-zk-3:2888:3888
+      ZOO_SERVERS: server.1=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2888:3888;2181 server.2=${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2888:3888;2181 server.3=${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true
 
-  gxa-zk-3:
-    image: zookeeper:3.4.14
-    container_name: gxa-zk-3
+  gxa-solrcloud-zookeeper-2:
+    container_name: ${SOLR_CLOUD_ZK_CONTAINER_3_NAME}
+    image: zookeeper:3.7.0
     networks:
-      - gxa
+      - atlas-test-net
     ports:
-      - "2183:2181"
+      - 2183:2181
+      - 7002:7000
     volumes:
       - gxa-zk-3-data:/data
       - gxa-zk-3-datalog:/datalog
     environment:
       ZOO_MY_ID: 3
-      ZOO_SERVERS: server.1=gxa-zk-1:2888:3888 server.2=gxa-zk-2:2888:3888 server.3=0.0.0.0:2888:3888
+      ZOO_SERVERS: server.1=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2888:3888;2181 server.2=${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2888:3888;2181 server.3=${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+      ZOO_CFG_EXTRA: metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true
+
+  gxa-solrcloud-0:
+    container_name: ${SOLR_CLOUD_CONTAINER_1_NAME}
+    image: solr:8.7.0
+    networks:
+      - atlas-test-net
+    ports:
+      - 8983:8983
+    volumes:
+      - gxa-solrcloud-1-data:/var/solr/data
+    environment:
+      SOLR_JAVA_STACK_SIZE: '-Xss512k'
+      SOLR_HEAP: 3g
+      SOLR_OPTS: -Denable.packages=true -Dsolr.max.booleanClauses=100000000
+      ZK_HOST: ${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181
+    depends_on:
+      - gxa-solrcloud-zookeeper-0
+      - gxa-solrcloud-zookeeper-1
+      - gxa-solrcloud-zookeeper-2
 
   gxa-solrcloud-1:
-    image: solr:7.1.0
-    container_name: gxa-solrcloud-1
+    container_name: ${SOLR_CLOUD_CONTAINER_2_NAME}
+    image: solr:8.7.0
     networks:
-      - gxa
+      - atlas-test-net
     ports:
-      - "8983:8983"
+      - 8984:8983
     volumes:
-      - gxa-solrcloud-1-data:/opt/solr/server/solr
+      - gxa-solrcloud-2-data:/var/solr/data
     environment:
-      - SOLR_HEAP=3g
-      - SOLR_OPTS=-Denable.runtime.lib=true
-      - ZK_HOST=gxa-zk-1:2181,gxa-zk-2:2181,gxa-zk-3:2181
+      SOLR_JAVA_STACK_SIZE: '-Xss512k'
+      SOLR_HEAP: 3g
+      SOLR_OPTS: -Denable.packages=true -Dsolr.max.booleanClauses=100000000
+      ZK_HOST: ${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181
     depends_on:
-      - gxa-zk-1
-      - gxa-zk-2
-      - gxa-zk-3
-
-  gxa-solrcloud-2:
-    image: solr:7.1.0
-    container_name: gxa-solrcloud-2
-    networks:
-      - gxa
-    ports:
-      - "8984:8983"
-    volumes:
-      - gxa-solrcloud-2-data:/opt/solr/server/solr
-    environment:
-      - SOLR_HEAP=3g
-      - SOLR_OPTS=-Denable.runtime.lib=true
-      - ZK_HOST=gxa-zk-1:2181,gxa-zk-2:2181,gxa-zk-3:2181
-    depends_on:
-      - gxa-zk-1
-      - gxa-zk-2
-      - gxa-zk-3
+      - gxa-solrcloud-zookeeper-0
+      - gxa-solrcloud-zookeeper-1
+      - gxa-solrcloud-zookeeper-2
 
 volumes:
   gxa-zk-1-data:
@@ -98,5 +109,5 @@ volumes:
     name: gxa-solrcloud-2-data
 
 networks:
-  gxa:
-    name: gxa
+  atlas-test-net:
+    name: atlas-test-net
