@@ -5,7 +5,7 @@ services:
     image: tomcat:9-jdk11
     container_name: gxa-tomcat
     networks:
-      - gxa
+      - atlas-test-net
     environment:
       JPDA_ADDRESS: "*:8000"
     ports:
@@ -27,5 +27,5 @@ volumes:
     name: gxa-tomcat-conf
 
 networks:
-  gxa:
-    name: gxa
+  atlas-test-net:
+    name: atlas-test-net

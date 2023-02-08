@@ -5,7 +5,7 @@ services:
     image: postgres:10-alpine
     container_name: $POSTGRES_HOST
     networks:
-      - gxa
+      - atlas-test-net
     restart: always
     environment:
       POSTGRES_HOST: $POSTGRES_HOST
@@ -19,7 +19,7 @@ services:
     image: flyway/flyway
     container_name: gxa-flyway-test
     networks:
-      - gxa
+      - atlas-test-net
     command: -url=jdbc:postgresql://$POSTGRES_HOST/$POSTGRES_DB -schemas=$POSTGRES_USER -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD -connectRetries=60 migrate
     volumes:
       - ../schemas/flyway/gxa/:/flyway/sql
@@ -27,5 +27,5 @@ services:
       - gxa-postgres-test
 
 networks:
-  gxa:
-    name: gxa
+  atlas-test-net:
+    name: atlas-test-net
