@@ -2,7 +2,7 @@ version: "3.6"
 
 services:
   gxa-gradle:
-    image: openjdk:11
+    image: gradle:7.0-jdk11
     container_name: gxa-gradle
     networks:
       - atlas-test-net
@@ -10,24 +10,30 @@ services:
       - "5005:5005"
     working_dir: /root/project
     volumes:
-      - ..:/root/project
-      - ./packages:/root/.m2
       - $ATLAS_DATA_PATH:/atlas-data
+      - ..:/root/project
+      - gradle-wrapper-dists:/root/.gradle/wrapper/dists
+      - gradle-ro-dep-cache:/gradle-ro-dep-cache:ro
+      - bioentity-properties:/atlas-data/bioentity_properties:ro
+      - gxa-data:/atlas-data/gxa:ro
+      - gxa-expdesign:/atlas-data/expdesign
+      - ./packages:/root/.m2
     depends_on:
+      - gxa-solrcloud-0
       - gxa-solrcloud-1
-      - gxa-solrcloud-2
-      - gxa-flyway-test
+      - gxa-flyway
     environment:
       POSTGRES_HOST: $POSTGRES_HOST
       POSTGRES_DB: $POSTGRES_DB
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      GRADLE_RO_DEP_CACHE: /gradle-ro-dep-cache
     command:
       - sh
       - -c
       - >
-        ./gradlew :app:clean &&
-        ./gradlew
+        gradle :app:clean &&
+        gradle
         -PdataFilesLocation=/atlas-data
         -PexperimentFilesLocation=/atlas-data/gxa
         -PjdbcUrl=jdbc:postgresql://$POSTGRES_HOST:5432/$POSTGRES_DB
@@ -36,10 +42,23 @@ services:
         -PzkHost=gxa-zk-1
         -PsolrHost=gxa-solrcloud-1
         :app:testClasses &&
-        ./gradlew -PtestResultsPath=ut :app:test --tests *Test &&
-        ./gradlew -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT &&
-        ./gradlew -PtestResultsPath=e2e :app:test --tests *WIT &&
-        ./gradlew :app:jacocoTestReport
+        gradle -PtestResultsPath=ut :app:test --tests *Test &&
+        gradle -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT &&
+        gradle -PtestResultsPath=e2e :app:test --tests *WIT &&
+        gradle :app:jacocoTestReport
+
+volumes:
+  gradle-wrapper-dists:
+    name: ${GRADLE_WRAPPER_DISTS_VOL_NAME}
+  gradle-ro-dep-cache:
+    name: ${GRADLE_RO_DEP_CACHE_VOL_NAME}
+  bioentity-properties:
+    name: ${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}
+  gxa-data:
+    name: ${ATLAS_DATA_GXA_VOL_NAME}
+  gxa-expdesign:
+    name: ${ATLAS_DATA_GXA_EXPDESIGN_VOL_NAME}
+
 networks:
   atlas-test-net:
     name: atlas-test-net
