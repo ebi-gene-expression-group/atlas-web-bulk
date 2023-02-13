@@ -101,8 +101,8 @@ processTestResources {
   filesMatching('jdbc.properties') {
     expand(
             jdbcUrl: project.hasProperty('jdbcUrl') ? jdbcUrl : 'jdbc:postgresql://localhost:5432/gxpgxadev',
-            jdbcUsername: project.hasProperty('jdbcUsername') ? jdbcUsername : 'atlasprd3',
-            jdbcPassword: project.hasProperty('jdbcPassword') ? jdbcPassword : 'atlasprd3'
+            jdbcUsername: project.hasProperty('jdbcUsername') ? jdbcUsername : 'atlasdev',
+            jdbcPassword: project.hasProperty('jdbcPassword') ? jdbcPassword : 'atlasdev'
     )
   }
 
