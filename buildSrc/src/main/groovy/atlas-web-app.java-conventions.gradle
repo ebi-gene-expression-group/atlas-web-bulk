@@ -91,8 +91,8 @@ processTestResources {
 
   filesMatching('solr.properties') {
     expand(
-            zkHosts: project.hasProperty('zkHosts') ? zkHosts : 'localhost',
-            solrHosts: project.hasProperty('solrHosts') ? solrHosts : 'localhost',
+            zkHosts: project.hasProperty('zkHosts') ? zkHosts : 'localhost:2181',
+            solrHosts: project.hasProperty('solrHosts') ? solrHosts : 'localhost:8983',
             solrUser: project.hasProperty('solrUser') ? solrUser : '',
             solrPass: project.hasProperty('solrPass') ? solrPass : '',
     )
