@@ -18,6 +18,7 @@ services:
       - gxa-pgdata:/var/lib/postgresql/data
 
   gxa-flyway:
+    container_name: gxa-flyway
     image: flyway/flyway
     networks:
       - atlas-test-net

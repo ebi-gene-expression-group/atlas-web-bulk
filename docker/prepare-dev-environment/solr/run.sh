@@ -60,22 +60,20 @@ print_stage_name "💤 Give Solr ten seconds to start up before copying ontology
 sleep 10
 print_done
 
-POSTGRES_HOST=postgres
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=pgpass
-print_stage_name "⚙ Spin up containers to index volume data in Solr"
-echo "docker run --network atlas-test-net -h ${POSTGRES_HOST} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:11-alpine"
-PG_CONTAINER_ID=$(docker run --network atlas-test-net -h ${POSTGRES_HOST} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -d postgres:11-alpine)
+print_stage_name "⚙ Spin up Postgres and Solr indexer containers to index volume data in Solr"
+docker-compose --env-file ${SCRIPT_DIR}/../../dev.env \
+-f ${SCRIPT_DIR}/../../docker-compose-postgres.yml \
+up -d >> ${LOG_FILE} 2>&1
+print_done
 
 GRADLE_RO_DEP_CACHE_DEST=/gradle-ro-dep-cache
 docker run --rm -it \
+--env-file ${SCRIPT_DIR}/../../dev.env \
 -v ${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}:/atlas-data/bioentity_properties:ro \
 -v ${ATLAS_DATA_GXA_VOL_NAME}:/atlas-data/gxa:ro \
 -v ${GRADLE_RO_DEP_CACHE_VOL_NAME}:${GRADLE_RO_DEP_CACHE_DEST}:ro \
+-v ${ATLAS_DATA_GXA_EXPDESIGN_VOL_NAME}:/atlas-data/gxa-expdesign:ro \
 -e GRADLE_RO_DEP_CACHE=${GRADLE_RO_DEP_CACHE_DEST} \
--e POSTGRES_HOST=${POSTGRES_HOST} \
--e POSTGRES_USER=${POSTGRES_USER} \
--e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
 -e SPECIES="${SPECIES}" \
 -e EXP_IDS="${EXP_IDS}" \
 -e SOLR_HOST=${SOLR_CLOUD_CONTAINER_1_NAME}:8983 \
@@ -87,12 +85,6 @@ docker run --rm -it \
 -e SOLR_COLLECTION_BULK_ANALYTICS_SCHEMA_VERSION=1 \
 --network atlas-test-net \
 ${IMAGE_NAME} >> ${LOG_FILE} 2>&1
-print_done
-
-print_stage_name "🧹 Clean up Postgres container"
-echo "docker stop ${PG_CONTAINER_ID}"
-docker stop ${PG_CONTAINER_ID} >> ${LOG_FILE} 2>&1
-docker rm ${PG_CONTAINER_ID} >> ${LOG_FILE} 2>&1
 print_done
 
 printf '%b\n' "🙂 All done! Point your browser at http://localhost:8983 to explore your SolrCloud instance."

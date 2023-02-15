@@ -12,7 +12,7 @@ RUN git clone --depth 1 https://github.com/ebi-gene-expression-group/index-bioen
 RUN git clone --depth 1 --recurse-submodules https://github.com/ebi-gene-expression-group/atlas-web-bulk.git
 RUN git clone --depth 1 https://github.com/ebi-gene-expression-group/solr-bulk.git
 
-VOLUME /atlas-data/bioentity_properties /atlas-data/gxa
+VOLUME /atlas-data/bioentity_properties /atlas-data/gxa /atlas-data/gxa-expdesign
 
 ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
 

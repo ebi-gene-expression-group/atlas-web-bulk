@@ -8,6 +8,7 @@ done
 cd /root/atlas-web-bulk
 ./gradlew -PdataFilesLocation=/root \
 -PexperimentFilesLocation=/atlas-data/gxa \
+-PexperimentDesignLocation=/atlas-data/gxa-expdesign \
 -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/postgres \
 -PjdbcUsername=${POSTGRES_USER} \
 -PjdbcPassword=${POSTGRES_PASSWORD} \
@@ -31,7 +32,8 @@ unset SCHEMA_VERSION
 cd /root/atlas-web-bulk
 ./gradlew -PdataFilesLocation=/root \
 -PexperimentFilesLocation=/atlas-data/gxa \
--PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/postgres \
+-PexperimentDesignLocation=/atlas-data/gxa-expdesign \
+-PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
 -PjdbcUsername=${POSTGRES_USER} \
 -PjdbcPassword=${POSTGRES_PASSWORD} \
 :cli:bootRun --args="bulk-analytics-json --output=/root/experiments-jsonl -e $(echo ${EXP_IDS} | sed -e "s/ /,/g")"
