@@ -1,18 +1,51 @@
 # Expression Atlas
 
-## Requirements
+## Prepare your development environment
+
+### TL;DR
+```bash
+./docker/prepare-dev-environment/gradle-cache/run.sh -l gradle-cache.log && \
+./docker/prepare-dev-environment/volumes/run.sh -l volumes.log && \
+./docker/prepare-dev-environment/postgres/run.sh -l pg.log && \
+./docker/prepare-dev-environment/solr/run.sh -l solr.log
+```
+
+### Requirements
 - Docker v19+
 - Docker Compose v1.25+
-- 100 GB of available storage (experiment files, PostgreSQL and Solr backup snapshots and Docker volumes)
+- 100 GB of available storage for the following Docker volumes:
+    - Experiment files
+    - Bioentity properties (i.e. gene annotations)
+    - PostgreSQL
+    - SolrCloud and ZooKeeper
+    - Tomcat configuration files
 
-Notice that PostgreSQL and Solr snapshots are [`bind` mounted](https://docs.docker.com/storage/bind-mounts/) in order
-to move data back and forth from the containers. Actual files managed by either Solr or PostgreSQL are kept in volumes
-which will be reused even if the containers are removed or brought down by Docker Compose. If you want to start afresh
-delete the old volume (e.g. for Postgres `docker volume rm gxa-pgdata`) and re-run the necessary step to return to the
-initial state.
+Files written by Solr, PostgreSQL and Tomcat are kept in volumes which will be reused even if the containers are
+removed (e.g. when running `docker-compose down`).  If you want to start afresh delete the old volume(s) (e.g. for
+Postgres `docker volume rm gxa-pgdata`) and re-run the necessary script to return to the
+initial state. You can find the volume names used by each service in the `volumes` section of its Docker Compose YAML
+file.
 
-## Code
-Clone the repository of Bulk Expression Atlas proper:
+The full list of volumes is:
+- `gxa-atlas-data-bioentity-properties`
+- `gxa-atlas-data-gxa`
+- `gxa-atlas-data-gxa-expdesign`
+- `gxa-gradle-ro-dep-cache`
+- `gxa-gradle-wrapper-dists`
+- `gxa-pgdata`
+- `gxa-solrcloud-1-data`
+- `gxa-solrcloud-2-data`
+- `gxa-tomcat-conf`
+- `gxa-webapp-properties`
+- `gxa-zk-1-data`
+- `gxa-zk-1-datalog`
+- `gxa-zk-2-data`
+- `gxa-zk-2-datalog`
+- `gxa-zk-3-data`
+- `gxa-zk-3-datalog`
+
+### Code
+Clone the repository of Bulk Expression Atlas with submodules:
 ```bash
 git clone --recurse-submodules https://github.com/ebi-gene-expression-group/atlas-web-bulk.git
 ```
@@ -22,248 +55,154 @@ If you have already cloned the project ensure it’s up-to-date:
   git submodule update --remote
 ```
 
-
-## Data
-Choose a suitable location for the experiment files, database and Solr backup data. Set the path in the variable
-`ATLAS_DATA_PATH`.
-
-To download the data you can use `rsync` if you’re connected to the EBI network (over VPN or from campus):
+### Create a Gradle read-only dependency cache
+To speed up builds and tests it is strongly encouraged to create a Docker volume to back a [Gradle read-only dependency
+cache](https://docs.gradle.org/current/userguide/dependency_resolution.html#sub:ephemeral-ci-cache).
 ```bash
-ATLAS_DATA_PATH=/path/to/bulk/atlas/data 
-rsync -ravz ebi-cli:/nfs/ftp/pub/databases/microarray/data/atlas/test/gxa/* $ATLAS_DATA_PATH
+./docker/prepare-dev-environment/gradle-cache/run.sh -l gradle-cache.log
 ```
 
-Alternatively you can use `wget` and connect to EBI’s FTP server over HTTP:
+### Prepare volumes
+In order to run integration tests and a development instance of Bulk Expression Atlas you will need a few Docker
+volumes first. They will be populated with data that will be indexed in Solr and Postgres. Bulk Expression Atlas
+needs all three of: file bundles in the volumes, Solr collections and Postgres data. This step takes care of the first
+requirement:
 ```bash
-wget -P $ATLAS_DATA_PATH -c --reject="index.html*" --recursive -np -nc -nH --cut-dirs=7 --random-wait --wait 1 -e robots=off http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/test/gxa/
+./docker/prepare-dev-environment/volumes/run.sh -l volumes.log
 ```
 
-Notice that either way `ATLAS_DATA_PATH` will be created for you if the directory doesn’t exist.
+You can get detailed information about which volumes are created if you run the script with the `-h` flag.
 
-## Bring up the environment
-Besides `ATLAS_DATA_PATH` you need to set some variables for the Postgres container. Use the settings below and replace
-`ATLAS_DATA_PATH` value to the directory you set up in the first step.
+This script, unless it’s run with the `-r` flag, can be interrupted without losing any data. The container mirrors
+directories via FTP, and can resume after cancellation. It can be re-run to update the data in the volumes should the
+contents of the source directories change. This is especially useful when experiments are re-analysed/re-annotated,
+or the bioentity properties directory is updated after a release of  Ensembl, WormBase ParaSite, Reactome, Gene
+Ontoloy, Plant Ontology or InterPro.
 
-In the `atlas-web-bulk-cell/docker` directory run the following:
+### PostGreSQL
+
+To create our PostGreSQL database and run the schema migrations up to the latest version please execute this script:  
 ```bash
-ATLAS_DATA_PATH=/path/to/bulk/atlas/data \
-POSTGRES_HOST=gxa-postgres \
-POSTGRES_DB=gxpgxadev \
-POSTGRES_USER=atlasprd3 \
-POSTGRES_PASSWORD=atlasprd3 \
-docker-compose -f docker-compose-solrcloud.yml -f docker-compose-postgres.yml -f docker-compose-tomcat.yml up
+./docker/prepare-dev-environment/postgres/run.sh -l pg.log
 ```
 
-You can also set a Docker Compose *Run* configuration in IntelliJ IDEA with the environment variables from the command
-above if you find that more convenient.
+### Solr
+To create the collections, their schemas and populate them, please run the following script.
 
-After bringing up the containers, you may want to inspect the logs to see that all services are running fine. The last
-log should come from Tomcat, and it should be something similar to:
-```
-gxa-tomcat    | 18-Dec-2020 13:40:58.907 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in 6705 ms
-```
-
-Now let’s populate both the Postgres database and the SolrCloud collections.
-
-### Postgres
-Run the  following command to restore Postgres data from the provided `pg-dump.bin` file:
 ```bash
-docker exec -it gxa-postgres bash -c 'pg_restore -d $POSTGRES_DB -h localhost -p 5432 -U $POSTGRES_USER --clean /var/backups/postgresql/pg-dump.bin'
+./docker/prepare-dev-environment/solr/run.sh -l solr.log
 ```
 
-A few minutes later your Postgres database will be ready.
+Run the script with the `-h` flag for more details.
 
-### SolrCloud
-Use the provided `Dockerfile` to bootstrap SolrCloud:
-```bash
-docker build -t gxa-solrcloud-bootstrap .
-docker run -i --rm --network gxa gxa-solrcloud-bootstrap
-```
-
-You will see many warnings or errors in Solr’s responses. That’s alright and to be expected, since the scripts that
-create the config sets, collections and define the schemas will attempt first to remove them to start from a clean,
-known state; however Solr will reply with an error if the collections can’t be deleted.
-
-Again, this step will take a few minutes.
-
-### Tomcat
-Copy the Tomcat credentials file to the container. The `admin` role is used to access several admin endpoints in Bulk Expression Atlas (e.g. `/admin/experiments/help`). Tomcat’s `conf` directory is persisted as a volume so that we
-need to do this only once:
-```bash
-docker cp tomcat-users.xml gxa-tomcat:/usr/local/tomcat/conf
-```
-
-Run the Gradle task `war` in the `atlas-web-bulk` directory:
-```bash
-cd atlas-web-bulk
-./gradlew :app:war
-```
-
-You should now have the file `build/libs/gxa.war` which by default Tomcat’s naming conventions will be served at
-`gxa`. Point your browser at `http://localhost:8080/gxa` and voilà!
-
-Every time you re-run the `war` task the web app will be automatically re-deployed by Tomcat.
-
-If you face issues in redeployment, stop all running containers and re-run them
-
-## Backing up your data
-Eventually you’ll add new experiments to your development instance of GXA, or new, improved collections in Solr will
-replace the old ones. In such cases you’ll want to get a snapshot of the data to share with the team. Below there are
-instructions to do that.
-
-### PostgreSQL
-If at some point you wish to create a backup dump of the database run the command below:
-```bash
-docker exec -it gxa-postgres bash -c 'pg_dump -d $POSTGRES_DB -h localhost -p 5432 -U $POSTGRES_USER -f /var/backups/postgresql/pg-dump.bin -F c -n $POSTGRES_USER -t $POSTGRES_USER.* -T *flyway*'
-```
-
-### SolrCloud
-```bash
-for SOLR_COLLECTION in $SOLR_COLLECTIONS
-do
-  START_DATE_IN_SECS=`date +%s`
-  curl "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=backup&location=/var/backups/solr&name=${SOLR_COLLECTION}"
-
-  # Pattern enclosed in (?<=) is zero-width look-behind and (?=) is zero-width look-ahead, we match everything in between
-  COMPLETED_DATE=`curl -s "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=details" | grep -oP '(?<="snapshotCompletedAt",").*(?=")'`
-  COMPLETED_DATE_IN_SECS=`date +%s -d "${COMPLETED_DATE}"`
-
-  # We wait until snapshotCompletedAt is later than the date we took before issuing the backup operation
-  while [ ${COMPLETED_DATE_IN_SECS} -lt ${START_DATE_IN_SECS} ]
-  do
-    sleep 1s
-    COMPLETED_DATE=`curl -s "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=details" | grep -oP '(?<="snapshotCompletedAt",").*(?=")'`
-    COMPLETED_DATE_IN_SECS=`date +%s -d "${COMPLETED_DATE}"`
-  done
-done
-```
+You may want to speed up the process by raising the value of the environment variable `NUM_DOCS_PER_BATCH` (L81 of the
+`run.sh` script). On [a fairly powerful laptop at the time of 
+writing](https://www.lenovo.com/gb/en/p/laptops/thinkpad/thinkpadx1/x1-extreme-gen-2/22tp2txx1e2) 20,000 has been
+found to be a reliable number via painstaking trail and error, but your mileage may vary. Ensure that there are no
+errors in the script logs, or update your test data by add the necessary species names and experiment accessions in the `test-dev.env` file and rebuild the development
+environment. Some tests may fail due to incomplete annotations; `grep` for `DistributedUpdatesAsyncException` in
+particular, which signals a problem storing the document batch, which in turn stops processing the current file. If
+found, try again with a lower value for `NUM_DOCS_PER_BATCH`.
 
 ### Update test data
-Remember to update the file and any new experiments added to the `filesystem` directory by syncing your
-`ATLAS_DATA_PATH` with `/nfs/ftp/pub/databases/microarray/data/atlas/test/gxa`:
-```bash
-rsync -ravz $ATLAS_DATA_PATH/* ebi-cli:/nfs/ftp/pub/databases/microarray/data/atlas/test/gxa/
-```
+Add or change the necessary species names and experiment accessions in the `test-data.env` file and rebuild the
+development environment.
+
 ## Testing
-**Note: A few tests depend on the Solr suggesters, so don’t forget to build them in the SolrCloud container!**
 
-The project has a `docker-compose-gradle.yml` in the `docker` directory to run tests within a Gradle Docker container.
-It reuses the same SolrCloud service described earlier, and a Postgres container with minor variations: it doesn’t use
-volumes to ensure the database is clean before running any tests, and its name (and the dependency expressed in
-`docker-compose-gradle.yml`) has been changed to `gxa-postgres-test`; the reason is to avoid using `gxa-postgres` by
-mistake and wiping full tables when cleaning fixtures... such an unfortunate accident is known to have happened.
-
-Depending on your OS and Docker settings you might be able to run Gradle from your host machine without a container,
-and access Solr, ZooKeeper and Postgres via mapped ports on `localhost`. We know this is possible in Linux, but we’ve
-found it to be problematic in macOS. It’s probably due to the way DNS in Docker Compose works (i.e., ZooKeeper resolves
-`localhost` to an unknown IP address). As they say, networking is hard. YMMV.
-
-### Before you start
-Check with `docker ps` and `docker container ls -a` that no services used during tests are running or stopped,
-respectively. These are `gxa-solrcloud-1`, `gxa-solrcloud-2`, `gxa-zk-1`, `gxa-zk-2`, `gxa-zk-3`,
-`gxa-postgres-test`, `gxa-flyway-test` and `gxa-gradle`. We want to start with a clean application context every
-time we execute the test task. Here are two useful commands:
+### TL;DR
 ```bash
-docker stop gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test &&
-docker rm gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test gxa-gradle
+./execute-all-tests.sh      
+./execute-single-test.sh TEST_NAME 
+./debug-single-test.sh TEST_NAME
+./stop-and-remove-containers.sh
 ```
 
-### Running tests
-As mentioned before, `docker-compose-gradle.yml` runs the Gradle `test` task and it depends on all the necessary
-services to run unit tests, integration tests and end-to-end tests. It splits the job in the following six phases:
-1. Clean the build directory
-2. Compile the test classes
+### Execute all tests
+The `gxa-gradle` service in `docker/docker-compose-gradle.yml` executes all tests and writes reports to
+`atlas-web-core/build` and `app/build` in the host machine. It requires the SolrCloud service described earlier, and a
+Postgres container with the following differences compared to the development service, `gxa-postgres`: it doesn’t use
+named volumes to ensure the database is clean before running any tests, and its name (as well as the dependency
+declared in `docker-compose-gradle.yml`) has been changed to `gxa-postgres-test`. We don’t want to use
+`gxa-postgres` by mistake and wipe the tables from the dev instance when cleaning fixtures... such an unfortunate
+accident is known to have happened.
+
+The job is split in the following six phases:
+1. Clean build directory
+2. Compile test classes
 3. Run unit tests
 4. Run integration tests
 5. Run end-to-end tests
 6. Generate JaCoCo reports
 
-Bring it up like this (the Postgres variables can take any values, remember that the container will be removed):
-```bash
-ATLAS_DATA_PATH=/path/to/your/gxa/data \
-POSTGRES_HOST=gxa-postgres-test \
-POSTGRES_DB=gxpgxatest \
-POSTGRES_USER=gxa \
-POSTGRES_PASSWORD=gxa \
-docker-compose \
--f docker-compose-postgres-test.yml \
--f docker-compose-solrcloud.yml \
--f docker-compose-gradle.yml \
-up
-```
 
 You will eventually see these log messages:
 ```
-gxa-gradle         | BUILD SUCCESSFUL in 13s
+gxa-gradle         | BUILD SUCCESSFUL in 2s
 gxa-gradle         | 3 actionable tasks: 1 executed, 2 up-to-date
 gxa-gradle exited with code 0
 ```
 
-Press Ctrl+C to stop the container and clean any leftovers:
+Press `Ctrl+C` to stop the container and clean any leftovers:
 ```bash
-docker stop gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test &&
-docker rm gxa-solrcloud-1 gxa-solrcloud-2 gxa-zk-1 gxa-zk-2 gxa-zk-3 gxa-postgres-test gxa-flyway-test gxa-gradle
+docker-compose \
+--env-file ./docker/dev.env \
+-f ./docker/docker-compose-gradle.yml \
+-f ./docker/docker-compose-postgres-test.yml \
+-f ./docker/docker-compose-solrcloud.yml \
+down
 ```
 
+Or run `./stop-and-remove-containers.sh`.
 
-If you prefer, here’s a `docker-compose run` command to execute the tests:
+You will find very convenient to use the script `execute-all-tests.sh`.
 ```bash
-ATLAS_DATA_PATH=/path/to/your/gxa/data \
-POSTGRES_HOST=gxa-postgres-test \
-POSTGRES_DB=gxpgxatest \
-POSTGRES_USER=gxa \
-POSTGRES_PASSWORD=gxa \
-docker-compose \
--f docker-compose-postgres-test.yml \
--f docker-compose-solrcloud.yml \
--f docker-compose-gradle.yml \
-run --rm --service-ports \
-gxa-gradle bash -c '
-./gradlew :app:clean &&
-./gradlew -PdataFilesLocation=/atlas-data -PexperimentFilesLocation=/atlas-data/gxa -PjdbcUrl=jdbc:postgresql://$POSTGRES_HOST:5432/$POSTGRES_DB -PjdbcUsername=$POSTGRES_USER -PjdbcPassword=$POSTGRES_PASSWORD -PzkHost=gxa-zk-1 -PsolrHost=gxa-solrcloud-1 app:testClasses &&
-./gradlew -PtestResultsPath=ut :app:test --tests *Test &&
-./gradlew -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT &&
-./gradlew -PtestResultsPath=e2e :app:test --tests *WIT &&
-./gradlew :app:jacocoTestReport
-'
-``` 
+./execute-all-tests.sh
+```
 
-With `run` the control returns to your shell once the tasks have finished, but you’ll need to clean up the service
-containers anyway.
+The script uses `docker-compose run`, and control returns to your shell once the tasks have finished, but you’ll need
+to clean up the service containers anyway.
 
-In either case you may find all reports at `app/build/reports`.
-
-### Running a single test
+### Execute a single test
 Many times you will find yourself working in a specific test case or class. Running all tests in such cases is
 impractical. In such situations you can use
 [Gradle’s continuous build execution](https://blog.gradle.org/introducing-continuous-build). See the example below for
-e.g. `SitemapDaoIT.java`:
+e.g. `GenePageControllerIT.java`:
 ```bash
-ATLAS_DATA_PATH=/path/to/your/gxa/data \
-POSTGRES_HOST=gxa-postgres-test \
-POSTGRES_DB=gxpgxatest \
-POSTGRES_USER=gxa \
-POSTGRES_PASSWORD=gxa \
 docker-compose \
--f docker-compose-postgres-test.yml \
--f docker-compose-solrcloud.yml \
--f docker-compose-gradle.yml \
+--env-file ./docker/dev.env \
+-f ./docker/docker-compose-gradle.yml \
+-f ./docker/docker-compose-postgres-test.yml \
+-f ./docker/docker-compose-solrcloud.yml \
 run --rm --service-ports \
 gxa-gradle bash -c '
 ./gradlew :app:clean &&
-./gradlew -PdataFilesLocation=/atlas-data -PexperimentFilesLocation=/atlas-data/gxa -PjdbcUrl=jdbc:postgresql://$POSTGRES_HOST:5432/$POSTGRES_DB -PjdbcUsername=$POSTGRES_USER -PjdbcPassword=$POSTGRES_PASSWORD -PzkHost=gxa-zk-1 -PsolrHost=gxa-solrcloud-1 app:testClasses &&
-./gradlew --continuous :app:test --tests SitemapDaoIT
+./gradlew \
+-PdataFilesLocation=/atlas-data \
+-PexperimentFilesLocation=/atlas-data/gxa \
+-PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
+-PjdbcUsername=${POSTGRES_USER} \
+-PjdbcPassword=${POSTGRES_PASSWORD} \
+-PzkHosts=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181 \
+-PsolrHosts=http://${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr \
+app:testClasses &&
+./gradlew --continuous :app:test --tests GenePageControllerIT
 '
 ```
 
 After running the test Gradle stays idle and waits for any changes in the code. When it detects that the files in your
-project have been updated it will recompile them and run the tests again. Notice that you can specify multiple test
-files after `--tests` (by name or with wildcards).
+project have been updated it will recompile them and run the specified test again. Notice that you can specify multiple
+test files after `--tests` (by name or with wildcards).
 
-### Remote debugging
-If you want to use a debugger, add the option `-PremoteDebug` to the task test line. For instance:
+Again, a convenience script can be used:
 ```bash
-./gradlew -PremoteDebug :app:test --tests SitemapDaoIT
+./execute-single-test.sh TEST_NAME
+```
+
+### Debug tests
+If you want to use a debugger, add the option `-PremoteDebug` to the command of the test. For instance:
+```bash
+./gradlew -PremoteDebug :app:test --tests GenePageControllerIT
 ```
 
 Be aware that Gradle won’t execute the tests until you attach a remote debugger to port 5005. It will notify you when
@@ -293,6 +232,113 @@ To attach a remote debugger to your gradle test you can add following configurat
 
 [![RMoIhF.md.png](https://iili.io/RMoIhF.md.png)](https://freeimage.host/i/RMoIhF)
 
+
+The script `debug-single-test.sh` is a shortcut for this task. It takes the same arguments as executing a single test.
+
+```bash
+./debug-single-test.sh TEST_NAME
+```
+
+## Run web application
+The web application is compiled in two stages:
+1. Front end JavaScript packages are transpiled into “bundles” with [Webpack](https://webpack.js.org/)
+2. Bundles and back end Java code are built as a WAR file to deploy and serve with Tomcat (other Java EE web servers
+   might work but no testing has been carried out in this regard)
+
+To generate the Webpack bundles run the following script:
+```bash
+ ./compile-front-end-packages.sh -iu
+```
+
+If the script encounters no compilation errors it will open your default browser with a graphical diagram of the
+bundles and their contents.
+
+Run the script with `-h` to know more about its usage.
+You can add `-p` to generate production bundles, which will minify the code and omit browser console warnings. Certain
+React rendering tasks are also faster but it makes debugging very hard.
+
+Then run the Gradle task `war` in the `atlas-web-bulk` directory:
+```bash
+./gradlew clean :app:war
+```
+
+You should now have the file `webapps/gxa.war`.
+
+You can now deploy it in Tomcat’s container with the following:
+```bash
+docker-compose \
+--env-file=./docker/dev.env \
+-f ./docker/docker-compose-solrcloud.yml \
+-f ./docker/docker-compose-postgres.yml \
+-f ./docker/docker-compose-tomcat.yml \
+up
+```
+
+You can also set a Docker Compose *Run* configuration in IntelliJ IDEA with the `dev.env` in environment files.
+
+After bringing up the containers, you may want to inspect the logs to see that all services are running fine. The last
+log should come from Tomcat, and it should be similar to:
+```
+scxa-tomcat    | 18-Dec-2020 13:40:58.907 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in 6705 ms
+...
+scxa-tomcat    | 12-Jan-2021 14:59:47.566 INFO [Catalina-utility-1] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/gxa.war] has finished in [5,510] ms
+```
+
+Point your browser at `http://localhost:8080/gxa` and voilà!
+
+Every time you re-run the `war` task the web app will be automatically re-deployed by Tomcat.
+
+If you get any redeployment issues or want to start again afresh, remove all containers using this:
+```bash
+docker-compose \
+--env-file=./docker/dev.env \
+-f ./docker/docker-compose-solrcloud.yml \
+-f ./docker/docker-compose-postgres.yml \
+-f ./docker/docker-compose-tomcat.yml \
+down
+```
+
+
+
+## Backing up your data
+Eventually you’ll add new experiments to your development instance of GXA, or new, improved collections in Solr will
+replace the old ones. In such cases you’ll want to get a snapshot of the data to share with the team. Below there are
+instructions to do that.
+
+### PostgreSQL
+If at some point you wish to create a backup dump of the database run the command below:
+```bash
+docker exec -it gxa-postgres bash -c 'pg_dump -d $POSTGRES_DB -h localhost -p 5432 -U $POSTGRES_USER -f /var/backups/postgresql/pg-dump.bin -F c -n $POSTGRES_USER -t $POSTGRES_USER.* -T *flyway*'
+```
+
+### SolrCloud
+
+> **Warning!**
+> 
+> **_!!! THIS SECTION IS OUTDATED. NEEDS TO BE UPDATED WITH AUTHENTICATION TO WORK WITH SOLR VERSION 8._**
+
+```bash
+for SOLR_COLLECTION in $SOLR_COLLECTIONS
+do
+  START_DATE_IN_SECS=`date +%s`
+  curl "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=backup&location=/var/backups/solr&name=${SOLR_COLLECTION}"
+
+  # Pattern enclosed in (?<=) is zero-width look-behind and (?=) is zero-width look-ahead, we match everything in between
+  COMPLETED_DATE=`curl -s "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=details" | grep -oP '(?<="snapshotCompletedAt",").*(?=")'`
+  COMPLETED_DATE_IN_SECS=`date +%s -d "${COMPLETED_DATE}"`
+
+  # We wait until snapshotCompletedAt is later than the date we took before issuing the backup operation
+  while [ ${COMPLETED_DATE_IN_SECS} -lt ${START_DATE_IN_SECS} ]
+  do
+    sleep 1s
+    COMPLETED_DATE=`curl -s "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=details" | grep -oP '(?<="snapshotCompletedAt",").*(?=")'`
+    COMPLETED_DATE_IN_SECS=`date +%s -d "${COMPLETED_DATE}"`
+  done
+done
+```
+
+
+
 ## Troubleshooting
 
 ### SolrCloud nodes shut down on macOS
@@ -302,13 +348,6 @@ to between 8-12 GB and disk image to 100 GB or more. Please see the screenshot b
 
 ![Screenshot-2021-02-18-at-18-27-40](https://user-images.githubusercontent.com/4425744/109644570-8ccee680-7b4d-11eb-9db0-7a29fb4d9e2b.png)
 
-### The script that backs up Solr snapshot hangs
-
-Ensure you have writing privileges for the directory bind at `/var/backups/solr`. You can check the status of your
-backup operation with (set `SOLR_HOST` and `SOLR_COLLECTION` to the appropriate values):
-```bash
-docker exec -i ${SOLR_HOST} curl -s "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=details"
-```
 ### I’m not getting any suggestions in Epression Atlas
 Read the important message after you run `gxa-solrlcoud-bootstrap`:
 > PLEASE READ!
