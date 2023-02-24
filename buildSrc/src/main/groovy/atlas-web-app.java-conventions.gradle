@@ -70,10 +70,12 @@ dependencies {
   testImplementation 'org.assertj:assertj-guava:3.2.0'
   testImplementation 'org.hamcrest:java-hamcrest:2.0.0.0'
 
-  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.1'
-  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.1'
+  testImplementation platform('org.junit:junit-bom:5.6.0')
+  testImplementation 'org.junit.jupiter:junit-jupiter-api'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+  // For JUnit 4 tests in atlas-web-core
+  testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
   testImplementation 'junit:junit:4.12'
-  testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.4.1'
 }
 
 processTestResources {
@@ -94,7 +96,7 @@ processTestResources {
             zkHosts: project.hasProperty('zkHosts') ? zkHosts : 'localhost:2181',
             solrHosts: project.hasProperty('solrHosts') ? solrHosts : 'localhost:8983',
             solrUser: project.hasProperty('solrUser') ? solrUser : '',
-            solrPass: project.hasProperty('solrPass') ? solrPass : '',
+            solrPassword: project.hasProperty('solrPassword') ? solrPassword : '',
     )
   }
 

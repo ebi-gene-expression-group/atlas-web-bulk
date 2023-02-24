@@ -16,7 +16,7 @@ source ${SCRIPT_DIR}/../../dev.env
 source ${SCRIPT_DIR}/../utils.sh
 
 function print_usage() {
-  printf '\n%b\n' "Usage: ${0} [ -k DIRECTORY ] [ -o FILE ] [ -l FILE ]"
+  printf '\n%b\n' "Usage: ${0} [ -l FILE ]"
   printf '\n%b\n' "Populate a Docker Compose SolrCloud 8 cluster with Bulk Expression Atlas data."
 
   printf '\n%b\n' "-l FILE \tLog file (default is /dev/stdout)"
@@ -66,8 +66,12 @@ docker-compose --env-file ${SCRIPT_DIR}/../../dev.env \
 up -d >> ${LOG_FILE} 2>&1
 print_done
 
+print_stage_name "💤 Wait for twenty seconds to Postgres server be ready to work"
+sleep 10
+print_done
+
 GRADLE_RO_DEP_CACHE_DEST=/gradle-ro-dep-cache
-docker run --rm -it \
+docker run -it \
 --env-file ${SCRIPT_DIR}/../../dev.env \
 -v ${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}:/atlas-data/bioentity_properties:ro \
 -v ${ATLAS_DATA_GXA_VOL_NAME}:/atlas-data/gxa:ro \
