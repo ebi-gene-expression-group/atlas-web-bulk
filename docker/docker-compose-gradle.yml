@@ -10,7 +10,6 @@ services:
       - "5005:5005"
     working_dir: /root/project
     volumes:
-      - $ATLAS_DATA_PATH:/atlas-data
       - ..:/root/project
       - gradle-wrapper-dists:/root/.gradle/wrapper/dists
       - gradle-ro-dep-cache:/gradle-ro-dep-cache:ro
@@ -21,7 +20,7 @@ services:
     depends_on:
       - gxa-solrcloud-0
       - gxa-solrcloud-1
-      - gxa-flyway
+      - gxa-flyway-test
     environment:
       POSTGRES_HOST: $POSTGRES_HOST
       POSTGRES_DB: $POSTGRES_DB

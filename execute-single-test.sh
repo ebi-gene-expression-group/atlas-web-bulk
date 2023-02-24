@@ -7,7 +7,6 @@ source ${SCRIPT_DIR}/docker/dev.env
 TEST_CASE_NAME=$1
 echo "Testing ${TEST_CASE_NAME}"
 
-SCHEMA_VERSION=${2:-latest} \
 docker-compose \
 --env-file ${SCRIPT_DIR}/docker/dev.env \
 -f docker/docker-compose-postgres-test.yml \
@@ -16,9 +15,9 @@ docker-compose \
 run --rm --service-ports \
 gxa-gradle bash -c "
 set -e
-./gradlew clean
+gradle clean
 
-./gradlew \
+gradle \
 -PdataFilesLocation=/atlas-data \
 -PexperimentFilesLocation=/atlas-data/gxa \
 -PexperimentDesignLocation=/atlas-data/expdesign \
@@ -29,5 +28,5 @@ set -e
 -PsolrHosts=http://${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr \
 app:testClasses
 
-./gradlew --continuous :app:test --tests $TEST_CASE_NAME
+gradle --continuous :app:test --tests $TEST_CASE_NAME
 "

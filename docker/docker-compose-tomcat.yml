@@ -12,7 +12,6 @@ services:
       - "8080:8080"
       - "8000:8000"
     volumes:
-      - $ATLAS_DATA_PATH:/atlas-data
       - ../webapps:/usr/local/tomcat/webapps
       - webapp-properties:/webapp-properties
       - bioentity-properties:/atlas-data/bioentity_properties
