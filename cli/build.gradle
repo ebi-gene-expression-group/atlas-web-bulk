@@ -44,7 +44,7 @@ processResources {
                 zkHosts: project.hasProperty('zkHosts') ? zkHosts : "${System.env.ATLAS_ZK_HOSTS}",
                 solrHosts: project.hasProperty('solrHosts') ? solrHosts : "${System.env.ATLAS_SOLR_HOSTS}",
                 solrUser: project.hasProperty('solrUser') ? solrUser : "${System.env.ATLAS_SOLR_USER}",
-                solrPassword: project.hasProperty('solrPassword') ? solrPass : "${System.env.ATLAS_SOLR_PASSWORD}"
+                solrPassword: project.hasProperty('solrPassword') ? solrPassword : "${System.env.ATLAS_SOLR_PASSWORD}"
         )
     }
 }
