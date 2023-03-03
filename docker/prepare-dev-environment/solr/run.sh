@@ -56,20 +56,14 @@ docker-compose \
 up -d >> ${LOG_FILE} 2>&1
 print_done
 
-print_stage_name "💤 Give Solr ten seconds to start up before copying ontology file..."
-sleep 10
-print_done
-
-print_stage_name "⚙ Spin up Postgres and Solr indexer containers to index volume data in Solr"
-docker-compose --env-file ${SCRIPT_DIR}/../../dev.env \
+print_stage_name "🐘 Start Postgres 11 in Docker Compose so that the CLI can create the experiments JSONL files"
+docker-compose \
+--env-file ${SCRIPT_DIR}/../../dev.env \
 -f ${SCRIPT_DIR}/../../docker-compose-postgres.yml \
 up -d >> ${LOG_FILE} 2>&1
 print_done
 
-print_stage_name "💤 Wait for twenty seconds to Postgres server be ready to work"
-sleep 10
-print_done
-
+print_stage_name "⚙ Spin up ephemeral container to index volume data in Solr"
 GRADLE_RO_DEP_CACHE_DEST=/gradle-ro-dep-cache
 docker run -it \
 --env-file ${SCRIPT_DIR}/../../dev.env \
