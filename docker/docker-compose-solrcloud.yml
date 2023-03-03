@@ -10,8 +10,8 @@ services:
       - 2181:2181
       - 7000:7000
     volumes:
-      - gxa-zk-1-data:/data
-      - gxa-zk-1-datalog:/datalog
+      - gxa-solrcloud-zookeeper-0-data:/data
+      - gxa-solrcloud-zookeeper-0-datalog:/datalog
     environment:
       ZOO_MY_ID: 1
       ZOO_SERVERS: server.1=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2888:3888;2181 server.2=${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2888:3888;2181 server.3=${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2888:3888;2181
@@ -27,8 +27,8 @@ services:
       - 2182:2181
       - 7001:7000
     volumes:
-      - gxa-zk-2-data:/data
-      - gxa-zk-2-datalog:/datalog
+      - gxa-solrcloud-zookeeper-1-data:/data
+      - gxa-solrcloud-zookeeper-1-datalog:/datalog
     environment:
       ZOO_MY_ID: 2
       ZOO_SERVERS: server.1=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2888:3888;2181 server.2=${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2888:3888;2181 server.3=${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2888:3888;2181
@@ -44,8 +44,8 @@ services:
       - 2183:2181
       - 7002:7000
     volumes:
-      - gxa-zk-3-data:/data
-      - gxa-zk-3-datalog:/datalog
+      - gxa-solrcloud-zookeeper-2-data:/data
+      - gxa-solrcloud-zookeeper-2-datalog:/datalog
     environment:
       ZOO_MY_ID: 3
       ZOO_SERVERS: server.1=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2888:3888;2181 server.2=${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2888:3888;2181 server.3=${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2888:3888;2181
@@ -60,7 +60,7 @@ services:
     ports:
       - 8983:8983
     volumes:
-      - gxa-solrcloud-1-data:/var/solr/data
+      - gxa-solrcloud-0-data:/var/solr/data
     environment:
       SOLR_JAVA_STACK_SIZE: '-Xss512k'
       SOLR_HEAP: 3g
@@ -79,7 +79,7 @@ services:
     ports:
       - 8984:8983
     volumes:
-      - gxa-solrcloud-2-data:/var/solr/data
+      - gxa-solrcloud-1-data:/var/solr/data
     environment:
       SOLR_JAVA_STACK_SIZE: '-Xss512k'
       SOLR_HEAP: 3g
@@ -91,22 +91,22 @@ services:
       - gxa-solrcloud-zookeeper-2
 
 volumes:
-  gxa-zk-1-data:
-    name: gxa-zk-1-data
-  gxa-zk-1-datalog:
-    name: gxa-zk-1-datalog
-  gxa-zk-2-data:
-    name: gxa-zk-2-data
-  gxa-zk-2-datalog:
-    name: gxa-zk-2-datalog
-  gxa-zk-3-data:
-    name: gxa-zk-3-data
-  gxa-zk-3-datalog:
-    name: gxa-zk-3-datalog
+  gxa-solrcloud-zookeeper-0-data:
+    name: gxa-solrcloud-zookeeper-0-data
+  gxa-solrcloud-zookeeper-0-datalog:
+    name: gxa-solrcloud-zookeeper-0-datalog
+  gxa-solrcloud-zookeeper-1-data:
+    name: gxa-solrcloud-zookeeper-1-data
+  gxa-solrcloud-zookeeper-1-datalog:
+    name: gxa-solrcloud-zookeeper-1-datalog
+  gxa-solrcloud-zookeeper-2-data:
+    name: gxa-solrcloud-zookeeper-2-data
+  gxa-solrcloud-zookeeper-2-datalog:
+    name: gxa-solrcloud-zookeeper-2-datalog
+  gxa-solrcloud-0-data:
+    name: gxa-solrcloud-0-data
   gxa-solrcloud-1-data:
     name: gxa-solrcloud-1-data
-  gxa-solrcloud-2-data:
-    name: gxa-solrcloud-2-data
 
 networks:
   atlas-test-net:
