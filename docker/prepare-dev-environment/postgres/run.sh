@@ -17,8 +17,8 @@ source ${SCRIPT_DIR}/../../dev.env
 source ${SCRIPT_DIR}/../utils.sh
 
 function print_usage() {
-  printf '\n%b\n' "Usage: ${0} [ -v NUMBER ] [ -l FILE ]"
-  printf '\n%b\n' "Populate a Bulk Expression Atlas Postgres 11 database."
+  printf '\n%b\n' "Usage: ${0} [ -l FILE ]"
+  printf '\n%b\n' "Populate a bulk Expression Atlas Postgres 11 database."
   printf '\n%b\n' "-l FILE\tLog file (default is /dev/stdout)"
   printf '%b\n\n' "-h\tDisplay usage instructions"
 }

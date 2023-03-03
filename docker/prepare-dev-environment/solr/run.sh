@@ -17,7 +17,7 @@ source ${SCRIPT_DIR}/../utils.sh
 
 function print_usage() {
   printf '\n%b\n' "Usage: ${0} [ -l FILE ]"
-  printf '\n%b\n' "Populate a Docker Compose SolrCloud 8 cluster with Bulk Expression Atlas data."
+  printf '\n%b\n' "Populate a Docker Compose SolrCloud 8 cluster with bulk Expression Atlas data."
 
   printf '\n%b\n' "-l FILE \tLog file (default is /dev/stdout)"
   printf '%b\n\n' "-h\t\tDisplay usage instructions"
@@ -45,7 +45,7 @@ done
 
 IMAGE_NAME=gxa-solr-indexer
 print_stage_name "🚧 Build Docker image ${IMAGE_NAME}"
-docker build \
+docker build --no-cache \
 -t ${IMAGE_NAME} ${SCRIPT_DIR} >> ${LOG_FILE} 2>&1
 print_done
 

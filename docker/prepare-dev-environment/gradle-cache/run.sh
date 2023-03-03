@@ -13,7 +13,7 @@ source ${SCRIPT_DIR}/../utils.sh
 function print_usage() {
   printf '\n%b\n\n' "Usage: ${0} [ -l FILE ]"
   printf '%b\n' "Create and populate a Gradle wrapper and RO dependency cache volume to speed up builds of"
-  printf '%b\n' "Bulk Expression Atlas."
+  printf '%b\n' "bulk Expression Atlas."
   printf '\n%b\n\n' "-h\tShow usage instructions"
 }
 

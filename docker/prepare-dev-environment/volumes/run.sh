@@ -16,7 +16,7 @@ source ${SCRIPT_DIR}/../utils.sh
 
 function print_usage() {
   printf '\n%b\n\n' "Usage: ${0} [ -r ] [ -l FILE ]"
-  printf '%b\n' "Provision four Docker volumes for Bulk Expression Atlas testing & development:"
+  printf '%b\n' "Provision four Docker volumes for bulk Expression Atlas testing & development:"
   printf '%b\n' " • ${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}: gene annotations from array designs, Ensembl, Reactome,"
   printf '%b\n' "                                         WormBase ParaSite, miRBase, Gene Ontology and InterPro"
   printf '%b\n' " • ${ATLAS_DATA_GXA_VOL_NAME}: test experiments data bundles, species and release definition files"
