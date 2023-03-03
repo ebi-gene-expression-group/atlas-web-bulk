@@ -65,13 +65,16 @@ print_done
 
 print_stage_name "⚙ Spin up ephemeral container to index volume data in Solr"
 GRADLE_RO_DEP_CACHE_DEST=/gradle-ro-dep-cache
-docker run -it \
---env-file ${SCRIPT_DIR}/../../dev.env \
+docker run --rm \
 -v ${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}:/atlas-data/bioentity_properties:ro \
 -v ${ATLAS_DATA_GXA_VOL_NAME}:/atlas-data/gxa:ro \
 -v ${GRADLE_RO_DEP_CACHE_VOL_NAME}:${GRADLE_RO_DEP_CACHE_DEST}:ro \
 -v ${ATLAS_DATA_GXA_EXPDESIGN_VOL_NAME}:/atlas-data/gxa-expdesign:ro \
 -e GRADLE_RO_DEP_CACHE=${GRADLE_RO_DEP_CACHE_DEST} \
+-e POSTGRES_HOST=${POSTGRES_HOST} \
+-e POSTGRES_DB=${POSTGRES_DB} \
+-e POSTGRES_USER=${POSTGRES_USER} \
+-e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
 -e SPECIES="${SPECIES}" \
 -e EXP_IDS="${EXP_IDS}" \
 -e SOLR_HOST=${SOLR_CLOUD_CONTAINER_1_NAME}:8983 \
