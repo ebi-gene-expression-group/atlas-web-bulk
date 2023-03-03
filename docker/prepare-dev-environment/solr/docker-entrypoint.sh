@@ -45,6 +45,7 @@ cd /root/solr-bulk/bin
 cd /root/index-bioentities/bin
 export SOLR_COLLECTION=${SOLR_COLLECTION_BULK_ANALYTICS}
 export SCHEMA_VERSION=${SOLR_COLLECTION_BULK_ANALYTICS_SCHEMA_VERSION}
+export SOLR_PROCESSORS=dedupe
 for FILE in `ls /root/experiments-jsonl/*.jsonl`
 do
   INPUT_JSONL=${FILE} ./solr-jsonl-chunk-loader.sh >> /dev/stdout 2>&1
