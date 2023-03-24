@@ -1,30 +1,35 @@
-
 version: "3.6"
 
 services:
   gxa-postgres:
-    image: postgres:10-alpine
-    container_name: $POSTGRES_HOST
+    container_name: ${POSTGRES_HOST}
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
-      - gxa
+      - atlas-test-net
     restart: always
     command: -c max_wal_size=2GB
-    environment:
-      POSTGRES_USER: $POSTGRES_USER
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-      POSTGRES_DB: $POSTGRES_DB
     ports:
       - "5432:5432"
     volumes:
       - gxa-pgdata:/var/lib/postgresql/data
-      - $ATLAS_DATA_PATH/postgresql:/var/backups/postgresql
 
   gxa-flyway:
-    image: flyway/flyway
     container_name: gxa-flyway
+    image: flyway/flyway
     networks:
-      - gxa
-    command: -url=jdbc:postgresql://$POSTGRES_HOST/$POSTGRES_DB -schemas=$POSTGRES_USER -user=$POSTGRES_USER -password=$POSTGRES_PASSWORD -connectRetries=60 migrate
+      - atlas-test-net
+    command: [
+      "-url=jdbc:postgresql://${POSTGRES_HOST}/${POSTGRES_DB}",
+      "-schemas=${POSTGRES_USER}",
+      "-user=${POSTGRES_USER}",
+      "-password=${POSTGRES_PASSWORD}",
+      "-connectRetries=60",
+      "migrate"
+    ]
     volumes:
       - ../schemas/flyway/gxa/:/flyway/sql
     depends_on:
@@ -35,5 +40,5 @@ volumes:
     name: gxa-pgdata
 
 networks:
-  gxa:
-    name: gxa
+  atlas-test-net:
+    name: atlas-test-net

@@ -22,11 +22,14 @@ public class ExperimentOpLogWriterTest {
 
     @Before
     public void setUp() throws Exception {
-        Path dir = Files.createTempDirectory("");
-        dir.toFile().deleteOnExit();
-        Files.createDirectory(dir.resolve("admin"));
+        Path experimentsDirPath = Files.createTempDirectory("");
+        experimentsDirPath.toFile().deleteOnExit();
+        Files.createDirectory(experimentsDirPath.resolve("admin"));
 
-        subject = new ExperimentOpLogWriter(new DataFileHub(dir));
+        Path experimentDesignDirPath = Files.createTempDirectory("");
+        experimentDesignDirPath.toFile().deleteOnExit();
+
+        subject = new ExperimentOpLogWriter(new DataFileHub(experimentsDirPath, experimentDesignDirPath));
     }
 
     @Test

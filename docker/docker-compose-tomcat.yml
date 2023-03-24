@@ -5,7 +5,7 @@ services:
     image: tomcat:9-jdk11
     container_name: gxa-tomcat
     networks:
-      - gxa
+      - atlas-test-net
     environment:
       JPDA_ADDRESS: "*:8000"
     ports:
@@ -13,19 +13,29 @@ services:
       - "8000:8000"
     volumes:
       - ../webapps:/usr/local/tomcat/webapps
-      - ./atlas-properties:/atlas-properties
-      - $ATLAS_DATA_PATH:/atlas-data
+      - webapp-properties:/webapp-properties
+      - bioentity-properties:/atlas-data/bioentity_properties
+      - gxa-data:/atlas-data/gxa
+      - gxa-expdesign:/atlas-data/gxa-expdesign
       - gxa-tomcat-conf:/usr/local/tomcat/conf
     depends_on:
       - gxa-postgres
+      - gxa-solrcloud-0
       - gxa-solrcloud-1
-      - gxa-solrcloud-2
     command: ["catalina.sh", "jpda", "run"]
 
 volumes:
+  webapp-properties:
+    name: ${WEBAPP_PROPERTIES_VOL_NAME}
+  bioentity-properties:
+    name: ${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}
+  gxa-data:
+    name: ${ATLAS_DATA_GXA_VOL_NAME}
+  gxa-expdesign:
+    name: ${ATLAS_DATA_GXA_EXPDESIGN_VOL_NAME}
   gxa-tomcat-conf:
     name: gxa-tomcat-conf
 
 networks:
-  gxa:
-    name: gxa
+  atlas-test-net:
+    name: atlas-test-net
