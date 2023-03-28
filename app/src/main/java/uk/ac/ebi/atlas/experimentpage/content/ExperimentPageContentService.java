@@ -85,11 +85,11 @@ public class ExperimentPageContentService {
                                             ExternallyAvailableContent.ContentType.PLOTS))));
         }
 
-        if (dataFileHub.getExperimentFiles(experiment.getAccession()).experimentDesign.exists()) {
+/*        if (dataFileHub.getExperimentFiles(experiment.getAccession()).experimentDesign.exists()) {
             availableTabs.add(
-                    experimentDesignTab(new ExperimentDesignTable(experiment).asJson(),
+                    experimentDesignTab(new ExperimentDesignTable(experimen).asJson(),
                             ExperimentDesignFile.makeUrl(experiment.getAccession(), accessKey)));
-        }
+        }*/
 
         availableTabs.add(
                 customContentTab(
