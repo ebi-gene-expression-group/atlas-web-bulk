@@ -12,11 +12,7 @@ import org.springframework.web.client.RestTemplate;
 // application context is enough in integration tests. It’s important to exclude CacheConfig, otherwise Spring will
 // complain if you want to inject classes such as GxaExperimentTrader, since a proxy will be injected instead! As an
 // exercise, remove CacheConfig.class and run tests in GxaExperimentTraderIT.
-@ComponentScan(basePackages = "uk.ac.ebi.atlas",
-               includeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE,
-                                        value = TestJdbcConfig.class),
-               excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE,
-                                        value = {JdbcConfig.class, AppConfig.class, CacheConfig.class}))
+@ComponentScan(basePackages = "uk.ac.ebi.atlas")
 public class TestConfig {
     @Bean
     public RestTemplate restTemplate() {
