@@ -1,13 +1,14 @@
 FROM ubuntu:jammy
 
-RUN apt -y -qq update
-RUN apt -y -qq install lftp
+# Update package lists and install lftp
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends lftp
 
-VOLUME /atlas-data/bioentity_properties /atlas-data/gxa /atlas-data/gxa-expdesign /webapp-properties
-RUN mkdir -p /atlas-data/gxa/magetab
+# Clean up APT cache and temporary files
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY atlas-data/gxa/* /atlas-data/gxa/
-COPY webapp-properties/* /webapp-properties/
+# Copy the auxiliary JSON files to the parent of the magetab directory
+COPY atlas-data/exp/* /atlas-data/exp/
 
-COPY docker-entrypoint.sh /
-CMD ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c"]
