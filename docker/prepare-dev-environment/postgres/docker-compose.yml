@@ -1,0 +1,64 @@
+version: "3.6"
+
+services:
+  postgres-populator:
+    build: ${DOCKERFILE_PATH}
+    networks:
+      - atlas-test-net
+    depends_on:
+      flyway:
+        condition: service_completed_successfully
+    volumes:
+      - gradle-wrapper-dists:/root/.gradle/wrapper/dists
+      - gradle-ro-dep-cache:/gradle-ro-dep-cache:ro
+      - atlas-data-exp:/atlas-data/exp
+      - atlas-data-expdesign:/atlas-data/expdesign
+    environment:
+      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF8"
+      EXP_IDS: ${EXP_IDS}
+      GRADLE_RO_DEP_CACHE: /gradle-ro-dep-cache
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    working_dir: /root
+    command:
+      - |
+        cd /root/atlas-web-bulk
+  
+        ./gradlew \
+        -PexperimentFilesLocation=/atlas-data/exp \
+        -PexperimentDesignLocation=/atlas-data/expdesign \
+        -PjdbcUrl=jdbc:postgresql://$${POSTGRES_HOST}:5432/$${POSTGRES_DB} \
+        -PjdbcUsername=$${POSTGRES_USER} \
+        -PjdbcPassword=$${POSTGRES_PASSWORD} \
+        :cli:bootRun --args="create-update-experiment -e $(echo $${EXP_IDS} | sed -e "s/ /,/g")"
+        
+        ./gradlew \
+        -PexperimentFilesLocation=/atlas-data/exp \
+        -PexperimentDesignLocation=/atlas-data/expdesign \
+        -PjdbcUrl=jdbc:postgresql://$${POSTGRES_HOST}:5432/$${POSTGRES_DB} \
+        -PjdbcUsername=$${POSTGRES_USER} \
+        -PjdbcPassword=$${POSTGRES_PASSWORD} \
+        :cli:bootRun --args="update-baseline-coexpression -e $(echo $${EXP_IDS} | sed -e "s/ /,/g")"
+        
+        # I read in a Postgres forum that you can use the following line to stop Postgres remotely; on occasions it 
+        # hangs indefinitely, so I leave as an exercise to the reader to find a better way to do it :(
+        PGPASSWORD=$${POSTGRES_PASSWORD} psql -h $${POSTGRES_HOST} -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c "COPY (SELECT 1) TO PROGRAM 'pg_ctl stop -m smart --no-wait';"
+
+volumes:
+  gradle-wrapper-dists:
+    external: true
+    name: ${PROJECT_NAME}_${GRADLE_WRAPPER_DISTS_VOL_NAME}
+  gradle-ro-dep-cache:
+    external: true
+    name: ${PROJECT_NAME}_${GRADLE_RO_DEP_CACHE_VOL_NAME}
+  atlas-data-exp:
+    external: true
+    name: ${PROJECT_NAME}_${ATLAS_DATA_EXP_VOL_NAME}
+  atlas-data-expdesign:
+    name: ${PROJECT_NAME}_${ATLAS_DATA_EXPDESIGN_VOL_NAME}
+
+networks:
+  atlas-test-net:
+    name: atlas-test-net
