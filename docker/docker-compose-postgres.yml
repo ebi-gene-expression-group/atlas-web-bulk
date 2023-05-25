@@ -1,7 +1,7 @@
 version: "3.6"
 
 services:
-  gxa-postgres:
+  postgres:
     container_name: ${POSTGRES_HOST}
     image: postgres:11-alpine
     environment:
@@ -15,13 +15,17 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - gxa-pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
-  gxa-flyway:
-    container_name: gxa-flyway
+  flyway:
     image: flyway/flyway
     networks:
       - atlas-test-net
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     command: [
       "-url=jdbc:postgresql://${POSTGRES_HOST}/${POSTGRES_DB}",
       "-schemas=${POSTGRES_USER}",
@@ -33,11 +37,11 @@ services:
     volumes:
       - ../schemas/flyway/gxa/:/flyway/sql
     depends_on:
-      - gxa-postgres
+      - postgres
 
 volumes:
-  gxa-pgdata:
-    name: gxa-pgdata
+  pgdata:
+    name: ${PROJECT_NAME}_pgdata
 
 networks:
   atlas-test-net:
