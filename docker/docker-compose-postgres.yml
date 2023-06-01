@@ -4,10 +4,6 @@ services:
   postgres:
     container_name: ${POSTGRES_HOST}
     image: postgres:11-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - atlas-test-net
     restart: always
