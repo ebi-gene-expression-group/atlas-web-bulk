@@ -21,11 +21,6 @@ services:
     image: flyway/flyway
     networks:
       - atlas-test-net
-    environment:
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     command: [
       "-url=jdbc:postgresql://${POSTGRES_HOST}/${POSTGRES_DB}",
       "-schemas=${POSTGRES_USER}",

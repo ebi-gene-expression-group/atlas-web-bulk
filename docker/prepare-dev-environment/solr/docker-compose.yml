@@ -17,13 +17,7 @@ services:
       - atlas-data-expdesign:/atlas-data/expdesign
     environment:
       JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF8"
-      EXP_IDS: ${EXP_IDS}
-      SPECIES: ${SPECIES}
       GRADLE_RO_DEP_CACHE: /gradle-ro-dep-cache
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       ZK_HOSTS: "${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181"
       SOLR_HOSTS: "http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr"
       SOLR_HOST: ${SOLR_CLOUD_CONTAINER_1_NAME}:8983
@@ -36,7 +30,7 @@ services:
     working_dir: /root
     command:
       - |
-        for _SPECIES in $${SPECIES}
+        for _SPECIES in ${SPECIES}
         do
           rsync -av --include=$${_SPECIES}* --include=*/ --exclude=* /atlas-data/bioentity_properties /root
         done
@@ -45,9 +39,9 @@ services:
         ./gradlew -PdataFilesLocation=/root \
         -PexperimentFilesLocation=/atlas-data/exp \
         -PexperimentDesignLocation=/atlas-data/expdesign \
-        -PjdbcUrl=jdbc:postgresql://$${POSTGRES_HOST}:5432/$${POSTGRES_DB} \
-        -PjdbcUsername=$${POSTGRES_USER} \
-        -PjdbcPassword=$${POSTGRES_PASSWORD} \
+        -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
+        -PjdbcUsername=${POSTGRES_USER} \
+        -PjdbcPassword=${POSTGRES_PASSWORD} \
         :cli:bootRun --args="bioentities-json --output=/root/bioentity-properties-jsonl"
         
         cd /root/index-bioentities/bin
@@ -71,9 +65,9 @@ services:
         -PexperimentDesignLocation=/atlas-data/expdesign \
         -PzkHosts=$${ZK_HOSTS} \
         -PsolrHosts="" \
-        -PjdbcUrl=jdbc:postgresql://$${POSTGRES_HOST}:5432/$${POSTGRES_DB} \
-        -PjdbcUsername=$${POSTGRES_USER} \
-        -PjdbcPassword=$${POSTGRES_PASSWORD} \
+        -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
+        -PjdbcUsername=${POSTGRES_USER} \
+        -PjdbcPassword=${POSTGRES_PASSWORD} \
         -PzkHosts=$${ZK_HOSTS} \
         -PsolrHosts=$${SOLR_HOSTS} \
         :cli:bootRun --args="bulk-analytics-json --output=/root/experiments-jsonl -e $(echo $${EXP_IDS} | sed -e "s/ /,/g")"

@@ -15,12 +15,7 @@ services:
       - atlas-data-expdesign:/atlas-data/expdesign
     environment:
       JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF8"
-      EXP_IDS: ${EXP_IDS}
       GRADLE_RO_DEP_CACHE: /gradle-ro-dep-cache
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     working_dir: /root
     command:
       - |
@@ -29,22 +24,22 @@ services:
         ./gradlew \
         -PexperimentFilesLocation=/atlas-data/exp \
         -PexperimentDesignLocation=/atlas-data/expdesign \
-        -PjdbcUrl=jdbc:postgresql://$${POSTGRES_HOST}:5432/$${POSTGRES_DB} \
-        -PjdbcUsername=$${POSTGRES_USER} \
-        -PjdbcPassword=$${POSTGRES_PASSWORD} \
-        :cli:bootRun --args="create-update-experiment -e $(echo $${EXP_IDS} | sed -e "s/ /,/g")"
+        -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
+        -PjdbcUsername=${POSTGRES_USER} \
+        -PjdbcPassword=${POSTGRES_PASSWORD} \
+        :cli:bootRun --args="create-update-experiment -e $(echo ${EXP_IDS} | sed -e "s/ /,/g")"
         
         ./gradlew \
         -PexperimentFilesLocation=/atlas-data/exp \
         -PexperimentDesignLocation=/atlas-data/expdesign \
-        -PjdbcUrl=jdbc:postgresql://$${POSTGRES_HOST}:5432/$${POSTGRES_DB} \
-        -PjdbcUsername=$${POSTGRES_USER} \
-        -PjdbcPassword=$${POSTGRES_PASSWORD} \
-        :cli:bootRun --args="update-baseline-coexpression -e $(echo $${EXP_IDS} | sed -e "s/ /,/g")"
+        -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
+        -PjdbcUsername=${POSTGRES_USER} \
+        -PjdbcPassword=${POSTGRES_PASSWORD} \
+        :cli:bootRun --args="update-baseline-coexpression -e $(echo ${EXP_IDS} | sed -e "s/ /,/g")"
         
         # I read in a Postgres forum that you can use the following line to stop Postgres remotely; on occasions it 
         # hangs indefinitely, so I leave as an exercise to the reader to find a better way to do it :(
-        PGPASSWORD=$${POSTGRES_PASSWORD} psql -h $${POSTGRES_HOST} -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c "COPY (SELECT 1) TO PROGRAM 'pg_ctl stop -m smart --no-wait';"
+        PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "COPY (SELECT 1) TO PROGRAM 'pg_ctl stop -m smart --no-wait';"
 
 volumes:
   gradle-wrapper-dists:

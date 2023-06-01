@@ -1,9 +1,9 @@
 version: "3.6"
 
 services:
-  gxa-postgres-test:
+  postgres-test:
     image: postgres:11-alpine
-    container_name: $POSTGRES_HOST
+    container_name: ${POSTGRES_HOST}
     networks:
       - atlas-test-net
     restart: always
@@ -11,14 +11,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_HOST: $POSTGRES_HOST
-      POSTGRES_USER: $POSTGRES_USER
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-      POSTGRES_DB: $POSTGRES_DB
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
-  gxa-flyway-test:
+
+  flyway:
     image: flyway/flyway
-    container_name: gxa-flyway-test
     networks:
       - atlas-test-net
     command: [
