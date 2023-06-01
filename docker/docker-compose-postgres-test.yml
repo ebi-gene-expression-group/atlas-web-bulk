@@ -10,11 +10,6 @@ services:
     command: -c max_wal_size=1GB
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
 
   flyway:
     image: flyway/flyway
