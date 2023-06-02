@@ -2,33 +2,40 @@
 set -e
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-# EXP_IDS
-source ${SCRIPT_DIR}/../test-data.env
-# ATLAS_DATA_GXA_EXPDESIGN_VOL_NAME
-# GRADLE_RO_DEP_CACHE_VOL_NAME
+# PROJECT_NAME
 # POSTGRES_HOST
 # POSTGRES_DB
 # POSTGRES_USER
 # POSTGRES_PASSWORD
-source ${SCRIPT_DIR}/../../dev.env
+ENV_FILE=${SCRIPT_DIR}/../../dev.env
+source ${ENV_FILE}
+
+# countdown
 # print_stage_name
 # print_done
 # print_error
 source ${SCRIPT_DIR}/../utils.sh
 
+LOG_FILE=/dev/stdout
+REMOVE_VOLUMES=false
 function print_usage() {
-  printf '\n%b\n' "Usage: ${0} [ -l FILE ]"
-  printf '\n%b\n' "Populate a bulk Expression Atlas Postgres 11 database."
-  printf '\n%b\n' "-l FILE\tLog file (default is /dev/stdout)"
+  printf '\n%b\n' "Usage: ${0} [ -r ] [ -l FILE ]"
+  printf '\n%b\n' "Populate a bulk Expression Atlas Postgres 11 database. The experiment design volume will be created"
+  printf '\n%b\n' "as a (desirable) side effect."
+  printf '\n%b\n' "-r\tRemove volumes before creating them"
+  printf '\n%b\n' "-l FILE\tLog file (default is ${LOG_FILE})"
   printf '%b\n\n' "-h\tDisplay usage instructions"
 }
 
-LOG_FILE=/dev/stdout
-while getopts "l:h" opt
+
+while getopts "l:rh" opt
 do
   case ${opt} in
     l)
       LOG_FILE=${OPTARG}
+      ;;
+    r)
+      REMOVE_VOLUMES=true
       ;;
     h)
       print_usage
@@ -42,40 +49,37 @@ do
   esac
 done
 
-IMAGE_NAME=gxa-postgres-loader
-print_stage_name "🚧 Build Docker image ${IMAGE_NAME}"
-docker build \
--t ${IMAGE_NAME} ${SCRIPT_DIR} >> ${LOG_FILE} 2>&1
+# Because Flyway (in docker-compose-postgres.yml) is mounting a bind volume with a relative path, it needs to be
+# declared first; see https://github.com/docker/compose/issues/3874
+DOCKER_COMPOSE_COMMAND="docker compose \
+--project-name ${PROJECT_NAME} \
+--env-file ${ENV_FILE} \
+--env-file ${SCRIPT_DIR}/../test-data.env \
+--file ${SCRIPT_DIR}/../../docker-compose-postgres.yml \
+--file ${SCRIPT_DIR}/docker-compose.yml"
+
+DOCKER_COMPOSE_COMMAND_VARS="DOCKERFILE_PATH=${SCRIPT_DIR}"
+
+if [ "${REMOVE_VOLUMES}" = "true" ]; then
+  countdown "🗑 Remove Docker Compose volumes of Postgres"
+  eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "down --volumes >> ${LOG_FILE} 2>&1"
+  print_done
+fi
+
+print_stage_name "🛫 Spin up service to load test experiments in Postgres"
+eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "up --build >> ${LOG_FILE} 2>&1"
 print_done
 
-print_stage_name "🐘 Start Postgres 11 in Docker Compose"
-docker-compose \
---env-file ${SCRIPT_DIR}/../../dev.env \
--f ${SCRIPT_DIR}/../../docker-compose-postgres.yml \
-up -d >> ${LOG_FILE} 2>&1
+print_stage_name "🛬 Bring down all services"
+eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "down --rmi local >> ${LOG_FILE} 2>&1"
 print_done
 
-print_stage_name "💤 Wait for twenty seconds to apply migrations and Postgres server be ready to work"
-sleep 20
-print_done
-
-print_stage_name "⚙ Spin up containers to index volume data in Postgres"
-GRADLE_RO_DEP_CACHE_DEST=/gradle-ro-dep-cache
-# Test data volume needs to be mounted in RW mode because db-gxa scripts write temp files in the magetab directory
-docker run --rm \
--v ${ATLAS_DATA_GXA_VOL_NAME}:/atlas-data/gxa:rw \
--v ${ATLAS_DATA_GXA_EXPDESIGN_VOL_NAME}:/atlas-data/gxa-expdesign:rw \
--v ${GRADLE_RO_DEP_CACHE_VOL_NAME}:${GRADLE_RO_DEP_CACHE_DEST}:ro \
--e POSTGRES_HOST=${POSTGRES_HOST} \
--e POSTGRES_DB=${POSTGRES_DB} \
--e POSTGRES_USER=${POSTGRES_USER} \
--e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
--e EXP_IDS="${EXP_IDS}" \
--e GRADLE_RO_DEP_CACHE=${GRADLE_RO_DEP_CACHE_DEST} \
---network atlas-test-net \
-${IMAGE_NAME} >> ${LOG_FILE} 2>&1
-print_done
+DOCKER_COMPOSE_POSTGRES_COMMAND="docker compose \
+--env-file ${ENV_FILE} \
+--file ${SCRIPT_DIR}/../../docker-compose-postgres.yml"
 
 printf '%b\n' "🙂 All done!"
-printf '%b\n' "   The Postgres 11 container exposes port 5432, so you should be able to connect with psql:"
-printf '%b\n' "   psql -h localhost -d ${POSTGRES_DB} -U ${POSTGRES_USER} # The password is ${POSTGRES_PASSWORD}"
+printf '%b\n\n' "   The Postgres 11 container exposes port 5432, so you should be able to connect with psql (password is ${POSTGRES_PASSWORD}):"
+printf '%b\n' "   ${DOCKER_COMPOSE_POSTGRES_COMMAND} up -d && \\"
+printf '%b\n' "   echo 'SELECT * FROM experiment' | psql -h localhost -d ${POSTGRES_DB} -U ${POSTGRES_USER} && \\"
+printf '%b\n' "   ${DOCKER_COMPOSE_POSTGRES_COMMAND} down"
