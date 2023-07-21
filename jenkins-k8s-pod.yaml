@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: jenkins-gene-expression
+spec:
+  serviceAccountName: admin-jenkins-gene-expression
+  # If we set workspaceVolume dynamicPVC() or workspaceVolume persistentVolumeClaimWorkspaceVolume() we need to add a
+  # fsGroup 1000 to make the /home/jenkins/agent directory writable. Otherwise, we get the following exception in the
+  # jnlp container:
+  # Exception in thread "main" java.io.IOException: The specified working directory should be fully accessible to the remoting executable (RWX): /home/jenkins/agent
+  # The securityContext in the pod is inherited, as it becomes the default pod template
+  securityContext:
+    fsGroup: 1000
+  containers:
+# TODO we need to add the following lines back when we set up our Solr Cloud Cluster for bulk
+#    - name: "kubectl"
+#      image: bitnami/kubectl
+#      command: [ "/bin/sh" ]
+#      args: [ "-c", "kubectl scale --replicas=2 solrcloud gxa && sleep 2h" ]
+#      resources:
+#        requests:
+#          memory: "0.5Gi"
+#        limits:
+#          memory: "0.5Gi"
+    - name: jnlp
+      resources:
+        requests:
+          memory: "512Mi"
+        limits:
+          memory: "512Mi"
+    - name: openjdk
+      image: openjdk:11
+      resources:
+        requests:
+          memory: "3.5Gi"
+          ephemeral-storage: "5Gi"
+        limits:
+          memory: "4Gi"
+      env:
+      - name: GRADLE_OPTS
+        value: "-Dorg.gradle.daemon=false"
+      - name: GRADLE_RO_DEP_CACHE
+        value: "/root/gradle-ro-dep-cache"
+      command: [ "/bin/sh" ]
+      args: [ "-c", "mkdir -p /root/expdesign-rw && cp /test-data/expdesign/* /root/expdesign-rw ; sleep 2h" ]
+      volumeMounts:
+# TODO we need to add the following lines back when we set up the below volumes for bulk
+#        - mountPath: /test-data/gxa
+#          name: gxa-data
+#          readOnly: true
+#        - mountPath: /test-data/expdesign
+#          name: gxa-expdesign
+#          readOnly: true
+        - mountPath: /test-data/bioentity_properties
+          name: bioentity-properties
+          readOnly: true
+        - mountPath: /root/gradle-ro-dep-cache
+          name: gradle-ro-dep-cache
+          readOnly: true
+    - name: postgres
+      image: postgres:11-alpine
+      resources:
+        requests:
+          memory: "100Mi"
+        limits:
+          memory: "200Mi"
+      env:
+        - name: POSTGRES_DB
+          value: "postgres"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+  volumes:
+# TODO we need to add the following lines back when we set up the below volumes for bulk
+#    - name: gxa-data
+#      persistentVolumeClaim:
+#        claimName: gxa-data-rox
+#        readOnly: true
+#    - name: gxa-expdesign
+#      persistentVolumeClaim:
+#        claimName: gxa-expdesign-rox
+#        readOnly: true
+    - name: bioentity-properties
+      persistentVolumeClaim:
+        claimName: bioentity-properties-rox
+        readOnly: true
+    - name: gradle-ro-dep-cache
+      persistentVolumeClaim:
+        claimName: gradle-7.0-ro-dep-cache-rox
+        readOnly: true
