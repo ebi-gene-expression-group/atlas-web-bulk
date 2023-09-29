@@ -14,12 +14,11 @@ pipeline {
   }
 
   stages {
-// TODO we need to add the following lines back when we set up our Solr Cloud Cluster for bulk
-    // stage('Scale SolrCloud') {
-    //  steps {
-    //    container('kubectl') {}
-    //  }
-    // }
+    stage('Scale SolrCloud') {
+     steps {
+       container('kubectl') {}
+     }
+    }
 
     stage('Provision Gradle') {
       options {
@@ -29,7 +28,6 @@ pipeline {
         sh './gradlew --no-watch-fs'
       }
     }
-
 
     stage('–– Core lib ––') {
       stages {
@@ -52,8 +50,8 @@ pipeline {
                     '-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=gxa ' +
                     '-PjdbcUsername=postgres ' +
                     '-PjdbcPassword=postgres ' +
-                    '-PzkHosts=scxa-solrcloud-zookeeper-0.scxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,scxa-solrcloud-zookeeper-1.scxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,scxa-solrcloud-zookeeper-2.scxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 ' +
-                    '-PsolrHosts=http://scxa-solrcloud-0.scxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://scxa-solrcloud-1.scxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr ' +
+                    '-PzkHosts=gxa-solrcloud-zookeeper-0.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,gxa-solrcloud-zookeeper-1.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,gxa-solrcloud-zookeeper-2.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 ' +
+                    '-PsolrHosts=http://gxa-solrcloud-0.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-1.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-2.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-3.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr ' +
                     '-PsolrUser=solr ' +
                     '-PsolrPassword=SolrRocks ' +
                     ':atlas-web-core:testClasses'
@@ -66,8 +64,7 @@ pipeline {
           }
           steps {
             sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
-// TODO we need to add the following lines back when we set up our Solr Cloud Cluster for bulk
-            // sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
+            sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
             sh './gradlew --no-watch-fs :atlas-web-core:jacocoTestReport'
           }
         }
@@ -96,8 +93,8 @@ pipeline {
                     '-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=gxa ' +
                     '-PjdbcUsername=postgres ' +
                     '-PjdbcPassword=postgres ' +
-                    '-PzkHosts=scxa-solrcloud-zookeeper-0.scxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,scxa-solrcloud-zookeeper-1.scxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,scxa-solrcloud-zookeeper-2.scxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 ' +
-                    '-PsolrHosts=http://scxa-solrcloud-0.scxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://scxa-solrcloud-1.scxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr ' +
+                    '-PzkHosts=gxa-solrcloud-zookeeper-0.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,gxa-solrcloud-zookeeper-1.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,gxa-solrcloud-zookeeper-2.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 ' +
+                    '-PsolrHosts=http://gxa-solrcloud-0.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-1.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-2.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-3.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr ' +
                     '-PsolrUser=solr ' +
                     '-PsolrPassword=SolrRocks ' +
                     ':app:testClasses'
@@ -110,9 +107,8 @@ pipeline {
           }
           steps {
             sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
-// TODO we need to add the following lines back when we set up our Solr Cloud Cluster for bulk
-            // sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
-            // sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
+            sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
+            sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
             sh './gradlew --no-watch-fs :app:jacocoTestReport'
           }
         }
@@ -178,13 +174,11 @@ pipeline {
   post {
     always {
       junit 'atlas-web-core/build/ut/**/*.xml'
-// TODO we need to add the following lines back when we set up our Solr Cloud Cluster for bulk
-      //junit 'atlas-web-core/build/it/**/*.xml'
+      junit 'atlas-web-core/build/it/**/*.xml'
 
       junit 'app/build/ut/**/*.xml'
-// TODO we need to add the following lines back when we set up our Solr Cloud Cluster for bulk
-      // junit 'app/build/it/**/*.xml'
-      // junit 'app/build/e2e/**/*.xml'
+      junit 'app/build/it/**/*.xml'
+      junit 'app/build/e2e/**/*.xml'
 
       archiveArtifacts artifacts: 'atlas-web-core/build/reports/**', fingerprint: true, allowEmptyArchive: true
       archiveArtifacts artifacts: 'app/build/reports/**', fingerprint: true, allowEmptyArchive: true
