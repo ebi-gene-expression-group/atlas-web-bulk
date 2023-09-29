@@ -44,8 +44,8 @@ pipeline {
                     '-Pflyway.schemas=gxa ' +
                     'flywayMigrate'
             sh './gradlew --no-watch-fs ' +
-                    '-PdataFilesLocation=/gxa-test-data ' +
-                    '-PexperimentFilesLocation=/gxa-test-data/gxa ' +
+                    '-PdataFilesLocation=/test-data ' +
+                    '-PexperimentFilesLocation=/test-data/gxa ' +
                     '-PexperimentDesignLocation=/root/expdesign-rw ' +
                     '-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=gxa ' +
                     '-PjdbcUsername=postgres ' +
