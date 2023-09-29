@@ -18,9 +18,9 @@ spec:
       args: [ "-c", "kubectl scale --replicas=4 solrcloud gxa && sleep 2h" ]
       resources:
         requests:
-          memory: "0.5Gi"
+          memory: "256Mi"
         limits:
-          memory: "0.5Gi"
+          memory: "256Mi"
     - name: jnlp
       resources:
         requests:
@@ -31,10 +31,10 @@ spec:
       image: openjdk:11
       resources:
         requests:
-          memory: "3.5Gi"
-          ephemeral-storage: "5Gi"
+          memory: "1.5Gi"
+          ephemeral-storage: "4Gi"
         limits:
-          memory: "4Gi"
+          memory: "3Gi"
       env:
       - name: GRADLE_OPTS
         value: "-Dorg.gradle.daemon=false"
