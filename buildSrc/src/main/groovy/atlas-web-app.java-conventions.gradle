@@ -64,8 +64,8 @@ dependencies {
   testImplementation 'org.springframework:spring-test:5.1.5.RELEASE'
   testImplementation 'com.h2database:h2:1.4.199'
   testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.1'
-  testImplementation 'org.mockito:mockito-core:2.25.1'
-  testImplementation 'org.mockito:mockito-junit-jupiter:2.25.1'
+  testImplementation 'org.mockito:mockito-core:5.2.0'
+  testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
   testImplementation 'org.assertj:assertj-core:3.11.1'
   testImplementation 'org.assertj:assertj-guava:3.2.0'
   testImplementation 'org.hamcrest:java-hamcrest:2.0.0.0'
@@ -121,17 +121,17 @@ test {
     jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005'
   }
 
+  if (project.hasProperty('excludeTests')) {
+    exclude project.property('excludeTests')
+  }
+
   if (project.hasProperty('testResultsPath')) {
-    reporting.baseDir = "${buildDir}/reports/" + project.property('testResultsPath')
-    testResultsDirName = "${buildDir}/test-results/" + project.property('testResultsPath')
+    testReportDirName = project.property('testResultsPath')
+    testResultsDirName = project.property('testResultsPath')
 
     jacoco {
       destinationFile = file("${buildDir}/jacoco/${project.property('testResultsPath')}.exec")
     }
-  }
-
-  if (project.hasProperty('excludeTests')) {
-    exclude project.property('excludeTests')
   }
 
   testLogging {
@@ -148,7 +148,7 @@ jacocoTestReport {
   executionData.setFrom fileTree(dir: "${buildDir}/jacoco", include: '*.exec' )
 
   reports {
-    html.destination file("${buildDir}/jacoco/html")
+    html.outputLocation = layout.buildDirectory.dir("reports/jacoco")
   }
 }
 
