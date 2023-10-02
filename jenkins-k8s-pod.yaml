@@ -76,7 +76,7 @@ spec:
         readOnly: true
     - name: gxa-expdesign
       persistentVolumeClaim:
-        claimName: gxa-expdesign-rwo
+        claimName: gxa-expdesign-rox
         readOnly: true
     - name: bioentity-properties
       persistentVolumeClaim:
