@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.ac.ebi.atlas.commons.readers.TsvStreamer;
 import uk.ac.ebi.atlas.commons.streams.ObjectInputStream;
+import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
 import uk.ac.ebi.atlas.model.OntologyTerm;
@@ -108,7 +109,7 @@ public class EvidenceService<X extends DifferentialExpression,
     private boolean shouldSkip(E experiment) {
         return !experiment.getSpecies().isUs() ||
                 experiment.getType().isMicroRna() ||
-                cellLineAsSampleCharacteristicButNoDiseaseAsFactor(experiment.getExperimentDesign());
+                cellLineAsSampleCharacteristicButNoDiseaseAsFactor(experiment);
     }
 
     private void piecesOfEvidence(E experiment,
@@ -424,14 +425,14 @@ public class EvidenceService<X extends DifferentialExpression,
         public abstract SampleCharacteristic organismPart();
 
         public static Optional<DiseaseAssociation> tryCreate(DifferentialExperiment experiment, Contrast contrast) {
-            var biosampleInfo = getBiosampleInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
-            var diseaseInfo = getDiseaseInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
+            var biosampleInfo = getBiosampleInfo(experiment, contrast.getTestAssayGroup());
+            var diseaseInfo = getDiseaseInfo(experiment, contrast.getTestAssayGroup());
 
             if (biosampleInfo.isPresent() && diseaseInfo.isPresent()) {
                 return Optional.of(
                         DiseaseAssociation.create(
                                 biosampleInfo.get(),
-                                experiment.getExperimentDesign(),
+                                experiment,
                                 contrast,
                                 experiment.doesContrastHaveCttvPrimaryAnnotation(contrast),
                                 diseaseInfo.get()));
@@ -441,18 +442,18 @@ public class EvidenceService<X extends DifferentialExpression,
         }
 
         public static DiseaseAssociation create(SampleCharacteristic biosampleInfo,
-                                                ExperimentDesign experimentDesign,
+                                                Experiment experiment,
                                                 Contrast contrast,
                                                 boolean isCttvPrimary,
                                                 SampleCharacteristic diseaseInfo) {
-            var referenceSampleLabel = factorBasedSummaryLabel(experimentDesign, contrast.getReferenceAssayGroup());
-            var testSampleLabel = factorBasedSummaryLabel(experimentDesign, contrast.getTestAssayGroup());
+            var referenceSampleLabel = factorBasedSummaryLabel(experiment, contrast.getReferenceAssayGroup());
+            var testSampleLabel = factorBasedSummaryLabel(experiment, contrast.getTestAssayGroup());
             var confidence =
                     determineStudyConfidence(
-                            experimentDesign, diseaseInfo, contrast.getTestAssayGroup(), isCttvPrimary);
+                            experiment, diseaseInfo, contrast.getTestAssayGroup(), isCttvPrimary);
             var organismPart =
                     Optional.ofNullable(
-                            experimentDesign.getSampleCharacteristic(
+                            experiment.getSampleCharacteristic(
                                     contrast.getTestAssayGroup().getFirstAssayId(),
                                     "organism part"))
                             .orElse(SampleCharacteristic.create("organism part", ""));
@@ -474,10 +475,9 @@ public class EvidenceService<X extends DifferentialExpression,
     https://github.com/opentargets/json_schema/blob/master/src/evidence/expression.json
     "test_sample", "reference_sample"
      */
-    private static String factorBasedSummaryLabel(final ExperimentDesign experimentDesign, AssayGroup assayGroup) {
-        return experimentDesign.getFactorValues(assayGroup.getFirstAssayId()).values().stream()
-                .filter(StringUtils::isNotEmpty)
-                .collect(Collectors.joining("; "));
+    private static String factorBasedSummaryLabel(final Experiment experiment, AssayGroup assayGroup) {
+        Stream<String> factorValueStream = experiment.getFactorValues(assayGroup.getFirstAssayId()).values().stream();
+        return factorValueStream.filter(StringUtils::isNotEmpty).collect(Collectors.joining("; "));
     }
 
     /*
@@ -485,12 +485,12 @@ public class EvidenceService<X extends DifferentialExpression,
     This will either be an organism part, a cell line, or a cell type.
     When we couldn't determine this we used to issue a warning asking curators to curate this.
      */
-    private static Optional<SampleCharacteristic> getBiosampleInfo(final ExperimentDesign experimentDesign,
+    private static Optional<SampleCharacteristic> getBiosampleInfo(final Experiment experiment,
                                                                    AssayGroup testAssayGroup) {
         return Stream.of("organism part", "cell line", "cell type").flatMap(
                 experimentalVariable -> {
                     var matchingSampleCharacteristic =
-                            experimentDesign.getSampleCharacteristic(
+                            experiment.getSampleCharacteristic(
                                     testAssayGroup.getFirstAssayId(), experimentalVariable);
                     return matchingSampleCharacteristic == null ?
                             Stream.empty() :
@@ -503,9 +503,11 @@ public class EvidenceService<X extends DifferentialExpression,
     Original comment:
     # Go through the types (should probably always only be one)...
      */
-    private static Optional<SampleCharacteristic> getDiseaseInfo(final ExperimentDesign experimentDesign,
+    private static Optional<SampleCharacteristic> getDiseaseInfo(final Experiment experiment,
                                                                  AssayGroup testAssayGroup) {
-        return experimentDesign.getSampleCharacteristics(testAssayGroup.getFirstAssayId()).stream()
+        Stream<SampleCharacteristic> sampleCharacteristicStream =
+                experiment.getSampleCharacteristics(testAssayGroup.getFirstAssayId()).stream();
+        return sampleCharacteristicStream
                 .filter(
                         sampleCharacteristic ->
                                 sampleCharacteristic.getHeader().toLowerCase().contains("disease") &&
@@ -526,11 +528,11 @@ public class EvidenceService<X extends DifferentialExpression,
     characteristics and something else is the factor e.g a treatment, the
     confidence is "low".
     */
-    private static DiseaseAssociation.CONFIDENCE determineStudyConfidence(ExperimentDesign experimentDesign,
+    private static DiseaseAssociation.CONFIDENCE determineStudyConfidence(Experiment experiment,
                                                                           SampleCharacteristic diseaseCharacteristic,
                                                                           AssayGroup testAssayGroup,
                                                                           boolean isCttvPrimary) {
-        var factorSet = experimentDesign.getFactors(testAssayGroup.getFirstAssayId());
+        var factorSet = experiment.getFactors(testAssayGroup.getFirstAssayId());
         if (factorSet != null) {
             if (!factorSet.factorsByType.containsKey(Factor.normalize(diseaseCharacteristic.getHeader()))) {
                 return DiseaseAssociation.CONFIDENCE.LOW;
@@ -597,9 +599,9 @@ public class EvidenceService<X extends DifferentialExpression,
     If something's a factor then it is also a characteristic unless we've made a mistake.
     Example mistake was E-GEOD-23764.
      */
-    private boolean cellLineAsSampleCharacteristicButNoDiseaseAsFactor(ExperimentDesign experimentDesign) {
-        return (experimentDesign.getSampleCharacteristicHeaders().contains("cell line") ||
-                experimentDesign.getFactorHeaders().contains("cell line"))  &&
-                !experimentDesign.getFactorHeaders().contains("disease");
+    private boolean cellLineAsSampleCharacteristicButNoDiseaseAsFactor(Experiment experiment) {
+        return (experiment.getSampleCharacteristicHeaders().contains("cell line") ||
+                experiment.getExperimentalFactorHeaders().contains("cell line"))  &&
+                !experiment.getExperimentalFactorHeaders().contains("disease");
     }
 }
