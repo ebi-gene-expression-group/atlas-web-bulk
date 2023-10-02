@@ -84,7 +84,7 @@ public class HeatmapGroupingsService {
                 Streams.concat(
                             Stream.of(experiment.getDisplayDefaults().getDefaultQueryFactorType()),
                             experiment.getDisplayDefaults().getFactorTypes().stream(),
-                            experiment.getExperimentDesign().getFactorHeaders().stream())
+                            experiment.getExperimentalFactorHeaders().stream())
                         .filter(StringUtils::isNotBlank)    // defaultQueryFactorType in diff experiments is ""
                         .map(Factor::normalize)
                         .collect(toImmutableSet());
@@ -104,7 +104,7 @@ public class HeatmapGroupingsService {
                                         mapAssayGroupsToFactors(assayId2AssayGroup, factorHeader, experiment)));
 
         Stream<HeatmapFilterGroup> sampleCharacteristicGroups =
-                experiment.getExperimentDesign().getSampleCharacteristicHeaders().stream()
+                experiment.getSampleCharacteristicHeaders().stream()
                         .filter(sampleCharacteristicHeader -> !orderedFactors.contains(Factor.normalize(sampleCharacteristicHeader)))
                         .map(sampleCharacteristicHeader ->
                                 HeatmapFilterGroup.create(
@@ -126,9 +126,9 @@ public class HeatmapGroupingsService {
             @NotNull String factorHeader,
             @NotNull Experiment<@NotNull ?> experiment) {
         return assayId2AssayGroup.keySet().stream()
-                .filter(assayId -> experiment.getExperimentDesign().getFactor(assayId, factorHeader) != null)
+                .filter(assayId -> experiment.getFactor(assayId, factorHeader) != null)
                 .collect(flatteningToImmutableSetMultimap(
-                        assayId -> experiment.getExperimentDesign().getFactor(assayId, factorHeader).getValue(),
+                        assayId -> experiment.getFactor(assayId, factorHeader).getValue(),
                         assayId -> assayId2AssayGroup.get(assayId).stream()));
     }
 
@@ -139,14 +139,10 @@ public class HeatmapGroupingsService {
             @NotNull Experiment<@NotNull?> experiment) {
         return assayId2AssayGroup.keySet().stream()
                 .filter(assayId ->
-                        experiment
-                                .getExperimentDesign()
-                                .getSampleCharacteristic(assayId, sampleCharacteristicHeader) != null)
+                        experiment.getSampleCharacteristic(assayId, sampleCharacteristicHeader) != null)
                 .collect(flatteningToImmutableSetMultimap(
                         assayId ->
-                                experiment
-                                        .getExperimentDesign()
-                                        .getSampleCharacteristic(assayId, sampleCharacteristicHeader).getValue(),
+                                experiment.getSampleCharacteristic(assayId, sampleCharacteristicHeader).getValue(),
                         assayId -> assayId2AssayGroup.get(assayId).stream()));
     }
 }
