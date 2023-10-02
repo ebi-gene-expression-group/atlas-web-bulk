@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.sample.Contrast;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.summary.ContrastSummary;
@@ -44,10 +43,8 @@ public class ContrastSummaryController {
             throw new IllegalArgumentException("No contrast with ID " + contrastId + " found.");
         }
 
-        ExperimentDesign experimentDesign = differentialExperiment.getExperimentDesign();
-
         ContrastSummary contrastSummary = new ContrastSummaryBuilder()
-                .withExperimentDesign(experimentDesign)
+                .withExperimentDesign(differentialExperiment)
                 .forContrast(contrast)
                 .withExperimentDescription(differentialExperiment.getDescription())
                 .build();

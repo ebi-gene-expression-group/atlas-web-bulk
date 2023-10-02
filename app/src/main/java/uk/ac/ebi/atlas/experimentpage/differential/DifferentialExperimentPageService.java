@@ -76,7 +76,7 @@ DifferentialExperimentPageService<
             JsonObject o = contrast.toJson();
             o.add("contrastSummary", new ContrastSummaryBuilder()
                     .forContrast(contrast)
-                    .withExperimentDesign(differentialExperiment.getExperimentDesign())
+                    .withExperimentDesign(differentialExperiment)
                     .withExperimentDescription(differentialExperiment.getDescription())
                     .build().toJson());
             o.add("resources", contrastImages.get(contrast.getId()));
