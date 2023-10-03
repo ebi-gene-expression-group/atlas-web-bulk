@@ -91,7 +91,7 @@ class ExperimentDesignControllerWIT {
     }
 
     @Test
-    void throwsErrorWithInValidPageSizeParameter() throws Exception {
+void whenExperimentDesignHasInvalidPageSizeParameterThenThrowsError() throws Exception {
         mockMvc.perform(get(URL, "E-TABM-713")
                         .param("pageSize", "0"))
                 .andExpect(status().isBadRequest());
