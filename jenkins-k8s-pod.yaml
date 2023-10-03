@@ -12,16 +12,15 @@ spec:
   securityContext:
     fsGroup: 1000
   containers:
-# TODO we need to add the following lines back when we set up our Solr Cloud Cluster for bulk
-#    - name: "kubectl"
-#      image: bitnami/kubectl
-#      command: [ "/bin/sh" ]
-#      args: [ "-c", "kubectl scale --replicas=2 solrcloud gxa && sleep 2h" ]
-#      resources:
-#        requests:
-#          memory: "0.5Gi"
-#        limits:
-#          memory: "0.5Gi"
+    - name: "kubectl"
+      image: bitnami/kubectl
+      command: [ "/bin/sh" ]
+      args: [ "-c", "kubectl scale --replicas=4 solrcloud gxa && sleep 2h" ]
+      resources:
+        requests:
+          memory: "256Mi"
+        limits:
+          memory: "256Mi"
     - name: jnlp
       resources:
         requests:
@@ -33,9 +32,9 @@ spec:
       resources:
         requests:
           memory: "3.5Gi"
-          ephemeral-storage: "5Gi"
+          ephemeral-storage: "6Gi"
         limits:
-          memory: "4Gi"
+          memory: "5Gi"
       env:
       - name: GRADLE_OPTS
         value: "-Dorg.gradle.daemon=false"
@@ -44,13 +43,12 @@ spec:
       command: [ "/bin/sh" ]
       args: [ "-c", "mkdir -p /root/expdesign-rw && cp /test-data/expdesign/* /root/expdesign-rw ; sleep 2h" ]
       volumeMounts:
-# TODO we need to add the following lines back when we set up the below volumes for bulk
-#        - mountPath: /test-data/gxa
-#          name: gxa-data
-#          readOnly: true
-#        - mountPath: /test-data/expdesign
-#          name: gxa-expdesign
-#          readOnly: true
+        - mountPath: /test-data/gxa
+          name: gxa-data
+          readOnly: true
+        - mountPath: /test-data/expdesign
+          name: gxa-expdesign
+          readOnly: true
         - mountPath: /test-data/bioentity_properties
           name: bioentity-properties
           readOnly: true
@@ -72,15 +70,14 @@ spec:
         - name: POSTGRES_PASSWORD
           value: "postgres"
   volumes:
-# TODO we need to add the following lines back when we set up the below volumes for bulk
-#    - name: gxa-data
-#      persistentVolumeClaim:
-#        claimName: gxa-data-rox
-#        readOnly: true
-#    - name: gxa-expdesign
-#      persistentVolumeClaim:
-#        claimName: gxa-expdesign-rox
-#        readOnly: true
+    - name: gxa-data
+      persistentVolumeClaim:
+        claimName: gxa-data-rox
+        readOnly: true
+    - name: gxa-expdesign
+      persistentVolumeClaim:
+        claimName: gxa-expdesign-rox
+        readOnly: true
     - name: bioentity-properties
       persistentVolumeClaim:
         claimName: bioentity-properties-rox

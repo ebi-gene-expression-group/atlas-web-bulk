@@ -63,8 +63,7 @@ public class DASFeaturesController extends HtmlExceptionHandlingController {
             Experiment experiment = experimentTrader.getPublicExperiment(dbe.getExperimentAccession());
 
             FactorSet factorsForAssayGroup =
-                    FactorSet.create(experiment.getExperimentDesign()
-                             .getFactorValues(testAssayGroup.getFirstAssayId()));
+                    FactorSet.create(experiment.getFactorValues(testAssayGroup.getFirstAssayId()));
             for (Factor factor : factorsForAssayGroup) {
                 factorValuesByType.put(factor.getType(), factor.getValue());
             }

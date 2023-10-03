@@ -6,8 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.model.experiment.sample.BiologicalReplicate;
 import uk.ac.ebi.atlas.model.OntologyTerm;
@@ -15,20 +13,14 @@ import uk.ac.ebi.atlas.model.experiment.sdrf.SampleCharacteristic;
 import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
-import static java.util.stream.Collectors.joining;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaselineExperimentAssayGroupsLinesTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaselineExperimentAssayGroupsLinesTest.class);
-
     private static final String EXPERIMENT_ACCESSION = "EXPERIMENT_ACCESSION";
     private static final String ASSAY1 = "ASSAY1";
     private static final String ASSAY2 = "ASSAY2";
@@ -93,18 +85,10 @@ public class BaselineExperimentAssayGroupsLinesTest {
         when(baselineExperiment.getAccession()).thenReturn(EXPERIMENT_ACCESSION);
         when(baselineExperiment.getDataColumnDescriptors()).thenReturn(ImmutableList.of(ASSAY_GROUP1, ASSAY_GROUP2,
                 ASSAY_GROUP3));
-        when(baselineExperiment.getExperimentDesign()).thenReturn(experimentDesign);
 
         BaselineExperimentAssayGroupsLines subject = new BaselineExperimentAssayGroupsLines(baselineExperiment);
 
         Iterator<String[]> lines = subject.iterator();
-
-        subject.forEach(line ->
-                LOGGER.info(
-                        Arrays.stream(line)
-                                .map(field -> wrap(field, "\""))
-                                .map(field -> isBlank(field) ? "\"\"" : field)
-                                .collect(joining(","))));
 
         assertThat(
                 lines.next(),

@@ -43,7 +43,7 @@ public class DifferentialExperimentContrastLines implements Iterable<String[]> {
                                  String assayAccession,
                                  Contrast contrast,
                                  String value) {
-        for (SampleCharacteristic sample : experiment.getExperimentDesign().getSampleCharacteristics(assayAccession)) {
+        for (SampleCharacteristic sample : experiment.getSampleCharacteristics(assayAccession)) {
             ImmutableList<String> line =
                     ImmutableList.of(
                             experiment.getAccession(),
@@ -61,7 +61,7 @@ public class DifferentialExperimentContrastLines implements Iterable<String[]> {
                                  String assayAccession,
                                  Contrast contrast,
                                  String value) {
-        FactorSet factorSet = experiment.getExperimentDesign().getFactors(assayAccession);
+        FactorSet factorSet = experiment.getFactors(assayAccession);
         if (factorSet != null) {
             for (Factor factor : factorSet) {
                 ImmutableList<String> line =
