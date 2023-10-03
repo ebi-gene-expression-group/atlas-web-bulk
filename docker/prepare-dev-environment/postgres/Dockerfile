@@ -12,7 +12,6 @@ VOLUME /atlas-data/gxa /atlas-data/gxa-expdesign
 
 WORKDIR /root
 RUN git clone --recurse-submodules --depth 1 -b move_to_solr8_pg11 --single-branch https://github.com/ebi-gene-expression-group/atlas-web-bulk.git
-RUN git clone --recurse-submodules https://github.com/ebi-gene-expression-group/db-scxa.git
 ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
 
 COPY docker-entrypoint.sh /
