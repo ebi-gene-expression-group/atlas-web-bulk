@@ -98,7 +98,7 @@ class ExperimentDesignControllerWIT {
     }
 
     @Test
-    void throwsErrorWithInValidPageNoParameter() throws Exception {
+void whenExperimentDesignHasInvalidPageNoParameterThenThrowsError() throws Exception {
         mockMvc.perform(get(URL, "E-TABM-713")
                         .param("pageNo", "0"))
                 .andExpect(status().isBadRequest());
