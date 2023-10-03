@@ -101,7 +101,7 @@ public class BaselineExperimentPageService extends ExperimentPageService {
             o.add("assayGroupSummary",
                     new AssayGroupSummaryBuilder()
                     .forAssayGroup(experiment.getDataColumnDescriptor(dataColumnDescriptor.getId()))
-                    .withExperimentDesign(experiment.getExperimentDesign())
+                    .withExperimentDesign(experiment)
                     .build().toJson());
             result.add(o);
         }
