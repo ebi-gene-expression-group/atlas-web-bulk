@@ -67,7 +67,7 @@ class ExperimentDesignControllerWIT {
     }
 
     @Test
-void whenExperimentDesignHasNoParameterThenReturnsOK() throws Exception {
+    void whenExperimentDesignHasNoParameterThenReturnsOK() throws Exception {
         mockMvc.perform(get(URL, "E-TABM-713"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
@@ -78,29 +78,32 @@ void whenExperimentDesignHasNoParameterThenReturnsOK() throws Exception {
     }
 
     @Test
-void whenExperimentDesignHasPageSizeParameterThenReturnsOK() throws Exception {
+    void whenExperimentDesignHasPageSizeParameterThenReturnsOK() throws Exception {
+        final String pageSize = "10";
         mockMvc.perform(get(URL, "E-TABM-713")
-                        .param("pageSize", "10"))
+                        .param("pageSize", pageSize))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(jsonPath("$.headers").isArray())
                 .andExpect(jsonPath("$.headers").isNotEmpty())
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data").isNotEmpty())
-                .andExpect(jsonPath("$.data.length()").value(10));
+                .andExpect(jsonPath("$.data.length()").value(pageSize));
     }
 
     @Test
-void whenExperimentDesignHasInvalidPageSizeParameterThenThrowsError() throws Exception {
+    void whenExperimentDesignHasInvalidPageSizeParameterThenThrowsError() throws Exception {
+        final String invalidPageSize = "0";
         mockMvc.perform(get(URL, "E-TABM-713")
-                        .param("pageSize", "0"))
+                        .param("pageSize", invalidPageSize))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-void whenExperimentDesignHasInvalidPageNoParameterThenThrowsError() throws Exception {
+    void whenExperimentDesignHasInvalidPageNoParameterThenThrowsError() throws Exception {
+        final String invalidPageNumber = "0";
         mockMvc.perform(get(URL, "E-TABM-713")
-                        .param("pageNo", "0"))
+                        .param("pageNo", invalidPageNumber))
                 .andExpect(status().isBadRequest());
     }
 
