@@ -44,7 +44,7 @@ public class ContrastSummaryController {
         }
 
         ContrastSummary contrastSummary = new ContrastSummaryBuilder()
-                .withExperimentDesign(differentialExperiment)
+                .withExperiment(differentialExperiment)
                 .forContrast(contrast)
                 .withExperimentDescription(differentialExperiment.getDescription())
                 .build();
