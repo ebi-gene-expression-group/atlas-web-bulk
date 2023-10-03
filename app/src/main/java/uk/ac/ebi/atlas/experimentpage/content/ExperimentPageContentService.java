@@ -10,14 +10,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.commons.readers.TsvStreamer;
-import uk.ac.ebi.atlas.experimentpage.ExperimentDesignFile;
 import uk.ac.ebi.atlas.experimentpage.ExternallyAvailableContentService;
 import uk.ac.ebi.atlas.experimentpage.json.JsonBaselineExperimentController;
 import uk.ac.ebi.atlas.experimentpage.qc.MicroarrayQcFiles;
 import uk.ac.ebi.atlas.experimentpage.qc.QcReportController;
 import uk.ac.ebi.atlas.model.download.ExternallyAvailableContent;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
-import uk.ac.ebi.atlas.model.experiment.ExperimentDesignTable;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.experiment.sample.ReportsGeneExpression;
 import uk.ac.ebi.atlas.resource.DataFileHub;
@@ -85,12 +83,6 @@ public class ExperimentPageContentService {
                                             ExternallyAvailableContent.ContentType.PLOTS))));
         }
 
-/*        if (dataFileHub.getExperimentFiles(experiment.getAccession()).experimentDesign.exists()) {
-            availableTabs.add(
-                    experimentDesignTab(new ExperimentDesignTable(experimen).asJson(),
-                            ExperimentDesignFile.makeUrl(experiment.getAccession(), accessKey)));
-        }*/
-
         availableTabs.add(
                 customContentTab(
                         "multipart",
@@ -120,7 +112,7 @@ public class ExperimentPageContentService {
         }
     }
 
-    private JsonArray supplementaryInformationTabs(final Experiment experiment, final String accessKey) {
+    private JsonArray supplementaryInformationTabs(final Experiment<? extends ReportsGeneExpression> experiment, final String accessKey) {
         JsonArray supplementaryInformationTabs = new JsonArray();
         if (dataFileHub.getExperimentFiles(experiment.getAccession()).analysisMethods.exists()) {
             try (TsvStreamer tsvStreamer =
@@ -154,8 +146,6 @@ public class ExperimentPageContentService {
                             "QC Report",
                             "reports",
                             pairsToArrayOfObjects(
-                                    "name",
-                                    "url",
                                     new MicroarrayQcFiles(
                                             dataFileHub.getExperimentFiles(experiment.getAccession()).qcFolder)
                                             .getArrayDesignsThatHaveQcReports().stream()
@@ -184,12 +174,12 @@ public class ExperimentPageContentService {
         return result;
     }
 
-    private JsonArray pairsToArrayOfObjects(String leftName, String rightName, List<Pair<String, String>> pairs) {
+    private JsonArray pairsToArrayOfObjects(List<Pair<String, String>> pairs) {
         JsonArray result = new JsonArray();
         for (Pair<String, String> p : pairs) {
             JsonObject o = new JsonObject();
-            o.addProperty(leftName, p.getLeft());
-            o.addProperty(rightName, p.getRight());
+            o.addProperty("name", p.getLeft());
+            o.addProperty("url", p.getRight());
             result.add(o);
         }
         return result;
@@ -222,12 +212,5 @@ public class ExperimentPageContentService {
         props.addProperty("genesDistributedByCutoffUrl", geneDistributionUrl);
         props.add("availableDataUnits", availableDataUnits);
         return customContentTab("heatmap", "Results", props);
-    }
-
-    private JsonObject experimentDesignTab(JsonObject table, String downloadUrl) {
-        JsonObject props = new JsonObject();
-        props.add("table", table);
-        props.addProperty("downloadUrl", downloadUrl);
-        return customContentTab("experiment-design", "Experiment Design", props);
     }
 }
