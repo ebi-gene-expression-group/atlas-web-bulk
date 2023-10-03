@@ -15,12 +15,8 @@ import uk.ac.ebi.atlas.model.experiment.sdrf.SampleCharacteristic;
 import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
-import static java.util.stream.Collectors.joining;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -97,13 +93,6 @@ public class BaselineExperimentAssayGroupsLinesTest {
         BaselineExperimentAssayGroupsLines subject = new BaselineExperimentAssayGroupsLines(baselineExperiment);
 
         Iterator<String[]> lines = subject.iterator();
-
-        subject.forEach(line ->
-                LOGGER.info(
-                        Arrays.stream(line)
-                                .map(field -> wrap(field, "\""))
-                                .map(field -> isBlank(field) ? "\"\"" : field)
-                                .collect(joining(","))));
 
         assertThat(
                 lines.next(),
