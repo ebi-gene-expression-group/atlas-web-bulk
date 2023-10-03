@@ -67,7 +67,7 @@ class ExperimentDesignControllerWIT {
     }
 
     @Test
-    void hasExperimentDesignDataWithoutAnyParameter() throws Exception {
+void whenExperimentDesignHasNoParameterThenReturnsOK() throws Exception {
         mockMvc.perform(get(URL, "E-TABM-713"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
