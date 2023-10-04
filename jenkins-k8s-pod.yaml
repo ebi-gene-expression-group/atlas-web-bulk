@@ -49,6 +49,9 @@ spec:
         - mountPath: /test-data/expdesign
           name: gxa-expdesign
           readOnly: true
+        - mountPath: /test-data/ontology
+          name: gxa-data-ontology
+          readOnly: true
         - mountPath: /test-data/bioentity_properties
           name: bioentity-properties
           readOnly: true
@@ -77,6 +80,10 @@ spec:
     - name: gxa-expdesign
       persistentVolumeClaim:
         claimName: gxa-expdesign-rox
+        readOnly: true
+    - name: gxa-data-ontology
+      persistentVolumeClaim:
+        claimName: gxa-data-ontology-rox
         readOnly: true
     - name: bioentity-properties
       persistentVolumeClaim:
