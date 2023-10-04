@@ -4,15 +4,14 @@
 
 ### TL;DR
 ```bash
-./docker/prepare-dev-environment/gradle-cache/run.sh -l gradle-cache.log && \
-./docker/prepare-dev-environment/volumes/run.sh -l volumes.log && \
-./docker/prepare-dev-environment/postgres/run.sh -l pg.log && \
-./docker/prepare-dev-environment/solr/run.sh -l solr.log
+./docker/prepare-dev-environment/gradle-cache/run.sh -r -l gradle-cache.log && \
+./docker/prepare-dev-environment/volumes/run.sh -r -l volumes.log && \
+./docker/prepare-dev-environment/postgres/run.sh -r -l pg.log && \
+./docker/prepare-dev-environment/solr/run.sh -r -l solr.log
 ```
 
 ### Requirements
-- Docker v19+
-- Docker Compose v1.25+
+- Docker v20+ with the [Compose plugin](https://docs.docker.com/compose/install/)
 - 100 GB of available storage for the following Docker volumes:
     - Experiment files
     - Bioentity properties (i.e. gene annotations)
@@ -27,22 +26,22 @@ initial state. You can find the volume names used by each service in the `volume
 file.
 
 The full list of volumes is:
-- `gxa-atlas-data-bioentity-properties`
-- `gxa-atlas-data-gxa`
-- `gxa-atlas-data-gxa-expdesign`
-- `gxa-gradle-ro-dep-cache`
-- `gxa-gradle-wrapper-dists`
-- `gxa-pgdata`
-- `gxa-solrcloud-1-data`
-- `gxa-solrcloud-2-data`
-- `gxa-tomcat-conf`
-- `gxa-webapp-properties`
-- `gxa-zk-1-data`
-- `gxa-zk-1-datalog`
-- `gxa-zk-2-data`
-- `gxa-zk-2-datalog`
-- `gxa-zk-3-data`
-- `gxa-zk-3-datalog`
+- `gxa_atlas-data-bioentity-properties`
+- `gxa_atlas-data-gxa`
+- `gxa_atlas-data-gxa-expdesign`
+- `gxa_gradle-ro-dep-cache`
+- `gxa_gradle-wrapper-dists`
+- `gxa_pgdata`
+- `gxa_solrcloud-1-data`
+- `gxa_solrcloud-2-data`
+- `gxa_zk-1-data`
+- `gxa_zk-1-datalog`
+- `gxa_zk-2-data`
+- `gxa_zk-2-datalog`
+- `gxa_zk-3-data`
+- `gxa_zk-3-datalog`
+- `gxa_tomcat-conf`
+- `gxa_webapp-properties`
 
 ### Code
 Clone the repository of Bulk Expression Atlas with submodules:
@@ -59,7 +58,7 @@ If you have already cloned the project ensure it’s up-to-date:
 To speed up builds and tests it is strongly encouraged to create a Docker volume to back a [Gradle read-only dependency
 cache](https://docs.gradle.org/current/userguide/dependency_resolution.html#sub:ephemeral-ci-cache).
 ```bash
-./docker/prepare-dev-environment/gradle-cache/run.sh -l gradle-cache.log
+./docker/prepare-dev-environment/gradle-cache/run.sh -r -l gradle-cache.log
 ```
 
 ### Prepare volumes
@@ -68,7 +67,7 @@ volumes first. They will be populated with data that will be indexed in Solr and
 needs all three of: file bundles in the volumes, Solr collections and Postgres data. This step takes care of the first
 requirement:
 ```bash
-./docker/prepare-dev-environment/volumes/run.sh -l volumes.log
+./docker/prepare-dev-environment/volumes/run.sh -r -l volumes.log
 ```
 
 You can get detailed information about which volumes are created if you run the script with the `-h` flag.
@@ -83,14 +82,14 @@ Ontoloy, Plant Ontology or InterPro.
 
 To create our PostGreSQL database and run the schema migrations up to the latest version please execute this script:  
 ```bash
-./docker/prepare-dev-environment/postgres/run.sh -l pg.log
+./docker/prepare-dev-environment/postgres/run.sh -r -l pg.log
 ```
 
 ### Solr
 To create the collections, their schemas and populate them, please run the following script.
 
 ```bash
-./docker/prepare-dev-environment/solr/run.sh -l solr.log
+./docker/prepare-dev-environment/solr/run.sh -r -l solr.log
 ```
 
 Run the script with the `-h` flag for more details.
@@ -299,46 +298,6 @@ down
 ```
 
 
-
-## Backing up your data
-Eventually you’ll add new experiments to your development instance of GXA, or new, improved collections in Solr will
-replace the old ones. In such cases you’ll want to get a snapshot of the data to share with the team. Below there are
-instructions to do that.
-
-### PostgreSQL
-If at some point you wish to create a backup dump of the database run the command below:
-```bash
-docker exec -it gxa-postgres bash -c 'pg_dump -d $POSTGRES_DB -h localhost -p 5432 -U $POSTGRES_USER -f /var/backups/postgresql/pg-dump.bin -F c -n $POSTGRES_USER -t $POSTGRES_USER.* -T *flyway*'
-```
-
-### SolrCloud
-
-> **Warning!**
-> 
-> **_!!! THIS SECTION IS OUTDATED. NEEDS TO BE UPDATED WITH AUTHENTICATION TO WORK WITH SOLR VERSION 8._**
-
-```bash
-for SOLR_COLLECTION in $SOLR_COLLECTIONS
-do
-  START_DATE_IN_SECS=`date +%s`
-  curl "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=backup&location=/var/backups/solr&name=${SOLR_COLLECTION}"
-
-  # Pattern enclosed in (?<=) is zero-width look-behind and (?=) is zero-width look-ahead, we match everything in between
-  COMPLETED_DATE=`curl -s "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=details" | grep -oP '(?<="snapshotCompletedAt",").*(?=")'`
-  COMPLETED_DATE_IN_SECS=`date +%s -d "${COMPLETED_DATE}"`
-
-  # We wait until snapshotCompletedAt is later than the date we took before issuing the backup operation
-  while [ ${COMPLETED_DATE_IN_SECS} -lt ${START_DATE_IN_SECS} ]
-  do
-    sleep 1s
-    COMPLETED_DATE=`curl -s "http://localhost:8983/solr/${SOLR_COLLECTION}/replication?command=details" | grep -oP '(?<="snapshotCompletedAt",").*(?=")'`
-    COMPLETED_DATE_IN_SECS=`date +%s -d "${COMPLETED_DATE}"`
-  done
-done
-```
-
-
-
 ## Troubleshooting
 
 ### SolrCloud nodes shut down on macOS
@@ -347,25 +306,3 @@ memory you need to increase the available amount in the Docker Dashboard. For bu
 to between 8-12 GB and disk image to 100 GB or more. Please see the screenshot below for reference:
 
 ![Screenshot-2021-02-18-at-18-27-40](https://user-images.githubusercontent.com/4425744/109644570-8ccee680-7b4d-11eb-9db0-7a29fb4d9e2b.png)
-
-### I’m not getting any suggestions in Epression Atlas
-Read the important message after you run `gxa-solrlcoud-bootstrap`:
-> PLEASE READ!
-> Suggesters haven’t been built because it’s very likely to get a `java.net.SocketTimeoutException` due
-> to the size of the bioentities collection. Raising the timeout in Jetty could mask other errors down
-> the line, and ignoring the exception doesn’t guarantee the suggester to be fully built since it still
-> takes a few extra minutes: the exception is thrown before the process has completed.
-> The best option is to manually build and supervise this step.
->
-> On one terminal session run the following command (don’t worry if the request returns a 500 error):
->
-> `docker exec -i gxa-solrcloud-1 curl 'http://localhost:8983/solr/bioentities-v1/suggest?suggest.build=true&suggest.dictionary=propertySuggester'`
->
-> On another terminal, monitor the size of the suggester directory size:
->
-> `docker exec -it gxa-solrcloud-1 bash -c 'watch du -sc server/solr/bioentities-v1*/data/*'`
-> `docker exec -it gxa-solrcloud-2 bash -c 'watch du -sc server/solr/bioentities-v1*/data/*'`
->
-> The suggester will be built when the propertySuggester directory size stabilises.
-> Run the above procedure for each of your SolrCloud containers.
- 
