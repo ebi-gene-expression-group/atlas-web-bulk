@@ -30,7 +30,7 @@ services:
     volumes:
       - ../schemas/flyway/gxa/:/flyway/sql
     depends_on:
-      - gxa-postgres-test
+      - postgres-test
 
 networks:
   atlas-test-net:
