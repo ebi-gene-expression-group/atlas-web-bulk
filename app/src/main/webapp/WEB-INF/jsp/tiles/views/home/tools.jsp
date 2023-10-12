@@ -19,23 +19,6 @@
         </div>
     </a>
 
-    <a href="https://www.ebi.ac.uk/fg/rnaseq/api/" target="_blank">
-        <div class="media-object">
-            <div class="media-object-section middle">
-                <h3 class="icon icon-functional" data-icon="A" />
-            </div>
-            <div class="media-object-section middle">
-                <p>
-                    <strong>RNASeq-er API: a gateway to systematically updated analysis of public RNA-Seq data</strong><br>
-                    The RNASeq-er REST API provides easy access to the results of the systematically updated and
-                    continually growing analysis of public RNA-seq data in the European Nucleotide Archive (ENA).
-                    The analysis of each sequencing run is performed by the EMBL-EBI's Gene Expression Team using
-                    the iRAP pipeline (see above).
-                </p>
-            </div>
-        </div>
-    </a>
-
     <a href="https://www.bioconductor.org/packages/release/bioc/html/ExpressionAtlas.html" target="_blank">
         <div class="media-object">
             <div class="media-object-section middle">
