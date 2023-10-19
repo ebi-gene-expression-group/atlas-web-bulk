@@ -74,7 +74,6 @@ services:
         ./create-bulk-analytics-collection.sh
         ./create-bulk-analytics-schema.sh
         
-        cd /root/index-bioentities/bin
         export SOLR_COLLECTION=$${SOLR_COLLECTION_BULK_ANALYTICS}
         export SCHEMA_VERSION=$${SOLR_COLLECTION_BULK_ANALYTICS_SCHEMA_VERSION}
         export SOLR_PROCESSORS=dedupe
