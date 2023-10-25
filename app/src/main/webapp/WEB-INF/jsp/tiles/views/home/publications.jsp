@@ -17,6 +17,20 @@
         </div>
     </a>
 
+    <a href="https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btx143" target="_blank">
+        <div class="media-object">
+            <div class="media-object-section middle">
+                <h3 class="icon icon-conceptual" data-icon="l" />
+            </div>
+            <div class="media-object-section middle">
+                <p>
+                    <strong>The RNASeq-er API – A gateway to systematically updated analysis of public RNA-seq data</strong><br>
+                    <em>Bioinformatics</em>, 22 March 2017.
+                </p>
+            </div>
+        </div>
+    </a>
+
     <a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0107026" target="_blank">
         <div class="media-object">
             <div class="media-object-section middle">
