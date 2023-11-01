@@ -1,7 +1,7 @@
 version: "3.6"
 
 services:
-  gradle:
+  gxa-gradle:
     image: gradle:7.0-jdk11
     networks:
       - atlas-test-net
@@ -15,11 +15,11 @@ services:
       - exp:/atlas-data/exp:ro
       - expdesign:/atlas-data/expdesign
     depends_on:
-      solrcloud-0:
+      gxa-solrcloud-0:
         condition: service_started
-      solrcloud-1:
+      gxa-solrcloud-1:
         condition: service_started
-      flyway:
+      gxa-flyway:
         condition: service_completed_successfully
     environment:
       GRADLE_RO_DEP_CACHE: /gradle-ro-dep-cache

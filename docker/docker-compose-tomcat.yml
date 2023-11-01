@@ -13,10 +13,11 @@ services:
       - "8000:8000"
     volumes:
       - ../webapps:/usr/local/tomcat/webapps
-      - webapp-properties:/webapp-properties
+      - ./webapp-properties:/webapp-properties
       - bioentity-properties:/atlas-data/bioentity_properties
       - gxa-data:/atlas-data/gxa
-      - gxa-expdesign:/atlas-data/gxa-expdesign
+      - gxa-expdesign:/atlas-data/expdesign
+      - gxa-exp:/atlas-data/exp
       - gxa-tomcat-conf:/usr/local/tomcat/conf
     depends_on:
       - gxa-postgres
@@ -25,14 +26,14 @@ services:
     command: ["catalina.sh", "jpda", "run"]
 
 volumes:
-  webapp-properties:
-    name: ${WEBAPP_PROPERTIES_VOL_NAME}
   bioentity-properties:
-    name: ${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}
+    name: ${PROJECT_NAME}_${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}
   gxa-data:
-    name: ${ATLAS_DATA_GXA_VOL_NAME}
+    name: ${PROJECT_NAME}_${ATLAS_DATA_VOL_NAME}
+  gxa-exp:
+    name: ${PROJECT_NAME}_${ATLAS_DATA_EXP_VOL_NAME}
   gxa-expdesign:
-    name: ${ATLAS_DATA_GXA_EXPDESIGN_VOL_NAME}
+    name: ${PROJECT_NAME}_${ATLAS_DATA_EXPDESIGN_VOL_NAME}
   gxa-tomcat-conf:
     name: gxa-tomcat-conf
 
