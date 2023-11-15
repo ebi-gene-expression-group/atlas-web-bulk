@@ -19,6 +19,7 @@ services:
 
   gxa-flyway:
     image: flyway/flyway
+    container_name: gxa-flyway
     networks:
       - atlas-test-net
     command: [

@@ -8,6 +8,7 @@ services:
       - atlas-test-net
     environment:
       JPDA_ADDRESS: "*:8000"
+      JAVA_OPTS: "-Dsolr.httpclient.builder.factory=org.apache.solr.client.solrj.impl.PreemptiveBasicAuthClientBuilderFactory -Dbasicauth=${SOLR_USER}:${SOLR_PASSWORD}"
     ports:
       - "8080:8080"
       - "8000:8000"
@@ -20,22 +21,31 @@ services:
       - gxa-exp:/atlas-data/exp
       - gxa-tomcat-conf:/usr/local/tomcat/conf
     depends_on:
-      - gxa-postgres
-      - gxa-solrcloud-0
-      - gxa-solrcloud-1
+      gxa-gradle-build:
+        condition: service_completed_successfully
+      gxa-postgres:
+          condition: service_started
+      gxa-solrcloud-0:
+          condition: service_started
+      gxa-solrcloud-1:
+          condition: service_started
     command: ["catalina.sh", "jpda", "run"]
 
 volumes:
-  bioentity-properties:
-    name: ${PROJECT_NAME}_${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}
+  gradle-wrapper-dists:
+    name: ${PROJECT_NAME:?err}_${GRADLE_WRAPPER_DISTS_VOL_NAME}
+  gradle-ro-dep-cache:
+    name: ${PROJECT_NAME}_${GRADLE_RO_DEP_CACHE_VOL_NAME}
   gxa-data:
     name: ${PROJECT_NAME}_${ATLAS_DATA_VOL_NAME}
+  gxa-tomcat-conf:
+    name: gxa-tomcat-conf
+  bioentity-properties:
+    name: ${PROJECT_NAME}_${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}
   gxa-exp:
     name: ${PROJECT_NAME}_${ATLAS_DATA_EXP_VOL_NAME}
   gxa-expdesign:
     name: ${PROJECT_NAME}_${ATLAS_DATA_EXPDESIGN_VOL_NAME}
-  gxa-tomcat-conf:
-    name: gxa-tomcat-conf
 
 networks:
   atlas-test-net:

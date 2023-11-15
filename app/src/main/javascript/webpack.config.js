@@ -1,5 +1,4 @@
 const path = require(`path`)
-const { CleanWebpackPlugin } = require(`clean-webpack-plugin`)
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const vendorsBundleName = `vendorCommons`
@@ -19,10 +18,9 @@ module.exports = {
   },
 
   plugins: [
-    new CleanWebpackPlugin({
-      cleanOnceBeforeBuildPatterns: `../webapp/resources/js-bundles/**`
-    }),
-    new BundleAnalyzerPlugin()
+    new BundleAnalyzerPlugin({
+      analyzerMode: `static`
+    })
   ],
 
   output: {
@@ -30,7 +28,7 @@ module.exports = {
     filename: `[name].bundle.js`,
     publicPath: `/gxa/resources/js-bundles/`,
     path: path.resolve(__dirname, `../webapp/resources/js-bundles`),
-    devtoolNamespace: `firefox`
+    clean:true
   },
 
   resolve: {
@@ -49,6 +47,10 @@ module.exports = {
       "urijs": path.resolve(`./node_modules/urijs`),
       "atlas-homepage-cards": path.resolve(`./node_modules/@ebi-gene-expression-group/atlas-homepage-cards`),
       "atlas-react-fetch-loader": path.resolve(`./node_modules/@ebi-gene-expression-group/atlas-react-fetch-loader`)
+    },
+
+    fallback: {
+      "querystring": false
     }
   },
 
