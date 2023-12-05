@@ -6,7 +6,7 @@ services:
     networks:
       - atlas-test-net
     depends_on:
-      flyway:
+      gxa-flyway:
         condition: service_completed_successfully
     volumes:
       - gradle-wrapper-dists:/root/.gradle/wrapper/dists
