@@ -143,3 +143,5 @@ _idea
 .DS_Store
 .module-cache
 
+# Webpack bundles
+app/src/main/webapp/resources/js-bundles
