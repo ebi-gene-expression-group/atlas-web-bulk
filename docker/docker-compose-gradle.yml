@@ -5,8 +5,6 @@ services:
     image: gradle:7.0-jdk11
     networks:
       - atlas-test-net
-    ports:
-      - "5005:5005"
     volumes:
       - ..:/root/project
       - gradle-wrapper-dists:/root/.gradle/wrapper/dists

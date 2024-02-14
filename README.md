@@ -261,9 +261,10 @@ dev instance of Single Cell Expression Atlas. The script before launching the we
 
 Here is the usage of this script:
 
-- -f      Use this flag if you would like to build the front-end javascript packages.
-- -b      Use this flag if you would like to build the back-end of the web application.
-- -h      Displaying the help file of this script.
+- -n Use this flag if you would not like to do any build, just execute the application.
+- -f Use this flag if you would like to build the front-end javascript packages.
+- -b Use this flag if you would like to build the back-end of the web application.
+- -h Displaying the help file of this script.
 
 If you don't give any flags, or you add both then the script is going to build both front and back-end part of the web application.
 
