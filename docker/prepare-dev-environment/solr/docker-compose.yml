@@ -20,7 +20,7 @@ services:
       GRADLE_RO_DEP_CACHE: /gradle-ro-dep-cache
       ZK_HOSTS: "${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181"
       SOLR_HOSTS: "http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr"
-      SOLR_HOST: ${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME}:8983
+      SOLR_HOST: ${SOLR_CLOUD_CONTAINER_1_NAME}:8983
       SOLR_NUM_SHARDS: 2
       NUM_DOCS_PER_BATCH: 20000
       SOLR_COLLECTION_BIOENTITIES: bioentities
@@ -70,7 +70,7 @@ services:
         -PjdbcPassword=${POSTGRES_PASSWORD} \
         -PzkHosts=$${ZK_HOSTS} \
         -PsolrHosts=$${SOLR_HOSTS} \
-        :cli:bootRun --args="bulk-analytics-json --output=/root/experiments-jsonl -e $(echo ${EXP_IDS} | sed -e "s/ /,/g")"
+        :cli:bootRun --args="bulk-analytics-json --output=/root/experiments-jsonl -e $(echo $${EXP_IDS} | sed -e "s/ /,/g")"
         
         cd /root/solr-bulk/bin
         ./create-bulk-analytics-collection.sh

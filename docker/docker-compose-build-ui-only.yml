@@ -15,8 +15,6 @@ services:
     extends:
       service: gxa-gradle
       file: docker-compose-gradle.yml
-    ports:
-      - "5005:5005"
 
   gxa-gradle-shell:
     extends:
@@ -28,5 +26,17 @@ services:
     depends_on:
       gxa-gradle-build:
         condition: service_completed_successfully
-    ports:
-      - "5006:5005"
+
+  gxa-tomcat:
+    extends:
+      service: gxa-tomcat
+      file: docker-compose-tomcat.yml
+    depends_on:
+      gxa-gradle-build:
+        condition: service_completed_successfully
+      gxa-postgres:
+        condition: service_started
+      gxa-solrcloud-0:
+        condition: service_started
+      gxa-solrcloud-1:
+        condition: service_started
