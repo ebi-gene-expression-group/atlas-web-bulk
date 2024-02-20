@@ -241,31 +241,62 @@ The script `debug-single-test.sh` is a shortcut for this task. It takes the same
 ## Run web application
 The web application is compiled in two stages:
 1. Front end JavaScript packages are transpiled into “bundles” with [Webpack](https://webpack.js.org/)
-2. Bundles and back end Java code are built as a WAR file
+2. Bundles and back end Java code are built as a WAR file to deploy and serve with Tomcat (other Java EE web servers
+   might work but no testing has been carried out in this regard)
 
-Lastly, Tomcat deploys the WAR file according to `app/src/main/webapp/META-INF/context.xml`; other Java EE web servers
-might work but no testing has been carried out in this regard.
-
-For the first step you can run the following script:
+To generate the Webpack bundles run the following script:
 ```bash
  ./compile-front-end-packages.sh -iu
 ```
 
-The second step is simply:
+If the script encounters no compilation errors it will open your default browser with a graphical diagram of the
+bundles and their contents.
+
+Run the script with `-h` to know more about its usage.
+You can add `-p` to generate production bundles, which will minify the code and omit browser console warnings. Certain
+React rendering tasks are also faster but it makes debugging very hard.
+
+Then run the Gradle task `war` in the `atlas-web-bulk` directory:
 ```bash
-./gradlew :app:war
+./gradlew clean :app:war
 ```
 
-The script `build-and-deploy-webapp.sh` puts it altogether and will eventually launch a Tomcat container with a running
-dev instance of Single Cell Expression Atlas. The script before launching the web application can build only the back-end or front-end component or both.
+You should now have the file `webapps/gxa.war`.
 
-Here is the usage of this script:
+You can now deploy it in Tomcat’s container with the following:
+```bash
+docker-compose \
+--env-file=./docker/dev.env \
+-f ./docker/docker-compose-solrcloud.yml \
+-f ./docker/docker-compose-postgres.yml \
+-f ./docker/docker-compose-tomcat.yml \
+up
+```
 
-- -f      Use this flag if you would like to build the front-end javascript packages.
-- -b      Use this flag if you would like to build the back-end of the web application.
-- -h      Displaying the help file of this script.
+You can also set a Docker Compose *Run* configuration in IntelliJ IDEA with the `dev.env` in environment files.
 
-If you don't give any flags, or you add both then the script is going to build both front and back-end part of the web application.
+After bringing up the containers, you may want to inspect the logs to see that all services are running fine. The last
+log should come from Tomcat, and it should be similar to:
+```
+scxa-tomcat    | 18-Dec-2020 13:40:58.907 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in 6705 ms
+...
+scxa-tomcat    | 12-Jan-2021 14:59:47.566 INFO [Catalina-utility-1] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/gxa.war] has finished in [5,510] ms
+```
+
+Point your browser at `http://localhost:8080/gxa` and voilà!
+
+Every time you re-run the `war` task the web app will be automatically re-deployed by Tomcat.
+
+If you get any redeployment issues or want to start again afresh, remove all containers using this:
+```bash
+docker-compose \
+--env-file=./docker/dev.env \
+-f ./docker/docker-compose-solrcloud.yml \
+-f ./docker/docker-compose-postgres.yml \
+-f ./docker/docker-compose-tomcat.yml \
+down
+```
+
 
 ## Troubleshooting
 

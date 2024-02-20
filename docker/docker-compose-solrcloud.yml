@@ -1,7 +1,7 @@
 version: "3.6"
 
 services:
-  gxa-solrcloud-zookeeper-0:
+  solrcloud-zookeeper-0:
     # Use the first container in the ZK service to check that PROJECT_NAME has been set, no need to repeat it elsewhere
     container_name: ${PROJECT_NAME:?err}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}
     image: zookeeper:3.7.0
@@ -19,7 +19,7 @@ services:
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true
 
-  gxa-solrcloud-zookeeper-1:
+  solrcloud-zookeeper-1:
     container_name: ${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}
     image: zookeeper:3.7.0
     networks:
@@ -36,7 +36,7 @@ services:
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true
 
-  gxa-solrcloud-zookeeper-2:
+  solrcloud-zookeeper-2:
     container_name: ${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}
     image: zookeeper:3.7.0
     networks:
@@ -53,7 +53,7 @@ services:
       ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
       ZOO_CFG_EXTRA: metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7000 metricsProvider.exportJvmInfo=true
 
-  gxa-solrcloud-0:
+  solrcloud-0:
     container_name: ${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME}
     image: solr:8.7.0
     networks:
@@ -68,12 +68,12 @@ services:
       SOLR_OPTS: -Denable.packages=true -Dsolr.max.booleanClauses=100000000
       ZK_HOST: ${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181
     depends_on:
-      - gxa-solrcloud-zookeeper-0
-      - gxa-solrcloud-zookeeper-1
-      - gxa-solrcloud-zookeeper-2
+      - solrcloud-zookeeper-0
+      - solrcloud-zookeeper-1
+      - solrcloud-zookeeper-2
     command: "-q"
 
-  gxa-solrcloud-1:
+  solrcloud-1:
     container_name: ${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_2_NAME}
     image: solr:8.7.0
     networks:
@@ -88,9 +88,9 @@ services:
       SOLR_OPTS: -Denable.packages=true -Dsolr.max.booleanClauses=100000000
       ZK_HOST: ${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181
     depends_on:
-      - gxa-solrcloud-zookeeper-0
-      - gxa-solrcloud-zookeeper-1
-      - gxa-solrcloud-zookeeper-2
+      - solrcloud-zookeeper-0
+      - solrcloud-zookeeper-1
+      - solrcloud-zookeeper-2
     command: "-q"
 
 volumes:
