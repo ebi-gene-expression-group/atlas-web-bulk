@@ -1,7 +1,7 @@
 version: "3.6"
 
 services:
-  gxa-postgres:
+  postgres:
     container_name: ${POSTGRES_HOST}
     image: postgres:11-alpine
     networks:
@@ -17,9 +17,8 @@ services:
       - POSTGRES_USER
       - POSTGRES_DB
 
-  gxa-flyway:
+  flyway:
     image: flyway/flyway
-    container_name: gxa-flyway
     networks:
       - atlas-test-net
     command: [
@@ -33,7 +32,7 @@ services:
     volumes:
       - ../schemas/flyway/gxa/:/flyway/sql
     depends_on:
-      - gxa-postgres
+      - postgres
 
 volumes:
   pgdata:

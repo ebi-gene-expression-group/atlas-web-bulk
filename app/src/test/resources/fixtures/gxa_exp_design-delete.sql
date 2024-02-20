@@ -1,1 +1,0 @@
-DELETE FROM exp_design;

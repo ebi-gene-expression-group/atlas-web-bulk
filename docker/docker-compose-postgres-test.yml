@@ -1,7 +1,7 @@
 version: "3.6"
 
 services:
-  gxa-postgres-test:
+  postgres-test:
     image: postgres:11-alpine
     container_name: ${POSTGRES_HOST}
     networks:
@@ -15,7 +15,7 @@ services:
       - POSTGRES_USER
       - POSTGRES_DB
 
-  gxa-flyway:
+  flyway:
     image: flyway/flyway
     networks:
       - atlas-test-net
