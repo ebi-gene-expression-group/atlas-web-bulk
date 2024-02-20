@@ -1,4 +1,0 @@
-INSERT INTO exp_design_column (experiment_accession, column_name, sample_type, column_order, id) VALUES ('E-TABM-713', 'disease', 'characteristic', 4, 2204);
-INSERT INTO exp_design_column (experiment_accession, column_name, sample_type, column_order, id) VALUES ('E-TABM-713', 'organism', 'characteristic', 5, 2205);
-INSERT INTO exp_design_column (experiment_accession, column_name, sample_type, column_order, id) VALUES ('E-TABM-713', 'organism part', 'characteristic', 3, 2206);
-INSERT INTO exp_design_column (experiment_accession, column_name, sample_type, column_order, id) VALUES ('E-TABM-713', 'disease', 'factor', 23, 2207);
