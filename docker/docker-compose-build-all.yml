@@ -1,0 +1,33 @@
+version: "3.6"
+
+services:
+  node-webpack:
+    image: node:16
+    volumes:
+      - ..:/root/project
+    working_dir: /root/project
+    command: ["sh", "-c", "export CPPFLAGS=-DPNG_ARM_NEON_OPT=0 && npm install -g npm-check-updates && ./compile-front-end-packages.sh -ui" ]
+
+  gxa-gradle-build:
+    depends_on:
+      node-webpack:
+        condition: service_completed_successfully
+    extends:
+      service: gxa-gradle
+      file: docker-compose-gradle.yml
+    ports:
+      - "5005:5005"
+    command: ["sh", "-c", "gradle clean :app:war"]
+
+  gxa-gradle-shell:
+    extends:
+      service: gxa-gradle
+      file: docker-compose-gradle.yml
+    tty: true
+    stdin_open: true
+    command: [ "sh", "-c", "gradle && /bin/bash" ]
+    depends_on:
+      gxa-gradle-build:
+        condition: service_completed_successfully
+    ports:
+      - "5006:5005"
