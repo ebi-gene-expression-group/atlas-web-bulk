@@ -19,7 +19,7 @@ gradle clean
 
 gradle \
 -PdataFilesLocation=/atlas-data \
--PexperimentFilesLocation=/atlas-data/gxa \
+-PexperimentFilesLocation=/atlas-data/exp \
 -PexperimentDesignLocation=/atlas-data/expdesign \
 -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
 -PjdbcUsername=${POSTGRES_USER} \
@@ -34,13 +34,13 @@ gradle :atlas-web-core:jacocoTestReport
 
 gradle \
 -PdataFilesLocation=/atlas-data \
--PexperimentFilesLocation=/atlas-data/gxa \
+-PexperimentFilesLocation=/atlas-data/exp \
 -PexperimentDesignLocation=/atlas-data/expdesign \
 -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
 -PjdbcUsername=${POSTGRES_USER} \
 -PjdbcPassword=${POSTGRES_PASSWORD} \
--PzkHosts=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181 \
--PsolrHosts=http://${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr \
+-PzkHosts=${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181 \
+-PsolrHosts=http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr \
 app:testClasses
 
 gradle -PtestResultsPath=ut :app:test --tests *Test

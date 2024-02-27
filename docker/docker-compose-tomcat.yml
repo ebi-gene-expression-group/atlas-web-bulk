@@ -16,7 +16,7 @@ services:
       - ../webapps:/usr/local/tomcat/webapps
       - ./webapp-properties:/webapp-properties
       - bioentity-properties:/atlas-data/bioentity_properties
-      - gxa-data:/atlas-data/gxa
+      - gxa-data:/atlas-data/exp
       - gxa-expdesign:/atlas-data/expdesign
       - gxa-exp:/atlas-data/exp
       - gxa-tomcat-conf:/usr/local/tomcat/conf
