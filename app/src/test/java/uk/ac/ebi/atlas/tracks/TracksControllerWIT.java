@@ -64,7 +64,7 @@ class TracksControllerWIT {
 
     @Test
     void getTrackFile() throws Exception {
-        this.mockMvc.perform(get(BASELINE_URL_TEMPLATE.format(new Object[] {"E-MTAB-5423", "g391"})))
+        this.mockMvc.perform(get(BASELINE_URL_TEMPLATE.format(new Object[] {"E-MTAB-5422", "g2_g1"})))
                 .andExpect(status().isOk());
     }
 
@@ -77,7 +77,7 @@ class TracksControllerWIT {
     @Test
     void getUnknownTrackEndsUpIn404NotFound() throws Exception {
         MvcResult result =
-                this.mockMvc.perform(get(BASELINE_URL_TEMPLATE.format(new Object[] {"E-MTAB-5423", "gFooBar"})))
+                this.mockMvc.perform(get(BASELINE_URL_TEMPLATE.format(new Object[] {"E-MTAB-5422", "gFooBar"})))
                         .andExpect(status().isOk())
                         .andReturn();
 
