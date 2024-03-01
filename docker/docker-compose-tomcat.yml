@@ -19,6 +19,7 @@ services:
       - gxa-data:/atlas-data/exp
       - gxa-expdesign:/atlas-data/expdesign
       - gxa-exp:/atlas-data/exp
+      - gxa-ontology:/atlas-data/ontology
       - gxa-tomcat-conf:/usr/local/tomcat/conf
     depends_on:
       gxa-gradle-build:
@@ -46,6 +47,8 @@ volumes:
     name: ${PROJECT_NAME}_${ATLAS_DATA_EXP_VOL_NAME}
   gxa-expdesign:
     name: ${PROJECT_NAME}_${ATLAS_DATA_EXPDESIGN_VOL_NAME}
+  gxa-ontology:
+    name: ${PROJECT_NAME}_${ATLAS_DATA_ONTOLOGY_VOL_NAME}
 
 networks:
   atlas-test-net:
