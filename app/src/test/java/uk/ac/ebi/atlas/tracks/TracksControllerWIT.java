@@ -87,14 +87,15 @@ class TracksControllerWIT {
 
     @Test
     void getTrackPrivateExperimentWithoutAcessKey() throws Exception {
-        this.mockMvc.perform(get(DIFFERENTIAL_URL_TEMPLATE.format(new Object[] {"E-MTAB-4106", "g5_g3"})))
+        this.mockMvc.perform(get(DIFFERENTIAL_URL_TEMPLATE.format(new Object[] {"E-MTAB-5555", "g4_g2"})))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void getTrackPrivateExperimentWitIncorrectAcessKey() throws Exception {
         this.mockMvc.perform(
-                get(DIFFERENTIAL_URL_TEMPLATE.format(new Object[] {"E-MTAB-4106", "g5_g3"}) + "?accessKey=foo-bar"))
+                get(DIFFERENTIAL_URL_TEMPLATE.format(new Object[] {"E-MTAB-5555", "g4_g2"})
+                        + "?accessKey=foo-bar"))
                 .andExpect(status().isNotFound());
     }
 
@@ -102,7 +103,7 @@ class TracksControllerWIT {
     void getTrackPrivateExperimentWithGoodAcessKey() throws Exception {
         this.mockMvc.perform(
                 get(DIFFERENTIAL_URL_TEMPLATE.format(
-                        new Object[] {"E-MTAB-4106", "g5_g3"}) + "?accessKey=89319682-55b6-4b4b-a5ef-f50e1e0915ea"))
+                        new Object[] {"E-MTAB-5555", "g4_g2"}) + "?accessKey=ef1db551-15ef-4074-b56c-ed9a1b1157d2"))
                 .andExpect(status().isOk());
     }
 }
