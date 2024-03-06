@@ -10,7 +10,7 @@ docker-compose \
 --env-file ${SCRIPT_DIR}/docker/dev.env \
 -f docker/docker-compose-postgres-test.yml \
 -f docker/docker-compose-solrcloud.yml \
--f docker/docker-compose-gradle.yml \
+-f docker/docker-compose-gradle-test.yml \
 run --rm --service-ports \
 gxa-gradle bash -c "
 set -e
