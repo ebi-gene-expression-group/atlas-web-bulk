@@ -3,9 +3,6 @@
 # Compiled class file
 *.class
 
-# Log file
-*.log
-
 # BlueJ files
 *.ctxt
 
@@ -145,3 +142,9 @@ _idea
 
 # Webpack bundles
 app/src/main/webapp/resources/js-bundles
+
+# Temporary folders
+tmp
+temp
+_tmp
+_temp
