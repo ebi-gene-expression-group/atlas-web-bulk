@@ -78,6 +78,24 @@ contents of the source directories change. This is especially useful when experi
 or the bioentity properties directory is updated after a release of  Ensembl, WormBase ParaSite, Reactome, Gene
 Ontoloy, Plant Ontology or InterPro.
 
+### How to add a private experiment bundle
+
+Private experiments are not available to download from our FTP site. You can download them from the `codon-cluster` by using the following steps:
+
+1. These steps should be done before the `PostGreSQL` and `Solr` steps. 
+2. After logged in to the `codon-cluster` check if the experiment bundle can be found under this path:
+```/nfs/production/irene/ma/experiments/```.
+2. If it is there, then go to the folder on your local computer where you would like to download the bundle.
+3. Download it by this command:
+```scp -r codon-login:/nfs/production/irene/ma/experiments/<EXPERIMENT_ACCESSION_ID> .```.
+4. Create a temp container with mounting the already existing data volume for our local experiments: 
+````docker container create --name expVol -v gxa_atlas-data-exp:/atlas-data/exp ubuntu:jammy````
+5. Copy the file bundles of the downloaded private experiment into the volume: ```docker cp <EXPERIMENT_ACCESSION_ID> expVol:/atlas-data/exp/magetab/```
+6. Add `<EXPERIMENT_ACCESSION_ID>` into the `PRIVATE_EXP_IDS` variable. It is in to `test-data.env` file under the `docker/prepare-dev-environment` folder. If it is not there, then please create it.
+7. The experiment accession IDs in that variable should be separated by SPACE.
+
+
+
 ### PostGreSQL
 
 To create our PostGreSQL database and run the schema migrations up to the latest version please execute this script:
