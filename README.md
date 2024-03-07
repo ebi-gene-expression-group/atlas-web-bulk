@@ -257,6 +257,9 @@ The script `debug-single-test.sh` is a shortcut for this task. It takes the same
 ```
 
 ## Run web application
+
+Please check this first in the troubleshooting session: [Known Build Issue](#knownBuildIssue)
+
 The web application is compiled in two stages:
 1. Front end JavaScript packages are transpiled into “bundles” with [Webpack](https://webpack.js.org/)
 2. Bundles and back end Java code are built as a WAR file
@@ -288,9 +291,20 @@ If you don't give any flags, or you add both then the script is going to build b
 
 ## Troubleshooting
 
+### <a name="knownBuildIssue"></a>Known Build Issue
+
+This current version of our developer env has a bug when we build and execute the application
+with the `build-and-deploy-webapp.sh` script.
+We have a ticket to fix this in our backlog: [Update bulk with the latest webpack and its dependencies](https://github.com/ebi-gene-expression-group/atlas-web-bulk/issues/176)
+
+You can build a working WAR with the following steps:
+1. Manually build the UI: `./compile-front-end-packages.sh -iu`
+2. Manually build the backend: `./gradlew :app:war`
+3. Use this script to start up the web app on your local environment: `./build-and-deploy-webapp.sh -n`
+
 ### SolrCloud nodes shut down on macOS
 Docker for macOS sets fairly strict resource limits for all Docker containers. If your containers require e.g. more
-memory you need to increase the available amount in the Docker Dashboard. For bulk Expression Atlas, plase set Memory
+memory you need to increase the available amount in the Docker Dashboard. For bulk Expression Atlas, please set Memory
 to between 8-12 GB and disk image to 100 GB or more. Please see the screenshot below for reference:
 
 ![Screenshot-2021-02-18-at-18-27-40](https://user-images.githubusercontent.com/4425744/109644570-8ccee680-7b4d-11eb-9db0-7a29fb4d9e2b.png)
