@@ -298,9 +298,20 @@ with the `build-and-deploy-webapp.sh` script.
 We have a ticket to fix this in our backlog: [Update bulk with the latest webpack and its dependencies](https://github.com/ebi-gene-expression-group/atlas-web-bulk/issues/176)
 
 You can build a working WAR with the following steps:
-1. Manually build the UI: `./compile-front-end-packages.sh -iu`
-2. Manually build the backend: `./gradlew :app:war`
-3. Use this script to start up the web app on your local environment: `./build-and-deploy-webapp.sh -n`
+1. Manually build the UI:
+```bash
+./compile-front-end-packages.sh -iu
+```
+
+2. Manually build the backend:
+```bash
+./gradlew :app:war
+```
+
+3. Use this script to start up the web app on your local environment:
+```bash
+./build-and-deploy-webapp.sh -n
+```
 
 ### SolrCloud nodes shut down on macOS
 Docker for macOS sets fairly strict resource limits for all Docker containers. If your containers require e.g. more
