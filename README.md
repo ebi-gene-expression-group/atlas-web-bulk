@@ -258,7 +258,7 @@ The script `debug-single-test.sh` is a shortcut for this task. It takes the same
 
 ## Run web application
 
-Please check this first in the troubleshooting session: [Known Build Issue](#knownBuildIssue)
+Please check this first in the troubleshooting session: [Known Build Issue](#known-build-issue)
 
 The web application is compiled in two stages:
 1. Front end JavaScript packages are transpiled into “bundles” with [Webpack](https://webpack.js.org/)
@@ -291,7 +291,7 @@ If you don't give any flags, or you add both then the script is going to build b
 
 ## Troubleshooting
 
-### <a name="knownBuildIssue"></a>Known Build Issue
+### <a name="known-build-issue"></a>Known Build Issue
 
 This current version of our developer env has a bug when we build and execute the application
 with the `build-and-deploy-webapp.sh` script.
