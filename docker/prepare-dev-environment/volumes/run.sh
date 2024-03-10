@@ -77,4 +77,5 @@ printf '%b\n' "🙂 All done! You can inspect the volume contents attaching them
 printf '%b\n' "   docker run \\"
 printf '%b\n' "   -v ${PROJECT_NAME}_${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}:/${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME} \\"
 printf '%b\n' "   -v ${PROJECT_NAME}_${ATLAS_DATA_EXP_VOL_NAME}:/${ATLAS_DATA_EXP_VOL_NAME} \\"
+printf '%b\n' "   -v ${PROJECT_NAME}_${ATLAS_DATA_ONTOLOGY_VOL_NAME}:/${ATLAS_DATA_ONTOLOGY_VOL_NAME} \\"
 printf '%b\n' "   --rm -it ubuntu:jammy bash"

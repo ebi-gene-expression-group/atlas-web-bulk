@@ -70,7 +70,7 @@ services:
         -PjdbcPassword=${POSTGRES_PASSWORD} \
         -PzkHosts=$${ZK_HOSTS} \
         -PsolrHosts=$${SOLR_HOSTS} \
-        :cli:bootRun --args="bulk-analytics-json --output=/root/experiments-jsonl -e $(echo ${EXP_IDS} | sed -e "s/ /,/g")"
+        :cli:bootRun --args="bulk-analytics-json --output=/root/experiments-jsonl -e $(echo ${EXP_IDS} ${PRIVATE_EXP_IDS} | sed -e "s/ /,/g")"
         
         cd /root/solr-bulk/bin
         ./create-bulk-analytics-collection.sh

@@ -78,6 +78,24 @@ contents of the source directories change. This is especially useful when experi
 or the bioentity properties directory is updated after a release of  Ensembl, WormBase ParaSite, Reactome, Gene
 Ontoloy, Plant Ontology or InterPro.
 
+### How to add a private experiment bundle
+
+Private experiments are not available to download from our FTP site. You can download them from the `codon-cluster` by using the following steps:
+
+1. These steps should be done before the `PostGreSQL` and `Solr` steps. 
+2. After logged in to the `codon-cluster` check if the experiment bundle can be found under this path:
+```/nfs/production/irene/ma/experiments/```.
+2. If it is there, then go to the folder on your local computer where you would like to download the bundle.
+3. Download it by this command:
+```scp -r codon-login:/nfs/production/irene/ma/experiments/<EXPERIMENT_ACCESSION_ID> .```.
+4. Create a temp container with mounting the already existing data volume for our local experiments: 
+````docker container create --name expVol -v gxa_atlas-data-exp:/atlas-data/exp ubuntu:jammy````
+5. Copy the file bundles of the downloaded private experiment into the volume: ```docker cp <EXPERIMENT_ACCESSION_ID> expVol:/atlas-data/exp/magetab/```
+6. Add `<EXPERIMENT_ACCESSION_ID>` into the `PRIVATE_EXP_IDS` variable. It is in to `test-data.env` file under the `docker/prepare-dev-environment` folder. If it is not there, then please create it.
+7. The experiment accession IDs in that variable should be separated by SPACE.
+
+
+
 ### PostGreSQL
 
 To create our PostGreSQL database and run the schema migrations up to the latest version please execute this script:
@@ -239,6 +257,9 @@ The script `debug-single-test.sh` is a shortcut for this task. It takes the same
 ```
 
 ## Run web application
+
+Please check this first in the troubleshooting session: [Known Build Issue](#known-build-issue)
+
 The web application is compiled in two stages:
 1. Front end JavaScript packages are transpiled into “bundles” with [Webpack](https://webpack.js.org/)
 2. Bundles and back end Java code are built as a WAR file
@@ -270,9 +291,31 @@ If you don't give any flags, or you add both then the script is going to build b
 
 ## Troubleshooting
 
+### <a name="known-build-issue"></a>Known Build Issue
+
+This current version of our developer env has a bug when we build and execute the application
+with the `build-and-deploy-webapp.sh` script.
+We have a ticket to fix this in our backlog: [Update bulk with the latest webpack and its dependencies](https://github.com/ebi-gene-expression-group/atlas-web-bulk/issues/176)
+
+You can build a working WAR with the following steps:
+1. Manually build the UI:
+```bash
+./compile-front-end-packages.sh -iu
+```
+
+2. Manually build the backend:
+```bash
+./gradlew :app:war
+```
+
+3. Use this script to start up the web app on your local environment:
+```bash
+./build-and-deploy-webapp.sh -n
+```
+
 ### SolrCloud nodes shut down on macOS
 Docker for macOS sets fairly strict resource limits for all Docker containers. If your containers require e.g. more
-memory you need to increase the available amount in the Docker Dashboard. For bulk Expression Atlas, plase set Memory
+memory you need to increase the available amount in the Docker Dashboard. For bulk Expression Atlas, please set Memory
 to between 8-12 GB and disk image to 100 GB or more. Please see the screenshot below for reference:
 
 ![Screenshot-2021-02-18-at-18-27-40](https://user-images.githubusercontent.com/4425744/109644570-8ccee680-7b4d-11eb-9db0-7a29fb4d9e2b.png)
