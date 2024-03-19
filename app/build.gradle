@@ -6,7 +6,7 @@ plugins {
 }
 
 gitProperties {
-    gitPropertiesName = "git.properties"
+    gitPropertiesName = "resources/configuration.properties"
 }
 
 version '36.0.0'
