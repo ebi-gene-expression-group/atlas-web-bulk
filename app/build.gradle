@@ -6,7 +6,8 @@ plugins {
 }
 
 gitProperties {
-    gitPropertiesName = "resources/git.properties"
+    gitPropertiesName = "git.properties"
+    gitPropertiesResourceDir = "${project.rootDir}" as DirectoryProperty
 }
 
 version '36.0.0'
