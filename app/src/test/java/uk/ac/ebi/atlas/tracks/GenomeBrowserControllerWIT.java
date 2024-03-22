@@ -303,7 +303,7 @@ class GenomeBrowserControllerWIT {
     @Test
     void privateExperimentWithoutAccessKey() throws Exception {
         this.mockMvc.perform(
-                get(MessageFormat.format(URL_TEMPLATE, "ensembl", "E-MTAB-4106", "SPAC869.01", "g5_g1")))
+                get(MessageFormat.format(URL_TEMPLATE, "ensembl", "E-MTAB-5555", "ENSMUSG00000000001", "g4_g2")))
                 .andExpect(status().isNotFound())
                 .andReturn();
     }

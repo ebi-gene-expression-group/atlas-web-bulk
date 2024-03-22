@@ -53,7 +53,7 @@ docker-compose \
 --env-file ${SCRIPT_DIR}/docker/dev.env \
 -f docker/docker-compose-postgres-test.yml \
 -f docker/docker-compose-solrcloud.yml \
--f docker/docker-compose-gradle.yml \
+-f docker/docker-compose-gradle-test.yml \
 run --rm --service-ports \
 gxa-gradle bash -c "
 set -e
@@ -66,8 +66,8 @@ gradle \
 -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
 -PjdbcUsername=${POSTGRES_USER} \
 -PjdbcPassword=${POSTGRES_PASSWORD} \
--PzkHosts=${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181 \
--PsolrHosts=http://${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr \
+-PzkHosts=${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181 \
+-PsolrHosts=http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr \
 ${PROJECT_NAME}:testClasses
 
 gradle --continuous :${PROJECT_NAME}:test --tests $TEST_CASE_NAME

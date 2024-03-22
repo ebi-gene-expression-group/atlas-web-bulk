@@ -46,7 +46,7 @@ class DownloadControllerWIT {
         this.mockMvc.perform(get("/download"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("download"))
-                .andExpect(model().attributeExists("fileName", "fileSize", "fileTimestamp"));
+                .andExpect(model().attributeExists("mainTitle"));
     }
 
     @Test
