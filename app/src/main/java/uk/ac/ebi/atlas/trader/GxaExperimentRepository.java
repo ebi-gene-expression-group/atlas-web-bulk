@@ -106,4 +106,9 @@ public class GxaExperimentRepository implements ExperimentRepository {
                         + ": experiment type " + experimentDto.getExperimentType() + " is not supported");
         }
     }
+
+    @Override
+    public String getExperimentType(String experimentAccession) {
+        return experimentCrudDao.getExperimentType(experimentAccession);
+    }
 }
