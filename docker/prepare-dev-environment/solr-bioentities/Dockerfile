@@ -12,12 +12,11 @@ RUN apt-get clean && \
 
 # Create the necessary directory
 RUN mkdir -p /root/bioentity-properties-jsonl
-RUN mkdir -p /root/experiments-jsonl
 
 # Clone the necessary repositories
 WORKDIR /root
 RUN git clone --depth 1 --recurse-submodules https://github.com/ebi-gene-expression-group/index-bioentities.git
-RUN git clone --depth 1 --recurse-submodules --branch  bugfix/update_codebase_to_latest_atlas_web_core --single-branch  https://github.com/ebi-gene-expression-group/atlas-web-bulk.git
-RUN git clone --depth 1 https://github.com/ebi-gene-expression-group/solr-bulk.git
+RUN git clone --depth 1 --recurse-submodules https://github.com/ebi-gene-expression-group/atlas-web-bulk.git
+RUN git clone --depth 1 --recurse-submodules https://github.com/ebi-gene-expression-group/solr-bulk.git
 
 ENTRYPOINT ["/bin/bash", "-c"]
