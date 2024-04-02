@@ -1,0 +1,90 @@
+version: "3.6"
+
+services:
+  solr-populator:
+    build:
+      context: ${DOCKERFILE_PATH}
+      no_cache: true
+    networks:
+      - atlas-test-net
+    ports:
+      - "8089:8089"
+    depends_on:
+      - gxa-postgres
+      - gxa-solrcloud-0
+      - gxa-solrcloud-1
+    volumes:
+      - gradle-wrapper-dists:/root/.gradle/wrapper/dists
+      - gradle-ro-dep-cache:/gradle-ro-dep-cache:ro
+      - atlas-data-bioentity-properties:/atlas-data/bioentity_properties
+      - atlas-data-exp:/atlas-data/exp
+      - atlas-data-expdesign:/atlas-data/expdesign
+    secrets:
+      - solrcloud.pem
+    environment:
+      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF8"
+      JAVA_OPTS: "-Dsolr.httpclient.builder.factory=org.apache.solr.client.solrj.impl.PreemptiveBasicAuthClientBuilderFactory -Dbasicauth=${SOLR_USER}:${SOLR_PASSWORD}"
+      GRADLE_RO_DEP_CACHE: /gradle-ro-dep-cache
+      ZK_HOSTS: "${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181"
+      SOLR_HOST: ${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME}:8983
+      SOLR_NUM_SHARDS: 2
+      NUM_DOCS_PER_BATCH: 20000
+      SOLR_COLLECTION_BIOENTITIES: bioentities
+      SOLR_COLLECTION_BIOENTITIES_SCHEMA_VERSION: 1
+      SOLR_COLLECTION_BULK_ANALYTICS: bulk-analytics
+      SOLR_COLLECTION_BULK_ANALYTICS_SCHEMA_VERSION: 1
+    working_dir: /root
+    command:
+      - |
+        for _SPECIES in ${SPECIES}
+        do
+          rsync -av --include=$${_SPECIES}* --include=*/ --exclude=* /atlas-data/bioentity_properties /root
+        done
+        
+        cd /root/atlas-web-bulk
+        ./gradlew -PdataFilesLocation=/root \
+        -PexperimentFilesLocation=/atlas-data/exp \
+        -PexperimentDesignLocation=/atlas-data/expdesign \
+        -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
+        -PjdbcUsername=${POSTGRES_USER} \
+        -PjdbcPassword=${POSTGRES_PASSWORD} \
+        :cli:bootRun --args="bioentities-json --output=/root/bioentity-properties-jsonl"
+        
+        cd /root/index-bioentities/bin
+        ./create-bioentities-collection.sh
+        ./create-bioentities-schema.sh
+        ./create-bioentities-suggesters.sh
+        
+        export SOLR_COLLECTION=$${SOLR_COLLECTION_BIOENTITIES}
+        export SCHEMA_VERSION=$${SOLR_COLLECTION_BIOENTITIES_SCHEMA_VERSION}
+        for FILE in `ls /root/bioentity-properties-jsonl/*.jsonl`
+        do
+          INPUT_JSONL=$${FILE} ./solr-jsonl-chunk-loader.sh >> /dev/stdout 2>&1
+        done
+        ./build-suggesters.sh
+        unset SOLR_COLLECTION
+        unset SCHEMA_VERSION
+secrets:
+  solrcloud.pem:
+    file: ${SOLR_PRIVATE_KEY:-/dev/null}
+
+volumes:
+  gradle-wrapper-dists:
+    external: true
+    name: ${PROJECT_NAME}_${GRADLE_WRAPPER_DISTS_VOL_NAME}
+  gradle-ro-dep-cache:
+    external: true
+    name: ${PROJECT_NAME}_${GRADLE_RO_DEP_CACHE_VOL_NAME}
+  atlas-data-bioentity-properties:
+    external: true
+    name: ${PROJECT_NAME}_${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}
+  atlas-data-exp:
+    external: true
+    name: ${PROJECT_NAME}_${ATLAS_DATA_EXP_VOL_NAME}
+  atlas-data-expdesign:
+    external: true
+    name: ${PROJECT_NAME}_${ATLAS_DATA_EXPDESIGN_VOL_NAME}
+
+networks:
+  atlas-test-net:
+    name: atlas-test-net

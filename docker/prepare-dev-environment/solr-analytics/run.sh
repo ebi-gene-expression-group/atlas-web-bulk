@@ -14,26 +14,21 @@ source ${ENV_FILE}
 # print_error
 source ${SCRIPT_DIR}/../utils.sh
 
-REMOVE_VOLUMES=false
 LOG_FILE=/dev/stdout
 function print_usage() {
-  printf '\n%b\n' "Usage: ${0} [ -r ] [ -l FILE ]"
+  printf '\n%b\n' "Usage: ${0} [ -l FILE ]"
   printf '\n%b\n' "Populate a Docker Compose SolrCloud 8 cluster with bulk Expression Atlas data."
 
-  printf '\n%b\n' "-r\t\tRemove volumes before creating them"
   printf '\n%b\n' "-l FILE \tLog file (default is ${LOG_FILE})"
   printf '%b\n\n' "-h\t\tDisplay usage instructions"
 }
 
 
-while getopts "k:o:l:rh" opt
+while getopts "l:h" opt
 do
   case ${opt} in
     l)
       LOG_FILE=$OPTARG
-      ;;
-    r)
-      REMOVE_VOLUMES=true
       ;;
     h)
       print_usage
@@ -62,12 +57,6 @@ DOCKER_COMPOSE_SOLRCLOUD_COMMAND="docker compose \
 
 DOCKER_COMPOSE_COMMAND_VARS="DOCKERFILE_PATH=${SCRIPT_DIR}"
 
-if [ "${REMOVE_VOLUMES}" = "true" ]; then
-  countdown "🗑 Remove Docker Compose Solr and ZooKeeper volumes"
-  eval "${DOCKER_COMPOSE_SOLRCLOUD_COMMAND}" "down --volumes >> ${LOG_FILE} 2>&1"
-  print_done
-fi
-
 print_stage_name "🛫 Spin up containers to index bioentity annotations and test experiments metadata and data in Solr"
 eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "up --build >> ${LOG_FILE} 2>&1"
 print_done
@@ -76,7 +65,7 @@ print_stage_name "🛬 Bring down all services"
 eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "down --rmi local >> ${LOG_FILE} 2>&1"
 print_done
 
-printf '%b\n' "🙂 All done! You can keep $(basename ${SOLR_PRIVATE_KEY}) and reuse it to sign any other Solr packages."
+printf '%b\n' "🙂 All done!"
 printf '%b\n' "  Start the SolrCloud cluster again with the following command:"
 printf '%b\n\n' "  ${DOCKER_COMPOSE_SOLRCLOUD_COMMAND} up -d"
 printf '%b\n\n' "  You can point your browser at http://localhost:8983 to explore your SolrCloud instance."
