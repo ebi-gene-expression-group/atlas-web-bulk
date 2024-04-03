@@ -118,7 +118,7 @@ To create and populate the `bioentities` collection:
 
 To create and populate the `bulk-analytics` collection:
 ```bash
-./docker/prepare-dev-environment/solr-analytics/run.sh -r -l solr-analytics.log
+./docker/prepare-dev-environment/solr-analytics/run.sh -l solr-analytics.log
 ```
 
 Run the script with the `-h` flag for more details.
