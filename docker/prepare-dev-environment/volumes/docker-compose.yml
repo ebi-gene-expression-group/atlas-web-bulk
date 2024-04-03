@@ -6,12 +6,13 @@ services:
     volumes:
       - atlas-data-bioentity-properties:/atlas-data/bioentity_properties
       - atlas-data-exp:/atlas-data/exp
+      - atlas-data-ontology:/atlas-data/ontology
     command:
       - |
         lftp -e \
         "mirror -vvv /pub/databases/microarray/data/atlas/bioentity_properties /atlas-data/bioentity_properties; exit" \
         ftp.ebi.ac.uk
-        
+
         # Create a directory for MAGETAB files
         mkdir -p /atlas-data/exp/magetab
         for EXP_ID in ${EXP_IDS}
@@ -26,3 +27,5 @@ volumes:
     name: ${PROJECT_NAME}_${ATLAS_DATA_BIOENTITY_PROPERTIES_VOL_NAME}
   atlas-data-exp:
     name: ${PROJECT_NAME}_${ATLAS_DATA_EXP_VOL_NAME}
+  atlas-data-ontology:
+    name: ${PROJECT_NAME}_${ATLAS_DATA_ONTOLOGY_VOL_NAME}

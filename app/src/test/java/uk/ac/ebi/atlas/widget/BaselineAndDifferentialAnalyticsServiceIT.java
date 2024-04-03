@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -29,7 +30,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertTrue;
 import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 
 @ExtendWith(SpringExtension.class)
@@ -72,7 +72,7 @@ class BaselineAndDifferentialAnalyticsServiceIT {
         JsonObject result = baselineAnalyticsSearchService.findFacetsForTreeSearch(SemanticQuery.create(BASELINE_GENE),
                 SemanticQuery.create(), new Species("Foous baris", SpeciesProperties.UNKNOWN));
         assertThat(result.entrySet(), not(Matchers.empty()));
-        assertTrue("This Ensembl gene has a homo sapiens result", result.has("homo sapiens"));
+        Assertions.assertTrue(result.has("homo sapiens"), "This Ensembl gene has a homo sapiens result");
     }
 
     @Test
@@ -106,11 +106,11 @@ class BaselineAndDifferentialAnalyticsServiceIT {
     @Test
     void differentialAnalyticsSearchServiceHasTheRightReturnFormat() {
         JsonObject result =
-                differentialAnalyticsSearchService.fetchResults(SemanticQuery.create("GO:0008150"), EMPTY_QUERY);
+                differentialAnalyticsSearchService.fetchResults(SemanticQuery.create("GO:2000651"), EMPTY_QUERY);
         testDifferentialResultsAreInRightFormat(result);
     }
 
-    private ImmutableList<String> fieldsNeededInDifferentialResults = ImmutableList.of(
+    private final ImmutableList<String> fieldsNeededInDifferentialResults = ImmutableList.of(
             "species",
             "kingdom",
             "experimentType",
@@ -127,14 +127,14 @@ class BaselineAndDifferentialAnalyticsServiceIT {
             "colour",
             "id");
 
-    private ImmutableList<String> fieldsNeededInMicroarrayDifferentialResults =
+    private final ImmutableList<String> fieldsNeededInMicroarrayDifferentialResults =
             ImmutableList.<String>builder()
                     .addAll(fieldsNeededInDifferentialResults)
                     .add("tStatistic")
                     .build();
 
     private void testDifferentialResultsAreInRightFormat(JsonObject result) {
-        assertTrue(GSON.toJson(result), result.has("results"));
+        Assertions.assertTrue(result.has("results"), GSON.toJson(result));
         assertThat(result.get("results").getAsJsonArray().size(), greaterThan(0));
 
         for (JsonElement jsonElement: result.get("results").getAsJsonArray()) {
@@ -143,11 +143,11 @@ class BaselineAndDifferentialAnalyticsServiceIT {
 
             if (experimentType.isMicroarray()) {
                 for (String fieldName: fieldsNeededInMicroarrayDifferentialResults) {
-                    assertTrue("result has " + fieldName, jsonElement.getAsJsonObject().has(fieldName));
+                    Assertions.assertTrue(jsonElement.getAsJsonObject().has(fieldName), "result has " + fieldName);
                 }
             } else {
                 for (String fieldName: fieldsNeededInDifferentialResults) {
-                    assertTrue("result has " + fieldName, jsonElement.getAsJsonObject().has(fieldName));
+                    Assertions.assertTrue(jsonElement.getAsJsonObject().has(fieldName), "result has " + fieldName);
                 }
             }
         }

@@ -10,5 +10,6 @@ RUN apt-get clean && \
 
 # Copy the auxiliary JSON files to the parent of the magetab directory
 COPY atlas-data/exp/* /atlas-data/exp/
+COPY atlas-data/ontology/* /atlas-data/ontology/
 
 ENTRYPOINT ["/bin/bash", "-c"]

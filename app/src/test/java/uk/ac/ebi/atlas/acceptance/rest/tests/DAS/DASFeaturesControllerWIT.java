@@ -85,7 +85,7 @@ class DASFeaturesControllerWIT {
                 .andExpect(status().isOk())
                 .andExpect(view().name("das-features"))
                 .andExpect(model().attribute(
-                        MODEL_ATTRIBUTE_NAMES[ThreadLocalRandom.current().nextInt(2, MODEL_ATTRIBUTE_NAMES.length)],
+                        MODEL_ATTRIBUTE_NAMES[ThreadLocalRandom.current().nextInt(4, MODEL_ATTRIBUTE_NAMES.length)],
                         "Not studied or no differential expression found for this gene"));
     }
 
