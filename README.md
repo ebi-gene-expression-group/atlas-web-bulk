@@ -104,10 +104,21 @@ To create our PostGreSQL database and run the schema migrations up to the latest
 ```
 
 ### Solr
-To create the collections, their schemas and populate them, please run the following script.
+To create the collections, their schemas and populate them, please run the following scripts.
 
+Currently, this step is separated into 2 sub-steps by Solr collections. 
+There is an inconsistency in our web apps and various shell scripts - that we use together with the Data Prod Team -
+how we use the `SOLR_HOST` and `SOLR_HOSTS` variables. We need to sort this out, 
+but while it is not solved we probably have to keep this 2 sub-steps, unless we find a way to merge them.
+
+To create and populate the `bioentities` collection:
 ```bash
-./docker/prepare-dev-environment/solr/run.sh -r -l solr.log
+./docker/prepare-dev-environment/solr-bioentities/run.sh -r -l solr-bioentities.log
+```
+
+To create and populate the `bulk-analytics` collection:
+```bash
+./docker/prepare-dev-environment/solr-analytics/run.sh -l solr-analytics.log
 ```
 
 Run the script with the `-h` flag for more details.
