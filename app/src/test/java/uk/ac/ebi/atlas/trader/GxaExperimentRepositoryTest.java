@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.ac.ebi.atlas.controllers.ResourceNotFoundException;
 import uk.ac.ebi.atlas.experimentimport.ExperimentCrudDao;
 import uk.ac.ebi.atlas.experimentimport.ExperimentDto;
 import uk.ac.ebi.atlas.experimentimport.idf.IdfParser;
 import uk.ac.ebi.atlas.experimentimport.idf.IdfParserOutput;
 import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
+import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.trader.factory.BaselineExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.MicroarrayExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.ProteomicsDifferentialExperimentFactory;
@@ -24,6 +26,8 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.when;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.SINGLE_CELL_RNASEQ_MRNA_BASELINE;
@@ -59,6 +63,9 @@ class GxaExperimentRepositoryTest {
 
     private GxaExperimentRepository subject;
 
+    private String experimentAccession;
+    private ExperimentDto experimentDto;
+
     @BeforeEach
     void setUp() {
         subject =
@@ -70,23 +77,25 @@ class GxaExperimentRepositoryTest {
                         rnaSeqDifferentialExperimentFactoryMock,
                         microarrayExperimentFactoryMock,
                         proteomicsDifferentialExperimentFactoryMock);
+
+        experimentAccession = generateRandomExperimentAccession();
+        experimentDto = new ExperimentDto(
+                experimentAccession,
+                SINGLE_CELL_RNASEQ_MRNA_BASELINE,
+                generateRandomSpecies().getName(),
+                ImmutableList.of(generateRandomPubmedId()),
+                ImmutableList.of(generateRandomDoi()),
+                new Timestamp(new Date().getTime()),
+                new Timestamp(new Date().getTime()),
+                RNG.nextBoolean(),
+                UUID.randomUUID().toString());
+
     }
 
     @Test
     void cannotBuildNonBulkExperiments() {
-        var experimentAccession = generateRandomExperimentAccession();
-
         when(experimentCrudDaoMock.readExperiment(experimentAccession))
-                .thenReturn(new ExperimentDto(
-                        experimentAccession,
-                        SINGLE_CELL_RNASEQ_MRNA_BASELINE,
-                        generateRandomSpecies().getName(),
-                        ImmutableList.of(generateRandomPubmedId()),
-                        ImmutableList.of(generateRandomDoi()),
-                        new Timestamp(new Date().getTime()),
-                        new Timestamp(new Date().getTime()),
-                        RNG.nextBoolean(),
-                        UUID.randomUUID().toString()));
+                .thenReturn(experimentDto);
 
         when(experimentDesignParserMock.parse(experimentAccession))
                 .thenReturn(new ExperimentDesign());
@@ -101,5 +110,31 @@ class GxaExperimentRepositoryTest {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> subject.getExperiment(experimentAccession));
+    }
+
+    @Test
+    void whenExperimentDoesNotExists_ThrowsException() {
+        var experimentAccession = generateRandomExperimentAccession();
+
+        when(experimentCrudDaoMock.getExperimentType(experimentAccession))
+                .thenThrow(ResourceNotFoundException.class);
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(
+                        () -> subject.getExperimentType(experimentAccession)
+                );
+    }
+
+    @Test
+    void whenExperimentExists_thenReturnsExperimentType() {
+        final String originalExperimentType = experimentDto.getExperimentType().name();
+
+        when(experimentCrudDaoMock.getExperimentType(experimentAccession))
+                .thenReturn(originalExperimentType);
+
+        var experimentType = subject.getExperimentType(experimentAccession);
+
+        assertThat(experimentType).isEqualTo(originalExperimentType);
+        assertThat(ExperimentType.valueOf(experimentType)).isEqualTo(experimentDto.getExperimentType());
     }
 }
