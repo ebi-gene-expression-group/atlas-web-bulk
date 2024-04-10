@@ -14,6 +14,7 @@ source ${ENV_FILE}
 # print_error
 source ${SCRIPT_DIR}/../utils.sh
 
+SOLR_KEYS_DIRECTORY=${SCRIPT_DIR}
 REMOVE_VOLUMES=false
 LOG_FILE=/dev/stdout
 function print_usage() {
@@ -26,7 +27,7 @@ function print_usage() {
 }
 
 
-while getopts "k:o:l:rh" opt
+while getopts "l:rh" opt
 do
   case ${opt} in
     l)
@@ -60,6 +61,9 @@ DOCKER_COMPOSE_SOLRCLOUD_COMMAND="docker compose \
 --env-file ${ENV_FILE} \
 --file ${SCRIPT_DIR}/../../docker-compose-solrcloud.yml"
 
+SOLR_PRIVATE_KEY=${SOLR_KEYS_DIRECTORY}/solrcloud.pem
+SOLR_PUBLIC_KEY=${SOLR_KEYS_DIRECTORY}/solrcloud.der
+SOLR_USERFILES_PATH=/var/solr/data/userfiles/
 DOCKER_COMPOSE_COMMAND_VARS="DOCKERFILE_PATH=${SCRIPT_DIR}"
 
 if [ "${REMOVE_VOLUMES}" = "true" ]; then
@@ -67,6 +71,27 @@ if [ "${REMOVE_VOLUMES}" = "true" ]; then
   eval "${DOCKER_COMPOSE_SOLRCLOUD_COMMAND}" "down --volumes >> ${LOG_FILE} 2>&1"
   print_done
 fi
+
+print_stage_name "🔐 Generate RSA keypair to sign and verify Solr packages"
+openssl genrsa -out ${SOLR_PRIVATE_KEY} 512 >> ${LOG_FILE} 2>&1
+openssl rsa -in ${SOLR_PRIVATE_KEY} -pubout -outform DER -out ${SOLR_PUBLIC_KEY} >> ${LOG_FILE} 2>&1
+print_done
+
+print_stage_name "🌅 Start Solr 8 cluster in Docker Compose"
+eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_SOLRCLOUD_COMMAND}" "up -d >> ${LOG_FILE} 2>&1"
+print_done
+
+print_stage_name "💤 Give Solr ten seconds to start up"
+sleep 10
+print_done
+
+print_stage_name "🔏 Register ${SOLR_PUBLIC_KEY} in SolrCloud"
+docker exec ${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME} ./bin/solr package add-key /run/secrets/solrcloud.der >> ${LOG_FILE} 2>&1
+print_done
+
+print_stage_name "🌄 Stop Solr 8 cluster in Docker Compose"
+eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_SOLRCLOUD_COMMAND}" "down >> ${LOG_FILE} 2>&1"
+print_done
 
 print_stage_name "🛫 Spin up containers to index bioentity annotations and test experiments metadata and data in Solr"
 eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "up --build >> ${LOG_FILE} 2>&1"

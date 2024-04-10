@@ -67,6 +67,8 @@ services:
       SOLR_HEAP: 3g
       SOLR_OPTS: -Denable.packages=true -Dsolr.max.booleanClauses=100000000
       ZK_HOST: ${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181
+    secrets:
+      - solrcloud.der
     depends_on:
       - gxa-solrcloud-zookeeper-0
       - gxa-solrcloud-zookeeper-1
@@ -87,11 +89,17 @@ services:
       SOLR_HEAP: 3g
       SOLR_OPTS: -Denable.packages=true -Dsolr.max.booleanClauses=100000000
       ZK_HOST: ${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181
+    secrets:
+      - solrcloud.der
     depends_on:
       - gxa-solrcloud-zookeeper-0
       - gxa-solrcloud-zookeeper-1
       - gxa-solrcloud-zookeeper-2
     command: "-q"
+
+secrets:
+  solrcloud.der:
+    file: ${SOLR_PUBLIC_KEY:-/dev/null}
 
 volumes:
   zookeeper-0-data:
