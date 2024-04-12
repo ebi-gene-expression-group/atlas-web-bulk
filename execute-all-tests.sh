@@ -48,3 +48,9 @@ gradle -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT
 gradle -PtestResultsPath=e2e :app:test --tests *WIT
 gradle :app:jacocoTestReport
 "
+
+docker-compose \
+--env-file ${SCRIPT_DIR}/docker/dev.env \
+-f docker/docker-compose-postgres-test.yml \
+-f docker/docker-compose-solrcloud.yml \
+-f docker/docker-compose-gradle-test.yml down
