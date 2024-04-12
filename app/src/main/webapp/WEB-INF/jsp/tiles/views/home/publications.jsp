@@ -3,6 +3,20 @@
 <div id="publication-list" class="callout" data-equalizer-watch>
     <h4>Publications</h4>
 
+    <a href="https://academic.oup.com/nar/article/52/D1/D107/7442051" target="_blank">
+        <div class="media-object">
+            <div class="media-object-section middle">
+                <h3 class="icon icon-conceptual" data-icon="l" />
+            </div>
+            <div class="media-object-section middle">
+                <p>
+                    <strong>Expression Atlas update: insights from sequencing data at both bulk and single cell level</strong><br>
+                    <em>Nucleic Acids Research</em>, 01 January 2024.
+                </p>
+            </div>
+        </div>
+    </a>
+
     <a href="https://academic.oup.com/nar/article/50/D1/D129/6438036" target="_blank">
         <div class="media-object">
             <div class="media-object-section middle">
