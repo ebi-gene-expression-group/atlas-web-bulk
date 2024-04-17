@@ -11,6 +11,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.commons.readers.TsvStreamer;
 import uk.ac.ebi.atlas.experimentpage.ExperimentDesignFile;
+import uk.ac.ebi.atlas.experimentpage.ExpressionAtlasContentService;
 import uk.ac.ebi.atlas.experimentpage.ExternallyAvailableContentService;
 import uk.ac.ebi.atlas.experimentpage.json.JsonBaselineExperimentController;
 import uk.ac.ebi.atlas.experimentpage.qc.MicroarrayQcFiles;
@@ -37,9 +38,11 @@ public class ExperimentPageContentService {
             .create();
 
     private final DataFileHub dataFileHub;
+    private final ExpressionAtlasContentService expressionAtlasContentService;
 
-    public ExperimentPageContentService(DataFileHub dataFileHub) {
+    public ExperimentPageContentService(DataFileHub dataFileHub, ExpressionAtlasContentService expressionAtlasContentService) {
         this.dataFileHub = dataFileHub;
+        this.expressionAtlasContentService = expressionAtlasContentService;
     }
 
     @Cacheable(cacheNames = "experimentContent", key = "#experiment.getAccession()")
@@ -134,17 +137,22 @@ public class ExperimentPageContentService {
             }
         }
 
-        supplementaryInformationTabs.add(
-                customContentTab(
-                        "resources",
-                        "Resources",
-                        "url",
-                        new JsonPrimitive(
-                                ExternallyAvailableContentService.listResourcesUrl(
-                                        experiment.getAccession(),
-                                        accessKey,
-                                        ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION)))
-        );
+        if(!expressionAtlasContentService.list(
+                experiment.getAccession(),
+                accessKey,
+                ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION).isEmpty()) {
+            supplementaryInformationTabs.add(
+                    customContentTab(
+                            "resources",
+                            "Resources",
+                            "url",
+                            new JsonPrimitive(
+                                    ExternallyAvailableContentService.listResourcesUrl(
+                                            experiment.getAccession(),
+                                            accessKey,
+                                            ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION)))
+            );
+        }
 
         if (experiment.getType().isMicroarray() &&
                 dataFileHub.getExperimentFiles(experiment.getAccession()).qcFolder.existsAndIsNonEmpty()) {
