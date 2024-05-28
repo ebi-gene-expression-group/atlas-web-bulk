@@ -7,8 +7,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.ebi.atlas.commons.readers.TsvStreamer;
 import uk.ac.ebi.atlas.commons.streams.ObjectInputStream;
+import uk.ac.ebi.atlas.home.AtlasInformationDao;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
 import uk.ac.ebi.atlas.model.OntologyTerm;
@@ -29,16 +32,13 @@ import uk.ac.ebi.atlas.resource.DataFileHub;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
 
 public class EvidenceService<X extends DifferentialExpression,
                              E extends DifferentialExperiment,
@@ -46,6 +46,8 @@ public class EvidenceService<X extends DifferentialExpression,
                              P extends Profile<Contrast, X, P>> {
     private static final double MIN_P_VALUE = 1e-234;
     private static final String ACTIVITY_URL_TEMPLATE = "http://identifiers.org/cttv.activity/{0}";
+    private static final Logger LOGGER = LoggerFactory.getLogger(EvidenceService.class);
+
 
     private final ProfileStreamFactory<Contrast, X, E, O, P> differentialProfileStreamFactory;
     private final DataFileHub dataFileHub;
@@ -477,7 +479,7 @@ public class EvidenceService<X extends DifferentialExpression,
     private static String factorBasedSummaryLabel(final ExperimentDesign experimentDesign, AssayGroup assayGroup) {
         return experimentDesign.getFactorValues(assayGroup.getFirstAssayId()).values().stream()
                 .filter(StringUtils::isNotEmpty)
-                .collect(Collectors.joining("; "));
+                .collect(joining("; "));
     }
 
     /*
@@ -555,16 +557,23 @@ public class EvidenceService<X extends DifferentialExpression,
         var whichContrastInWhichLine = percentileRanksColumnsFromHeader(lines.readNext(), experiment);
         var geneToRankedContrast = new HashMap<String, Map<Contrast, Integer>>();
 
+        var unparseableNumbers = new HashSet<String>();
         for (var line : new IterableObjectInputStream<>(lines)) {
             var resultForThisGene = new HashMap<Contrast, Integer>();
 
             for (var entry : whichContrastInWhichLine.entrySet()) {
                 String value = line[entry.getKey()];
-                if (!"NA".equals(value)) {
+                try {
                     resultForThisGene.put(entry.getValue(), Integer.parseInt(value));
+                } catch (NumberFormatException e) {
+                    unparseableNumbers.add(value);
                 }
             }
             geneToRankedContrast.put(line[0], resultForThisGene);
+        }
+        if (unparseableNumbers.size() > 0) {
+            var examples = unparseableNumbers.stream().map(item -> "'"+item+"'").collect(joining(", "));
+            LOGGER.warn("%s percentile ranks file has the following unparseable text entries: %s", experiment.getAccession(), examples);
         }
 
         return geneToRankedContrast;
