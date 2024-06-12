@@ -19,7 +19,10 @@ import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
@@ -33,24 +36,12 @@ public class ExpressionAtlasContentService {
             bulkDifferentialExperimentExternallyAvailableContentService;
     private final ExternallyAvailableContentService<MicroarrayExperiment>
             microarrayExperimentExternallyAvailableContentService;
-    private final ExternallyAvailableContentService<BaselineExperiment>
-            rnaSeqBaselineExperimentExternallyAvailableContentServiceGeo;
-    private final ExternallyAvailableContentService<DifferentialExperiment>
-            rnaSeqDifferentialExperimentExternallyAvailableContentServiceGeo;
-    private final ExternallyAvailableContentService<MicroarrayExperiment>
-            microarrayExperimentExternallyAvailableContentServiceGeo;
-    private final ExternallyAvailableContentService<BaselineExperiment>
-            rnaSeqBaselineExperimentExternallyAvailableContentServiceEna;
-    private final ExternallyAvailableContentService<DifferentialExperiment>
-            bulkDifferentialExperimentExternallyAvailableContentServiceEna;
-    private final ExternallyAvailableContentService<MicroarrayExperiment>
-            microarrayExperimentExternallyAvailableContentServiceEna;
-    private final ExternallyAvailableContentService<BaselineExperiment>
-            bulkBaselineExperimentExternallyAvailableContentServiceEga;
-    private final ExternallyAvailableContentService<DifferentialExperiment>
-            bulkDifferentialExperimentExternallyAvailableContentServiceEga;
-    private final ExternallyAvailableContentService<MicroarrayExperiment>
-            microarrayExperimentExternallyAvailableContentServiceEga;
+
+    private final LinkToEna linkToEna;
+    private final LinkToEga linkToEga;
+    private final LinkToGeo linkToGeo;
+    private final LinkToPride linkToPride;
+
     private final ExperimentTrader experimentTrader;
 
     public ExpressionAtlasContentService(
@@ -74,25 +65,21 @@ public class ExpressionAtlasContentService {
             LinkToArrayExpress.Differential differentialLinkToArrayExpress,
             LinkToArrayExpress.Microarray microarrayLinkToArrayExpress,
             LinkToPride linkToPride,
-            LinkToEna.RnaSeqBaseline rnaSeqBaselineLinkToEna,
-            LinkToEna.Differential differentialLinkToEna,
-            LinkToEna.Microarray microarrayLinkToEna,
-            LinkToEga.RnaSeqBaseline rnaSeqBaselineLinkToEga,
-            LinkToEga.Differential differentialLinkToEga,
-            LinkToEga.Microarray microarrayLinkToEga,
-            LinkToGeo.RnaSeqBaseline rnaSeqBaselineLinkToGeo,
-            LinkToGeo.Differential differentialLinkToGeo,
-            LinkToGeo.Microarray microarrayLinkToGeo,
+            LinkToEna linkToEna,
+            LinkToEga linkToEga,
+            LinkToGeo linkToGeo,
             ExperimentTrader experimentTrader) {
         this.experimentTrader = experimentTrader;
-
+        this.linkToEna = linkToEna;
+        this.linkToEga = linkToEga;
+        this.linkToGeo = linkToGeo;
+        this.linkToPride = linkToPride;
         this.proteomicsBaselineExperimentExternallyAvailableContentService =
                 new ExternallyAvailableContentService<>(
                         ImmutableList.of(
                                 proteomicsExperimentDownloadSupplier,
                                 baselineStaticFilesDownload,
                                 baselineExperimentDesignFile,
-                                linkToPride,
                                 proteomicsBaselineLinkToArrayExpress));
 
         this.rnaSeqBaselineExperimentExternallyAvailableContentService =
@@ -123,33 +110,6 @@ public class ExpressionAtlasContentService {
                                 microarrayExperimentDesignFile,
                                 microarrayLinkToArrayExpress,
                                 microarrayContrastImageSupplier));
-
-        this.rnaSeqBaselineExperimentExternallyAvailableContentServiceGeo =
-                new ExternallyAvailableContentService<>(ImmutableList.of(rnaSeqBaselineLinkToGeo));
-
-        this.rnaSeqDifferentialExperimentExternallyAvailableContentServiceGeo =
-                new ExternallyAvailableContentService<>(ImmutableList.of(differentialLinkToGeo));
-
-        this.microarrayExperimentExternallyAvailableContentServiceGeo =
-                new ExternallyAvailableContentService<>(ImmutableList.of(microarrayLinkToGeo));
-
-        this.rnaSeqBaselineExperimentExternallyAvailableContentServiceEna =
-                new ExternallyAvailableContentService<>(ImmutableList.of(rnaSeqBaselineLinkToEna));
-
-        this.bulkDifferentialExperimentExternallyAvailableContentServiceEna =
-                new ExternallyAvailableContentService<>(ImmutableList.of(differentialLinkToEna));
-
-        this.microarrayExperimentExternallyAvailableContentServiceEna =
-                new ExternallyAvailableContentService<>(ImmutableList.of(microarrayLinkToEna));
-
-        this.bulkBaselineExperimentExternallyAvailableContentServiceEga =
-                new ExternallyAvailableContentService<>(ImmutableList.of(rnaSeqBaselineLinkToEga));
-
-        this.bulkDifferentialExperimentExternallyAvailableContentServiceEga =
-                new ExternallyAvailableContentService<>(ImmutableList.of(differentialLinkToEga));
-
-        this.microarrayExperimentExternallyAvailableContentServiceEga =
-                new ExternallyAvailableContentService<>(ImmutableList.of(microarrayLinkToEga));
     }
 
     public Function<HttpServletResponse, Void> stream(String experimentAccession, String accessKey, final URI uri) {
@@ -174,7 +134,6 @@ public class ExpressionAtlasContentService {
                                                  String accessKey,
                                                  ExternallyAvailableContent.ContentType contentType) {
         Experiment<?> experiment = experimentTrader.getExperiment(experimentAccession, accessKey);
-        String externalResourceType = externalResourceLinksPriority(experiment);
         ImmutableList.Builder<ExternallyAvailableContent> arrayExpressAndOtherExternalResourcesLinks = ImmutableList.builder();
         ImmutableList.Builder<ExternallyAvailableContent> otherExternalResourceLinks = ImmutableList.builder();
 
@@ -183,32 +142,20 @@ public class ExpressionAtlasContentService {
             case PROTEOMICS_BASELINE_DIA:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(
                         proteomicsBaselineExperimentExternallyAvailableContentService.list((BaselineExperiment) experiment, contentType));
+                otherExternalResourceLinks = externalResourceLinks(experiment);
+                arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case RNASEQ_MRNA_BASELINE:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqBaselineExperimentExternallyAvailableContentService.list(
                         (BaselineExperiment) experiment, contentType));
-                otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?
-                        rnaSeqBaselineExperimentExternallyAvailableContentServiceGeo.list(
-                                (BaselineExperiment) experiment, contentType) :
-                        externalResourceType.equals("ega") ?
-                                bulkBaselineExperimentExternallyAvailableContentServiceEga.list(
-                                        (BaselineExperiment) experiment, contentType) :
-                                rnaSeqBaselineExperimentExternallyAvailableContentServiceEna.list(
-                                        (BaselineExperiment) experiment, contentType));
+                otherExternalResourceLinks = externalResourceLinks(experiment);
                 arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case RNASEQ_MRNA_DIFFERENTIAL:
             case PROTEOMICS_DIFFERENTIAL:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(bulkDifferentialExperimentExternallyAvailableContentService.list(
                         (DifferentialExperiment) experiment, contentType));
-                otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?
-                        rnaSeqDifferentialExperimentExternallyAvailableContentServiceGeo.list(
-                                (DifferentialExperiment) experiment, contentType) :
-                        externalResourceType.equals("ega") ?
-                                bulkDifferentialExperimentExternallyAvailableContentServiceEga.list(
-                                        (DifferentialExperiment) experiment, contentType) :
-                                bulkDifferentialExperimentExternallyAvailableContentServiceEna.list(
-                                        (DifferentialExperiment) experiment, contentType));
+                otherExternalResourceLinks = externalResourceLinks(experiment);
                 arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL:
@@ -216,14 +163,7 @@ public class ExpressionAtlasContentService {
             case MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL:
                 arrayExpressAndOtherExternalResourcesLinks.addAll(microarrayExperimentExternallyAvailableContentService.list(
                         (MicroarrayExperiment) experiment, contentType));
-                otherExternalResourceLinks.addAll(externalResourceType.equals("geo") ?
-                        microarrayExperimentExternallyAvailableContentServiceGeo.list(
-                                (MicroarrayExperiment) experiment, contentType) :
-                        externalResourceType.equals("ega") ?
-                                microarrayExperimentExternallyAvailableContentServiceEga.list(
-                                        (MicroarrayExperiment) experiment, contentType) :
-                                microarrayExperimentExternallyAvailableContentServiceEna.list(
-                                        (MicroarrayExperiment) experiment, contentType));
+                otherExternalResourceLinks = externalResourceLinks(experiment);
                 arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             default:
@@ -233,14 +173,47 @@ public class ExpressionAtlasContentService {
         return arrayExpressAndOtherExternalResourcesLinks.build();
     }
 
-    private String externalResourceLinksPriority(Experiment<?> experiment) {
-        var geoAccessions = experiment.getSecondaryAccessions().stream()
-                .filter(accession -> accession.matches("GSE.*"))
-                .collect(toImmutableList());
-        var egaAccessions = experiment.getSecondaryAccessions().stream()
-                .filter(accession -> accession.matches("EGA.*"))
-                .collect(toImmutableList());
+    private ImmutableList.Builder<ExternallyAvailableContent> externalResourceLinks(Experiment<?> experiment) {
+        ImmutableList.Builder<ExternallyAvailableContent> otherExternalResourceLinks = ImmutableList.builder();
 
-        return geoAccessions.isEmpty() ? egaAccessions.isEmpty() ? "ena" : "ega" : "geo";
+        Map<String, List<String>> resourceList = experiment.getSecondaryAccessions().stream()
+                .collect(Collectors.groupingBy(accession -> {
+                    if (accession.matches("GSE.*")) return "GEO";
+                    if (accession.matches("EGA.*")) return "EGA";
+                    if (accession.matches("E-MTAB.*|E-ERAD.*|E-GEUV.*")) return "ArrayExpress";
+                    if (accession.matches("PDX.*")) return "PRIDE";
+                    if (accession.matches("ERP.*|SRP.*|DRP.*|PRJEB.*|PRJNA.*|PRJDB.*")) return "ENA";
+                    return "OTHER";
+                }));
+
+        // Convert lists to ImmutableList
+        resourceList.replaceAll((k, v) -> v.stream().collect(toImmutableList()));
+
+        // Remove "OTHER" key if it exists
+        resourceList.remove("OTHER");
+
+        // Add to the builder based on the type
+        resourceList.forEach((resource, accessions) -> {
+            switch (resource) {
+                case "GEO":
+                    otherExternalResourceLinks.addAll(linkToGeo.get(experiment));
+                    break;
+                case "EGA":
+                    otherExternalResourceLinks.addAll(linkToEga.get(experiment));
+                    break;
+//                case "ArrayExpress":
+//                    otherExternalResourceLinks.add(linkToArrayExpress.get(experiment));
+//                    break;
+                case "PRIDE":
+                    otherExternalResourceLinks.addAll(linkToPride.get(experiment));
+                    break;
+                case "ENA":
+                    otherExternalResourceLinks.addAll(linkToEna.get(experiment));
+                    break;
+            }
+        });
+
+        return otherExternalResourceLinks;
     }
+
 }
