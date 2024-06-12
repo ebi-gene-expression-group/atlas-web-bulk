@@ -17,6 +17,7 @@ import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.model.experiment.sdrf.RichFactorGroup;
 import uk.ac.ebi.atlas.model.experiment.summary.AssayGroupSummaryBuilder;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
 import java.util.List;
@@ -28,13 +29,16 @@ public class BaselineExperimentPageService extends ExperimentPageService {
     private final BaselineExperimentProfilesService baselineExperimentProfilesService;
     private final CoexpressedGenesService coexpressedGenesService;
     private final AnatomogramFactory anatomogramFactory;
+    private final ExperimentTrader experimentTrader;
 
     public BaselineExperimentPageService(BaselineExperimentProfilesService baselineExperimentProfilesService,
-                                         CoexpressedGenesService coexpressedGenesService) {
+                                         CoexpressedGenesService coexpressedGenesService,
+                                         ExperimentTrader experimentTrader) {
         super();
         this.anatomogramFactory = new AnatomogramFactory();
         this.baselineExperimentProfilesService = baselineExperimentProfilesService;
         this.coexpressedGenesService = coexpressedGenesService;
+        this.experimentTrader = experimentTrader;
     }
 
     public <U extends ExpressionUnit.Absolute> JsonObject getResultsForExperiment(
@@ -101,7 +105,7 @@ public class BaselineExperimentPageService extends ExperimentPageService {
             o.add("assayGroupSummary",
                     new AssayGroupSummaryBuilder()
                     .forAssayGroup(experiment.getDataColumnDescriptor(dataColumnDescriptor.getId()))
-                    .withExperimentDesign(experiment.getExperimentDesign())
+                    .withExperimentDesign(experimentTrader.getExperimentDesign(experiment.getAccession()))
                     .build().toJson());
             result.add(o);
         }
