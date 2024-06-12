@@ -36,7 +36,7 @@ public class ExperimentsConditionsDetailsController {
     public void generateTsvFormatBaseline(HttpServletResponse response) {
         writeTsvLinesToResponse(
                 response,
-                experiment -> new BaselineExperimentAssayGroupsLines((BaselineExperiment) experiment),
+                experiment -> new BaselineExperimentAssayGroupsLines(experimentTrader, (BaselineExperiment) experiment),
                 RNASEQ_MRNA_BASELINE,
                 PROTEOMICS_BASELINE,
                 PROTEOMICS_BASELINE_DIA);
