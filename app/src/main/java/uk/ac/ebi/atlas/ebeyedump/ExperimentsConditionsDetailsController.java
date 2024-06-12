@@ -26,7 +26,7 @@ import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFER
 @Controller
 @Scope("request")
 public class ExperimentsConditionsDetailsController {
-    private ExperimentTrader experimentTrader;
+    private final ExperimentTrader experimentTrader;
 
     public ExperimentsConditionsDetailsController(ExperimentTrader experimentTrader) {
         this.experimentTrader = experimentTrader;
@@ -46,7 +46,7 @@ public class ExperimentsConditionsDetailsController {
     public void generateTsvFormatDifferential(HttpServletResponse response) {
         writeTsvLinesToResponse(
                 response,
-                experiment -> new DifferentialExperimentContrastLines((DifferentialExperiment) experiment),
+                experiment -> new DifferentialExperimentContrastLines(experimentTrader, (DifferentialExperiment) experiment),
                 MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL,
                 MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
                 MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,

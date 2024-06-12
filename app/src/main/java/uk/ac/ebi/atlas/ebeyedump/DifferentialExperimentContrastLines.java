@@ -3,11 +3,13 @@ package uk.ac.ebi.atlas.ebeyedump;
 import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.ebi.atlas.model.OntologyTerm;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.sdrf.FactorSet;
 import uk.ac.ebi.atlas.model.experiment.sdrf.SampleCharacteristic;
 import uk.ac.ebi.atlas.model.experiment.sdrf.Factor;
 import uk.ac.ebi.atlas.model.experiment.sample.Contrast;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -18,9 +20,11 @@ import static java.util.stream.Collectors.joining;
 public class DifferentialExperimentContrastLines implements Iterable<String[]> {
     private final LinkedHashSet<ImmutableList<String>> contrastDetails;
     private final LinkedHashSet<ImmutableList<String>> result = new LinkedHashSet<>();
+    private final ExperimentTrader experimentTrader;
 
-    public DifferentialExperimentContrastLines(DifferentialExperiment experiment) {
+    public DifferentialExperimentContrastLines(ExperimentTrader experimentTrader, DifferentialExperiment experiment) {
         this.contrastDetails = buildContrastDetails(experiment);
+        this.experimentTrader = experimentTrader;
     }
 
     private LinkedHashSet<ImmutableList<String>> buildContrastDetails(DifferentialExperiment experiment) {
@@ -43,10 +47,11 @@ public class DifferentialExperimentContrastLines implements Iterable<String[]> {
                                  String assayAccession,
                                  Contrast contrast,
                                  String value) {
-        for (SampleCharacteristic sample : experiment.getExperimentDesign().getSampleCharacteristics(assayAccession)) {
+        final String experimentAccession = experiment.getAccession();
+        for (SampleCharacteristic sample : getExperimentDesign(experimentAccession).getSampleCharacteristics(assayAccession)) {
             ImmutableList<String> line =
                     ImmutableList.of(
-                            experiment.getAccession(),
+                            experimentAccession,
                             contrast.getId(),
                             value,
                             "characteristic",
@@ -61,12 +66,13 @@ public class DifferentialExperimentContrastLines implements Iterable<String[]> {
                                  String assayAccession,
                                  Contrast contrast,
                                  String value) {
-        FactorSet factorSet = experiment.getExperimentDesign().getFactors(assayAccession);
+        final String experimentAccession = experiment.getAccession();
+        FactorSet factorSet = getExperimentDesign(experimentAccession).getFactors(assayAccession);
         if (factorSet != null) {
             for (Factor factor : factorSet) {
                 ImmutableList<String> line =
                         ImmutableList.of(
-                                experiment.getAccession(),
+                                experimentAccession,
                                 contrast.getId(),
                                 value,
                                 "factor",
@@ -76,6 +82,10 @@ public class DifferentialExperimentContrastLines implements Iterable<String[]> {
                 result.add(line);
             }
         }
+    }
+
+    private ExperimentDesign getExperimentDesign(String experimentAccession) {
+        return experimentTrader.getExperimentDesign(experimentAccession);
     }
 
     private static String joinURIs(Set<OntologyTerm> ontologyTerms) {
