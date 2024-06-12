@@ -14,6 +14,7 @@ import uk.ac.ebi.atlas.model.OntologyTerm;
 import uk.ac.ebi.atlas.model.experiment.sdrf.SampleCharacteristic;
 import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -23,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -70,6 +72,9 @@ public class BaselineExperimentAssayGroupsLinesTest {
     @Mock
     private BaselineExperiment baselineExperiment;
 
+    @Mock
+    private ExperimentTrader experimentTraderMock;
+
     @Test
     public void lines() {
         ExperimentDesign experimentDesign = new ExperimentDesign();
@@ -79,23 +84,20 @@ public class BaselineExperimentAssayGroupsLinesTest {
         SampleCharacteristic sampleCharacteristic2 =
                 SampleCharacteristic.create(SAMPLE_HEADER, SAMPLE_VALUE2, SAMPLE_ONTOLOGY_TERM2);
 
-
         experimentDesign.putSampleCharacteristic(ASSAY1, SAMPLE_HEADER, sampleCharacteristic1);
-        experimentDesign.putFactor(ASSAY1, FACTOR_HEADER, FACTOR_VALUE1, FACTOR_ONTOLOGY_TERM1);
-
         experimentDesign.putSampleCharacteristic(ASSAY2, SAMPLE_HEADER, sampleCharacteristic2);
-        experimentDesign.putFactor(ASSAY2, FACTOR_HEADER, FACTOR_VALUE2, FACTOR_ONTOLOGY_TERM2);
-
         experimentDesign.putSampleCharacteristic(ASSAY3, SAMPLE_HEADER, SAMPLE_VALUE3);
+        experimentDesign.putFactor(ASSAY1, FACTOR_HEADER, FACTOR_VALUE1, FACTOR_ONTOLOGY_TERM1);
+        experimentDesign.putFactor(ASSAY2, FACTOR_HEADER, FACTOR_VALUE2, FACTOR_ONTOLOGY_TERM2);
         experimentDesign.putFactor(ASSAY3, FACTOR_HEADER, FACTOR_VALUE3);
-
 
         when(baselineExperiment.getAccession()).thenReturn(EXPERIMENT_ACCESSION);
         when(baselineExperiment.getDataColumnDescriptors()).thenReturn(ImmutableList.of(ASSAY_GROUP1, ASSAY_GROUP2,
                 ASSAY_GROUP3));
-        when(baselineExperiment.getExperimentDesign()).thenReturn(experimentDesign);
+        when(experimentTraderMock.getExperimentDesign(any())).thenReturn(experimentDesign);
 
-        BaselineExperimentAssayGroupsLines subject = new BaselineExperimentAssayGroupsLines(baselineExperiment);
+        BaselineExperimentAssayGroupsLines subject =
+                new BaselineExperimentAssayGroupsLines(experimentTraderMock, baselineExperiment);
 
         Iterator<String[]> lines = subject.iterator();
 
