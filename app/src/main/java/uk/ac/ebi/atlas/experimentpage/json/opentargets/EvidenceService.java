@@ -26,6 +26,7 @@ import uk.ac.ebi.atlas.profiles.MinMaxProfileRanking;
 import uk.ac.ebi.atlas.profiles.differential.DifferentialProfileStreamOptions;
 import uk.ac.ebi.atlas.profiles.stream.ProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.DataFileHub;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -50,12 +51,15 @@ public class EvidenceService<X extends DifferentialExpression,
     private final ProfileStreamFactory<Contrast, X, E, O, P> differentialProfileStreamFactory;
     private final DataFileHub dataFileHub;
     private final String expressionAtlasVersion;
+    private final ExperimentTrader experimentTrader;
 
     public EvidenceService(ProfileStreamFactory<Contrast, X, E, O, P> differentialProfileStreamFactory,
                            DataFileHub dataFileHub,
+                           ExperimentTrader experimentTrader,
                            String expressionAtlasVersion) {
         this.differentialProfileStreamFactory = differentialProfileStreamFactory;
         this.dataFileHub = dataFileHub;
+        this.experimentTrader = experimentTrader;
         this.expressionAtlasVersion = expressionAtlasVersion;
     }
 
@@ -67,7 +71,7 @@ public class EvidenceService<X extends DifferentialExpression,
         }
 
         var diseaseAssociations = getDiseaseAssociations(experiment);
-        if (diseaseAssociations.size() == 0) {
+        if (diseaseAssociations.isEmpty()) {
             return;
         }
 
@@ -108,7 +112,8 @@ public class EvidenceService<X extends DifferentialExpression,
     private boolean shouldSkip(E experiment) {
         return !experiment.getSpecies().isUs() ||
                 experiment.getType().isMicroRna() ||
-                cellLineAsSampleCharacteristicButNoDiseaseAsFactor(experiment.getExperimentDesign());
+                cellLineAsSampleCharacteristicButNoDiseaseAsFactor(
+                        experimentTrader.getExperimentDesign(experiment.getAccession()));
     }
 
     private void piecesOfEvidence(E experiment,

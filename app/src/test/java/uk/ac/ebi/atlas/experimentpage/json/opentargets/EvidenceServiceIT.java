@@ -66,7 +66,8 @@ class EvidenceServiceIT {
 
     @BeforeEach
     void setUp() {
-        subject = new EvidenceService<>(microarrayProfileStreamFactory, dataFileHub, "test");
+        subject = new EvidenceService<>(
+                microarrayProfileStreamFactory, dataFileHub, experimentTrader, "test");
     }
 
     @Test

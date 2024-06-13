@@ -53,9 +53,10 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
         String resourcesVersion = "prod.30";
 
         bulkDifferentialEvidenceService =
-                new EvidenceService<>(bulkDifferentialProfileStreamFactory, dataFileHub, resourcesVersion);
+                new EvidenceService<>(
+                        bulkDifferentialProfileStreamFactory, dataFileHub, experimentTrader, resourcesVersion);
         diffMicroarrayEvidenceService =
-                new EvidenceService<>(microarrayProfileStreamFactory, dataFileHub, resourcesVersion);
+                new EvidenceService<>(microarrayProfileStreamFactory, dataFileHub, experimentTrader, resourcesVersion);
     }
 
     @InitBinder("preferences")
