@@ -95,7 +95,7 @@ public class ExperimentPageContentService {
 
         if (dataFileHub.getExperimentFiles(experiment.getAccession()).experimentDesign.exists()) {
             availableTabs.add(
-                    experimentDesignTab(new ExperimentDesignTable(experiment).asJson(),
+                    experimentDesignTab(new ExperimentDesignTable(experimentTrader, experiment).asJson(),
                             ExperimentDesignFile.makeUrl(experiment.getAccession(), accessKey)));
         }
 
