@@ -113,7 +113,7 @@ public class EvidenceService<X extends DifferentialExpression,
         return !experiment.getSpecies().isUs() ||
                 experiment.getType().isMicroRna() ||
                 cellLineAsSampleCharacteristicButNoDiseaseAsFactor(
-                        experimentTrader.getExperimentDesign(experiment.getAccession()));
+                        getExperimentDesign(experiment.getAccession()));
     }
 
     private void piecesOfEvidence(E experiment,
@@ -408,11 +408,17 @@ public class EvidenceService<X extends DifferentialExpression,
     private ImmutableMap<Contrast, DiseaseAssociation> getDiseaseAssociations(DifferentialExperiment experiment) {
         var contrastToDiseaseBuilder = ImmutableMap.<Contrast, DiseaseAssociation>builder();
         for (var contrast: experiment.getDataColumnDescriptors()) {
-            DiseaseAssociation.tryCreate(experiment, contrast)
+            DiseaseAssociation.tryCreate(getExperimentDesign(experiment.getAccession()), experiment, contrast)
                     .ifPresent(diseaseAssociation -> contrastToDiseaseBuilder.put(contrast, diseaseAssociation));
         }
         return contrastToDiseaseBuilder.build();
     }
+
+    private ExperimentDesign getExperimentDesign(String experimentAccession) {
+        return experimentTrader.getExperimentDesign(experimentAccession);
+    }
+
+
 
     @AutoValue
     abstract static class DiseaseAssociation {
@@ -428,15 +434,17 @@ public class EvidenceService<X extends DifferentialExpression,
         public abstract boolean isCttvPrimary();
         public abstract SampleCharacteristic organismPart();
 
-        public static Optional<DiseaseAssociation> tryCreate(DifferentialExperiment experiment, Contrast contrast) {
-            var biosampleInfo = getBiosampleInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
-            var diseaseInfo = getDiseaseInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
+        public static Optional<DiseaseAssociation> tryCreate(ExperimentDesign experimentDesign,
+                                                             DifferentialExperiment experiment, Contrast contrast) {
+
+            var biosampleInfo = getBiosampleInfo(experimentDesign, contrast.getTestAssayGroup());
+            var diseaseInfo = getDiseaseInfo(experimentDesign, contrast.getTestAssayGroup());
 
             if (biosampleInfo.isPresent() && diseaseInfo.isPresent()) {
                 return Optional.of(
                         DiseaseAssociation.create(
                                 biosampleInfo.get(),
-                                experiment.getExperimentDesign(),
+                                experimentDesign,
                                 contrast,
                                 experiment.doesContrastHaveCttvPrimaryAnnotation(contrast),
                                 diseaseInfo.get()));
