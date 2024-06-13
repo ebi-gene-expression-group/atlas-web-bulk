@@ -17,6 +17,7 @@ import uk.ac.ebi.atlas.model.experiment.differential.DifferentialProfilesList;
 import uk.ac.ebi.atlas.model.experiment.summary.ContrastSummaryBuilder;
 import uk.ac.ebi.atlas.profiles.json.ExternallyViewableProfilesList;
 import uk.ac.ebi.atlas.resource.ContrastImageTrader;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
 
 import java.util.List;
@@ -35,15 +36,17 @@ DifferentialExperimentPageService<
     private final ContrastImageTrader contrastImageTrader;
     private final DifferentialRequestContextFactory<E, K, R> differentialRequestContextFactory;
     private final DifferentialProfilesHeatMap<X, E, P, R> profilesHeatMap;
+    private final ExperimentTrader experimentTrader;
 
     public DifferentialExperimentPageService(
             DifferentialRequestContextFactory<E, K, R> differentialRequestContextFactory,
             DifferentialProfilesHeatMap<X, E, P, R> profilesHeatMap,
-            ContrastImageTrader contrastImageTrader) {
+            ContrastImageTrader contrastImageTrader,
+            ExperimentTrader experimentTrader) {
         this.differentialRequestContextFactory = differentialRequestContextFactory;
         this.profilesHeatMap = profilesHeatMap;
         this.contrastImageTrader = contrastImageTrader;
-
+        this.experimentTrader = experimentTrader;
     }
 
     public JsonObject getResultsForExperiment(E experiment, String accessKey, K preferences) {
@@ -68,15 +71,15 @@ DifferentialExperimentPageService<
         return result;
     }
 
-    private JsonArray constructColumnHeaders(Iterable<Contrast> contrasts, DifferentialExperiment
-            differentialExperiment) {
+    private JsonArray constructColumnHeaders(Iterable<Contrast> contrasts,
+                                             DifferentialExperiment differentialExperiment) {
         JsonArray result = new JsonArray();
         Map<String, JsonArray> contrastImages = contrastImageTrader.contrastImages(differentialExperiment);
         for (Contrast contrast : contrasts) {
             JsonObject o = contrast.toJson();
             o.add("contrastSummary", new ContrastSummaryBuilder()
                     .forContrast(contrast)
-                    .withExperimentDesign(differentialExperiment.getExperimentDesign())
+                    .withExperimentDesign(experimentTrader.getExperimentDesign(differentialExperiment.getAccession()))
                     .withExperimentDescription(differentialExperiment.getDescription())
                     .build().toJson());
             o.add("resources", contrastImages.get(contrast.getId()));

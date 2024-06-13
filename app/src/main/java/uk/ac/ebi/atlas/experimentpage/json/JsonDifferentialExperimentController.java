@@ -65,12 +65,14 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
         differentialExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.RnaSeq(),
                         new DifferentialProfilesHeatMap<>(bulkDifferentialProfileStreamFactory, solrQueryService),
-                        atlasResourceHub);
+                        atlasResourceHub,
+                        experimentTrader);
 
         diffMicroarrayExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.Microarray(),
                         new DifferentialProfilesHeatMap<>(microarrayProfileStreamFactory, solrQueryService),
-                        atlasResourceHub);
+                        atlasResourceHub,
+                        experimentTrader);
     }
 
     private String differentialMicroarrayExperimentData(MicroarrayRequestPreferences preferences,
