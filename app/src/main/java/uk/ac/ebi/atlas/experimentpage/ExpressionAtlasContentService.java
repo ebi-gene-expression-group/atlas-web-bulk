@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.experimentpage;
 
 import com.google.common.collect.ImmutableList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.experimentpage.differential.download.DifferentialSecondaryDataFiles;
 import uk.ac.ebi.atlas.experimentpage.link.LinkToArrayExpress;
@@ -44,6 +45,7 @@ public class ExpressionAtlasContentService {
 
     private final ExperimentTrader experimentTrader;
 
+    @Autowired
     public ExpressionAtlasContentService(
             ExperimentDownloadSupplier.Proteomics proteomicsExperimentDownloadSupplier,
             ExperimentDownloadSupplier.RnaSeqBaseline rnaSeqBaselineExperimentDownloadSupplier,
