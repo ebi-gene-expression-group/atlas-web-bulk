@@ -10,7 +10,6 @@ import uk.ac.ebi.atlas.model.experiment.sdrf.FactorSet;
 import uk.ac.ebi.atlas.model.experiment.sdrf.SampleCharacteristic;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 import uk.ac.ebi.atlas.model.experiment.sdrf.Factor;
-import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -22,11 +21,11 @@ import static java.util.stream.Collectors.joining;
 public class BaselineExperimentAssayGroupsLines implements Iterable<String[]> {
     private final LinkedHashSet<ImmutableList<String>> result = new LinkedHashSet<>();
     private final LinkedHashSet<ImmutableList<String>> assayGroupsDetails;
-    private final ExperimentTrader experimentTrader;
+    private final ExperimentDesign experimentDesign;
 
-    public BaselineExperimentAssayGroupsLines(ExperimentTrader experimentTrader,
-                                              BaselineExperiment experiment) {
-        this.experimentTrader = experimentTrader;
+    public BaselineExperimentAssayGroupsLines(BaselineExperiment experiment,
+                                              ExperimentDesign experimentDesign) {
+        this.experimentDesign = experimentDesign;
         this.assayGroupsDetails = buildAssayGroupsDetails(experiment);
     }
 
@@ -60,26 +59,22 @@ public class BaselineExperimentAssayGroupsLines implements Iterable<String[]> {
     private void populateFactors(BaselineExperiment experiment, String assayAccession, AssayGroup assayGroup) {
         final String experimentAccession = experiment.getAccession();
 
-        FactorSet factorSet = getFactors(assayAccession, experimentAccession);
+        FactorSet factorSet = getFactors(assayAccession);
         if (factorSet != null) {
             for (Factor factor : factorSet) {
-                ImmutableList<String> line = ImmutableList.of(experiment.getAccession(), assayGroup.getId(), "factor",
+                ImmutableList<String> line = ImmutableList.of(experimentAccession, assayGroup.getId(), "factor",
                         factor.getHeader(), factor.getValue(), joinURIs(factor.getValueOntologyTerms()));
                 result.add(line);
             }
         }
     }
 
-    private ExperimentDesign getExperimentDesign(String experimentAccession) {
-        return experimentTrader.getExperimentDesign(experimentAccession);
-    }
-
     private Collection<SampleCharacteristic> getSampleCharacteristics(String assayAccession, String experimentAccession) {
-        return getExperimentDesign(experimentAccession).getSampleCharacteristics(assayAccession);
+        return experimentDesign.getSampleCharacteristics(assayAccession);
     }
 
-    private @Nullable FactorSet getFactors(String assayAccession, String experimentAccession) {
-        return getExperimentDesign(experimentAccession).getFactors(assayAccession);
+    private @Nullable FactorSet getFactors(String assayAccession) {
+        return experimentDesign.getFactors(assayAccession);
     }
 
     private static String joinURIs(Set<OntologyTerm> ontologyTerms) {

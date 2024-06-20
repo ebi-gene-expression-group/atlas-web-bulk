@@ -85,7 +85,7 @@ class ExperimentGroupingsForHeatmapIT {
 
         JsonArray result =
                 GSON.toJsonTree(HeatmapGroupingsService.getExperimentVariablesAsHeatmapFilterGroups(
-                                experimentTrader, experiment))
+                                experiment, experimentTrader.getExperimentDesign(accession)))
                         .getAsJsonArray();
 
         assertThat(result.size(), greaterThan(0));

@@ -71,7 +71,8 @@ public class ExperimentPageContentService {
         // everything wants to have a heatmap
         availableTabs.add(
                 heatmapTab(
-                        GSON.toJsonTree(getExperimentVariablesAsHeatmapFilterGroups(experimentTrader, experiment)).getAsJsonArray(),
+                        GSON.toJsonTree(getExperimentVariablesAsHeatmapFilterGroups(experiment,
+                                experimentTrader.getExperimentDesign(experiment.getAccession()))).getAsJsonArray(),
                         JsonBaselineExperimentController.geneDistributionUrl(
                                 experiment.getAccession(),
                                 accessKey,

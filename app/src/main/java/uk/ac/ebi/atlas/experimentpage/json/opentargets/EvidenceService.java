@@ -26,7 +26,6 @@ import uk.ac.ebi.atlas.profiles.MinMaxProfileRanking;
 import uk.ac.ebi.atlas.profiles.differential.DifferentialProfileStreamOptions;
 import uk.ac.ebi.atlas.profiles.stream.ProfileStreamFactory;
 import uk.ac.ebi.atlas.resource.DataFileHub;
-import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -51,26 +50,24 @@ public class EvidenceService<X extends DifferentialExpression,
     private final ProfileStreamFactory<Contrast, X, E, O, P> differentialProfileStreamFactory;
     private final DataFileHub dataFileHub;
     private final String expressionAtlasVersion;
-    private final ExperimentTrader experimentTrader;
 
     public EvidenceService(ProfileStreamFactory<Contrast, X, E, O, P> differentialProfileStreamFactory,
                            DataFileHub dataFileHub,
-                           ExperimentTrader experimentTrader,
                            String expressionAtlasVersion) {
         this.differentialProfileStreamFactory = differentialProfileStreamFactory;
         this.dataFileHub = dataFileHub;
-        this.experimentTrader = experimentTrader;
         this.expressionAtlasVersion = expressionAtlasVersion;
     }
 
     public void evidenceForExperiment(E experiment,
+                                      ExperimentDesign experimentDesign,
                                       Function<Contrast, O> queryForOneContrast,
                                       Consumer<JsonObject> yield) {
-        if (shouldSkip(experiment)) {
+        if (shouldSkip(experiment, experimentDesign)) {
             return;
         }
 
-        var diseaseAssociations = getDiseaseAssociations(experiment);
+        var diseaseAssociations = getDiseaseAssociations(experiment, experimentDesign);
         if (diseaseAssociations.isEmpty()) {
             return;
         }
@@ -109,11 +106,10 @@ public class EvidenceService<X extends DifferentialExpression,
         }
     }
 
-    private boolean shouldSkip(E experiment) {
+    private boolean shouldSkip(E experiment, ExperimentDesign experimentDesign) {
         return !experiment.getSpecies().isUs() ||
                 experiment.getType().isMicroRna() ||
-                cellLineAsSampleCharacteristicButNoDiseaseAsFactor(
-                        getExperimentDesign(experiment.getAccession()));
+                cellLineAsSampleCharacteristicButNoDiseaseAsFactor(experimentDesign);
     }
 
     private void piecesOfEvidence(E experiment,
@@ -405,20 +401,15 @@ public class EvidenceService<X extends DifferentialExpression,
         return associationRecord;
     }
 
-    private ImmutableMap<Contrast, DiseaseAssociation> getDiseaseAssociations(DifferentialExperiment experiment) {
+    private ImmutableMap<Contrast, DiseaseAssociation> getDiseaseAssociations(DifferentialExperiment experiment,
+                                                                              ExperimentDesign experimentDesign) {
         var contrastToDiseaseBuilder = ImmutableMap.<Contrast, DiseaseAssociation>builder();
         for (var contrast: experiment.getDataColumnDescriptors()) {
-            DiseaseAssociation.tryCreate(getExperimentDesign(experiment.getAccession()), experiment, contrast)
+            DiseaseAssociation.tryCreate(experimentDesign, experiment, contrast)
                     .ifPresent(diseaseAssociation -> contrastToDiseaseBuilder.put(contrast, diseaseAssociation));
         }
         return contrastToDiseaseBuilder.build();
     }
-
-    private ExperimentDesign getExperimentDesign(String experimentAccession) {
-        return experimentTrader.getExperimentDesign(experimentAccession);
-    }
-
-
 
     @AutoValue
     abstract static class DiseaseAssociation {

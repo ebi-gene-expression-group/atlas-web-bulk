@@ -65,14 +65,12 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
         differentialExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.RnaSeq(),
                         new DifferentialProfilesHeatMap<>(bulkDifferentialProfileStreamFactory, solrQueryService),
-                        atlasResourceHub,
-                        experimentTrader);
+                        atlasResourceHub);
 
         diffMicroarrayExperimentPageService =
                 new DifferentialExperimentPageService<>(new DifferentialRequestContextFactory.Microarray(),
                         new DifferentialProfilesHeatMap<>(microarrayProfileStreamFactory, solrQueryService),
-                        atlasResourceHub,
-                        experimentTrader);
+                        atlasResourceHub);
     }
 
     private String differentialMicroarrayExperimentData(MicroarrayRequestPreferences preferences,
@@ -80,6 +78,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
                                                         String accessKey) {
         return GSON.toJson(diffMicroarrayExperimentPageService.getResultsForExperiment(
                 (MicroarrayExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
+                experimentTrader.getExperimentDesign(experimentAccession),
                 accessKey,
                 preferences));
     }
@@ -127,6 +126,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
             @RequestParam(defaultValue = "") String accessKey) {
         return GSON.toJson(differentialExperimentPageService.getResultsForExperiment(
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
+                experimentTrader.getExperimentDesign(experimentAccession),
                 accessKey, preferences));
     }
 
@@ -140,6 +140,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
             @RequestParam(defaultValue = "") String accessKey) {
         return GSON.toJson(differentialExperimentPageService.getResultsForExperiment(
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
+                experimentTrader.getExperimentDesign(experimentAccession),
                 accessKey, preferences));
     }
 }

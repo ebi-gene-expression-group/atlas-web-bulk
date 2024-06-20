@@ -67,7 +67,7 @@ class EvidenceServiceIT {
     @BeforeEach
     void setUp() {
         subject = new EvidenceService<>(
-                microarrayProfileStreamFactory, dataFileHub, experimentTrader, "test");
+                microarrayProfileStreamFactory, dataFileHub, "test");
     }
 
     @Test
@@ -75,7 +75,9 @@ class EvidenceServiceIT {
         var listBuilder = ImmutableList.<JsonObject>builder();
         var experiment = (MicroarrayExperiment) experimentTrader.getPublicExperiment("E-GEOD-40611");
         subject.evidenceForExperiment(
-                experiment, contrast -> {
+                experiment,
+                experimentTrader.getExperimentDesign(experiment.getAccession()),
+                contrast -> {
                     var requestPreferences = new MicroarrayRequestPreferences();
                     requestPreferences.setHeatmapMatrixSize(1000);
                     requestPreferences.setSelectedColumnIds(ImmutableSet.of(contrast.getId()));
@@ -95,7 +97,9 @@ class EvidenceServiceIT {
         var listBuilder = ImmutableList.<JsonObject>builder();
         var experiment = (MicroarrayExperiment) experimentTrader.getPublicExperiment("E-GEOD-40611");
         subject.evidenceForExperiment(
-                experiment, contrast -> {
+                experiment,
+                experimentTrader.getExperimentDesign(experiment.getAccession()),
+                contrast -> {
                     var requestPreferences = new MicroarrayRequestPreferences();
                     requestPreferences.setHeatmapMatrixSize(1000);
                     requestPreferences.setSelectedColumnIds(ImmutableSet.of(contrast.getId()));

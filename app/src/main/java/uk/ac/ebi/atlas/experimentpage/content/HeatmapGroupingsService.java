@@ -14,7 +14,6 @@ import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.sample.Contrast;
 import uk.ac.ebi.atlas.model.experiment.sample.ReportsGeneExpression;
 import uk.ac.ebi.atlas.model.experiment.sdrf.Factor;
-import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -50,8 +49,8 @@ public class HeatmapGroupingsService {
 
     // TODO Cache results of serialized JSON
     public static ImmutableList<HeatmapFilterGroup> getExperimentVariablesAsHeatmapFilterGroups(
-            ExperimentTrader experimentTrader,
-            Experiment<?> experiment) {
+            Experiment<?> experiment,
+            ExperimentDesign experimentDesign) {
         final String experimentAccession = experiment.getAccession();
         if (!(experiment instanceof BaselineExperiment) && !(experiment instanceof DifferentialExperiment)) {
             throw new IllegalArgumentException(
@@ -89,7 +88,7 @@ public class HeatmapGroupingsService {
                 Streams.concat(
                             Stream.of(experiment.getDisplayDefaults().getDefaultQueryFactorType()),
                             experiment.getDisplayDefaults().getFactorTypes().stream(),
-                            getExperimentDesign(experimentTrader, experimentAccession).getFactorHeaders().stream())
+                            experimentDesign.getFactorHeaders().stream())
                         .filter(StringUtils::isNotBlank)    // defaultQueryFactorType in diff experiments is ""
                         .map(Factor::normalize)
                         .collect(toImmutableSet());
@@ -106,18 +105,18 @@ public class HeatmapGroupingsService {
                                         experiment.getDisplayDefaults()
                                                 .defaultFilterValuesForFactor(factorHeader)
                                                 .orElse(ALL_VALUES_KEYWORD),
-                                        mapAssayGroupsToFactors(experimentTrader, assayId2AssayGroup, factorHeader,
+                                        mapAssayGroupsToFactors(experimentDesign, assayId2AssayGroup, factorHeader,
                                                 experiment)));
 
         Stream<HeatmapFilterGroup> sampleCharacteristicGroups =
-                getExperimentDesign(experimentTrader, experimentAccession).getSampleCharacteristicHeaders().stream()
+                experimentDesign.getSampleCharacteristicHeaders().stream()
                         .filter(sampleCharacteristicHeader -> !orderedFactors.contains(Factor.normalize(sampleCharacteristicHeader)))
                         .map(sampleCharacteristicHeader ->
                                 HeatmapFilterGroup.create(
                                         sampleCharacteristicHeader,
                                         primaryVariables.contains(sampleCharacteristicHeader),
                                         ALL_VALUES_KEYWORD,
-                                        mapAssayGroupsToSampleCharacteristics(experimentTrader, assayId2AssayGroup,
+                                        mapAssayGroupsToSampleCharacteristics(experimentDesign, assayId2AssayGroup,
                                                 sampleCharacteristicHeader, experiment)));
 
         return Streams.concat(
@@ -127,40 +126,31 @@ public class HeatmapGroupingsService {
                 .collect(toImmutableList());
     }
 
-    private static ExperimentDesign getExperimentDesign(ExperimentTrader experimentTrader,
-                                                        String experimentAccession) {
-        return experimentTrader.getExperimentDesign(experimentAccession);
-    }
-
     @NotNull
     private static ImmutableSetMultimap<String, String> mapAssayGroupsToFactors(
-            ExperimentTrader experimentTrader,
+            ExperimentDesign experimentDesign,
             @NotNull ImmutableMultimap<String, String> assayId2AssayGroup,
             @NotNull String factorHeader,
             @NotNull Experiment<@NotNull ?> experiment) {
         return assayId2AssayGroup.keySet().stream()
-                .filter(assayId -> getExperimentDesign(experimentTrader, experiment.getAccession())
-                        .getFactor(assayId, factorHeader) != null)
+                .filter(assayId -> experimentDesign.getFactor(assayId, factorHeader) != null)
                 .collect(flatteningToImmutableSetMultimap(
-                        assayId -> getExperimentDesign(experimentTrader, experiment.getAccession())
-                                .getFactor(assayId, factorHeader).getValue(),
+                        assayId -> experimentDesign.getFactor(assayId, factorHeader).getValue(),
                         assayId -> assayId2AssayGroup.get(assayId).stream()));
     }
 
     @NotNull
     private static ImmutableSetMultimap<String, String> mapAssayGroupsToSampleCharacteristics(
-            ExperimentTrader experimentTrader,
+            ExperimentDesign experimentDesign,
             @NotNull ImmutableMultimap<String, String> assayId2AssayGroup,
             @NotNull String sampleCharacteristicHeader,
             @NotNull Experiment<@NotNull?> experiment) {
         return assayId2AssayGroup.keySet().stream()
                 .filter(assayId ->
-                        getExperimentDesign(experimentTrader, experiment.getAccession())
-                                .getSampleCharacteristic(assayId, sampleCharacteristicHeader) != null)
+                        experimentDesign.getSampleCharacteristic(assayId, sampleCharacteristicHeader) != null)
                 .collect(flatteningToImmutableSetMultimap(
                         assayId ->
-                                getExperimentDesign(experimentTrader, experiment.getAccession())
-                                        .getSampleCharacteristic(assayId, sampleCharacteristicHeader).getValue(),
+                                experimentDesign.getSampleCharacteristic(assayId, sampleCharacteristicHeader).getValue(),
                         assayId -> assayId2AssayGroup.get(assayId).stream()));
     }
 }

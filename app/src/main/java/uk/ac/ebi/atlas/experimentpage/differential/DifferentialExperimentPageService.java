@@ -9,6 +9,7 @@ import uk.ac.ebi.atlas.experimentpage.link.LinkToGene;
 import uk.ac.ebi.atlas.experimentpage.context.DifferentialRequestContext;
 import uk.ac.ebi.atlas.experimentpage.context.DifferentialRequestContextFactory;
 import uk.ac.ebi.atlas.model.ExpressionUnit;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.sample.Contrast;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExpression;
@@ -17,7 +18,6 @@ import uk.ac.ebi.atlas.model.experiment.differential.DifferentialProfilesList;
 import uk.ac.ebi.atlas.model.experiment.summary.ContrastSummaryBuilder;
 import uk.ac.ebi.atlas.profiles.json.ExternallyViewableProfilesList;
 import uk.ac.ebi.atlas.resource.ContrastImageTrader;
-import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.DifferentialRequestPreferences;
 
 import java.util.List;
@@ -36,20 +36,18 @@ DifferentialExperimentPageService<
     private final ContrastImageTrader contrastImageTrader;
     private final DifferentialRequestContextFactory<E, K, R> differentialRequestContextFactory;
     private final DifferentialProfilesHeatMap<X, E, P, R> profilesHeatMap;
-    private final ExperimentTrader experimentTrader;
 
     public DifferentialExperimentPageService(
             DifferentialRequestContextFactory<E, K, R> differentialRequestContextFactory,
             DifferentialProfilesHeatMap<X, E, P, R> profilesHeatMap,
-            ContrastImageTrader contrastImageTrader,
-            ExperimentTrader experimentTrader) {
+            ContrastImageTrader contrastImageTrader) {
         this.differentialRequestContextFactory = differentialRequestContextFactory;
         this.profilesHeatMap = profilesHeatMap;
         this.contrastImageTrader = contrastImageTrader;
-        this.experimentTrader = experimentTrader;
     }
 
-    public JsonObject getResultsForExperiment(E experiment, String accessKey, K preferences) {
+    public JsonObject getResultsForExperiment(E experiment, ExperimentDesign experimentDesign,
+                                              String accessKey, K preferences) {
 
         JsonObject result = new JsonObject();
         R requestContext = differentialRequestContextFactory.create(experiment, preferences);
@@ -63,7 +61,7 @@ DifferentialExperimentPageService<
         }
 
         result.add("columnGroupings", new JsonArray());
-        result.add("columnHeaders", constructColumnHeaders(contrasts, experiment));
+        result.add("columnHeaders", constructColumnHeaders(contrasts, experiment, experimentDesign));
         result.add("profiles", new ExternallyViewableProfilesList<>(
                 profiles, new LinkToGene<>(), requestContext.getDataColumnsToReturn(),
                 p -> ExpressionUnit.Relative.FOLD_CHANGE).asJson());
@@ -72,14 +70,15 @@ DifferentialExperimentPageService<
     }
 
     private JsonArray constructColumnHeaders(Iterable<Contrast> contrasts,
-                                             DifferentialExperiment differentialExperiment) {
+                                             DifferentialExperiment differentialExperiment,
+                                             ExperimentDesign experimentDesign) {
         JsonArray result = new JsonArray();
         Map<String, JsonArray> contrastImages = contrastImageTrader.contrastImages(differentialExperiment);
         for (Contrast contrast : contrasts) {
             JsonObject o = contrast.toJson();
             o.add("contrastSummary", new ContrastSummaryBuilder()
                     .forContrast(contrast)
-                    .withExperimentDesign(experimentTrader.getExperimentDesign(differentialExperiment.getAccession()))
+                    .withExperimentDesign(experimentDesign)
                     .withExperimentDescription(differentialExperiment.getDescription())
                     .build().toJson());
             o.add("resources", contrastImages.get(contrast.getId()));

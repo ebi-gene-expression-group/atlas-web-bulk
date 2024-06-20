@@ -9,6 +9,7 @@ import uk.ac.ebi.atlas.experimentpage.baseline.coexpression.CoexpressedGenesServ
 import uk.ac.ebi.atlas.experimentpage.baseline.profiles.BaselineExperimentProfilesListSerializer;
 import uk.ac.ebi.atlas.experimentpage.baseline.profiles.BaselineExperimentProfilesService;
 import uk.ac.ebi.atlas.experimentpage.context.BaselineRequestContext;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.model.ExpressionUnit;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
@@ -17,7 +18,6 @@ import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.model.experiment.sdrf.RichFactorGroup;
 import uk.ac.ebi.atlas.model.experiment.summary.AssayGroupSummaryBuilder;
-import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
 import java.util.List;
@@ -29,25 +29,23 @@ public class BaselineExperimentPageService extends ExperimentPageService {
     private final BaselineExperimentProfilesService baselineExperimentProfilesService;
     private final CoexpressedGenesService coexpressedGenesService;
     private final AnatomogramFactory anatomogramFactory;
-    private final ExperimentTrader experimentTrader;
 
     public BaselineExperimentPageService(BaselineExperimentProfilesService baselineExperimentProfilesService,
-                                         CoexpressedGenesService coexpressedGenesService,
-                                         ExperimentTrader experimentTrader) {
+                                         CoexpressedGenesService coexpressedGenesService) {
         super();
         this.anatomogramFactory = new AnatomogramFactory();
         this.baselineExperimentProfilesService = baselineExperimentProfilesService;
         this.coexpressedGenesService = coexpressedGenesService;
-        this.experimentTrader = experimentTrader;
     }
 
     public <U extends ExpressionUnit.Absolute> JsonObject getResultsForExperiment(
-            BaselineExperiment experiment, String accessKey, BaselineRequestPreferences<U> preferences) {
+            BaselineExperiment experiment, ExperimentDesign experimentDesign, String accessKey,
+            BaselineRequestPreferences<U> preferences) {
 
         BaselineRequestContext<U> requestContext = new BaselineRequestContext<>(preferences, experiment);
 
         JsonObject result = new JsonObject();
-        result.add("columnHeaders", constructColumnHeaders(requestContext, experiment));
+        result.add("columnHeaders", constructColumnHeaders(requestContext, experiment, experimentDesign));
         result.add("columnGroupings", new JsonArray());
 
         GeneProfilesList<BaselineProfile> baselineProfilesList = fetchProfiles(experiment, preferences);
@@ -92,7 +90,8 @@ public class BaselineExperimentPageService extends ExperimentPageService {
         return baselineProfilesList;
     }
 
-    private JsonArray constructColumnHeaders(BaselineRequestContext<?> requestContext, BaselineExperiment experiment) {
+    private JsonArray constructColumnHeaders(BaselineRequestContext<?> requestContext, BaselineExperiment experiment,
+                                             ExperimentDesign experimentDesign) {
         JsonArray result = new JsonArray();
 
         for (AssayGroup dataColumnDescriptor : requestContext.getDataColumnsToReturn()) {
@@ -105,7 +104,7 @@ public class BaselineExperimentPageService extends ExperimentPageService {
             o.add("assayGroupSummary",
                     new AssayGroupSummaryBuilder()
                     .forAssayGroup(experiment.getDataColumnDescriptor(dataColumnDescriptor.getId()))
-                    .withExperimentDesign(experimentTrader.getExperimentDesign(experiment.getAccession()))
+                    .withExperimentDesign(experimentDesign)
                     .build().toJson());
             result.add(o);
         }

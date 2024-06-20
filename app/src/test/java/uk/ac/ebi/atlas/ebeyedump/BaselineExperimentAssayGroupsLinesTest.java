@@ -24,7 +24,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,9 +71,6 @@ public class BaselineExperimentAssayGroupsLinesTest {
     @Mock
     private BaselineExperiment baselineExperiment;
 
-    @Mock
-    private ExperimentTrader experimentTraderMock;
-
     @Test
     public void lines() {
         ExperimentDesign experimentDesign = new ExperimentDesign();
@@ -94,10 +90,9 @@ public class BaselineExperimentAssayGroupsLinesTest {
         when(baselineExperiment.getAccession()).thenReturn(EXPERIMENT_ACCESSION);
         when(baselineExperiment.getDataColumnDescriptors()).thenReturn(ImmutableList.of(ASSAY_GROUP1, ASSAY_GROUP2,
                 ASSAY_GROUP3));
-        when(experimentTraderMock.getExperimentDesign(any())).thenReturn(experimentDesign);
 
         BaselineExperimentAssayGroupsLines subject =
-                new BaselineExperimentAssayGroupsLines(experimentTraderMock, baselineExperiment);
+                new BaselineExperimentAssayGroupsLines(baselineExperiment, experimentDesign);
 
         Iterator<String[]> lines = subject.iterator();
 
