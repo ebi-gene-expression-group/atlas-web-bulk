@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
@@ -26,7 +27,7 @@ import static uk.ac.ebi.atlas.model.experiment.ExperimentType.RNASEQ_MRNA_DIFFER
 @Controller
 @Scope("request")
 public class ExperimentsConditionsDetailsController {
-    private ExperimentTrader experimentTrader;
+    private final ExperimentTrader experimentTrader;
 
     public ExperimentsConditionsDetailsController(ExperimentTrader experimentTrader) {
         this.experimentTrader = experimentTrader;
@@ -36,7 +37,8 @@ public class ExperimentsConditionsDetailsController {
     public void generateTsvFormatBaseline(HttpServletResponse response) {
         writeTsvLinesToResponse(
                 response,
-                experiment -> new BaselineExperimentAssayGroupsLines((BaselineExperiment) experiment),
+                experiment -> new BaselineExperimentAssayGroupsLines(
+                        (BaselineExperiment) experiment, getExperimentDesign(experiment.getAccession())),
                 RNASEQ_MRNA_BASELINE,
                 PROTEOMICS_BASELINE,
                 PROTEOMICS_BASELINE_DIA);
@@ -46,11 +48,16 @@ public class ExperimentsConditionsDetailsController {
     public void generateTsvFormatDifferential(HttpServletResponse response) {
         writeTsvLinesToResponse(
                 response,
-                experiment -> new DifferentialExperimentContrastLines((DifferentialExperiment) experiment),
+                experiment -> new DifferentialExperimentContrastLines(
+                        (DifferentialExperiment) experiment, getExperimentDesign(experiment.getAccession())),
                 MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL,
                 MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
                 MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
                 RNASEQ_MRNA_DIFFERENTIAL);
+    }
+
+    private ExperimentDesign getExperimentDesign(String experimentAccession) {
+        return experimentTrader.getExperimentDesign(experimentAccession);
     }
 
     private void writeTsvLinesToResponse(HttpServletResponse response,

@@ -78,6 +78,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
                                                         String accessKey) {
         return GSON.toJson(diffMicroarrayExperimentPageService.getResultsForExperiment(
                 (MicroarrayExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
+                experimentTrader.getExperimentDesign(experimentAccession),
                 accessKey,
                 preferences));
     }
@@ -125,6 +126,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
             @RequestParam(defaultValue = "") String accessKey) {
         return GSON.toJson(differentialExperimentPageService.getResultsForExperiment(
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
+                experimentTrader.getExperimentDesign(experimentAccession),
                 accessKey, preferences));
     }
 
@@ -138,6 +140,7 @@ public class JsonDifferentialExperimentController extends JsonExperimentControll
             @RequestParam(defaultValue = "") String accessKey) {
         return GSON.toJson(differentialExperimentPageService.getResultsForExperiment(
                 (DifferentialExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
+                experimentTrader.getExperimentDesign(experimentAccession),
                 accessKey, preferences));
     }
 }

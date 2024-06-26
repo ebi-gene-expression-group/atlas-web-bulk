@@ -60,14 +60,15 @@ public class EvidenceService<X extends DifferentialExpression,
     }
 
     public void evidenceForExperiment(E experiment,
+                                      ExperimentDesign experimentDesign,
                                       Function<Contrast, O> queryForOneContrast,
                                       Consumer<JsonObject> yield) {
-        if (shouldSkip(experiment)) {
+        if (shouldSkip(experiment, experimentDesign)) {
             return;
         }
 
-        var diseaseAssociations = getDiseaseAssociations(experiment);
-        if (diseaseAssociations.size() == 0) {
+        var diseaseAssociations = getDiseaseAssociations(experiment, experimentDesign);
+        if (diseaseAssociations.isEmpty()) {
             return;
         }
 
@@ -105,10 +106,10 @@ public class EvidenceService<X extends DifferentialExpression,
         }
     }
 
-    private boolean shouldSkip(E experiment) {
+    private boolean shouldSkip(E experiment, ExperimentDesign experimentDesign) {
         return !experiment.getSpecies().isUs() ||
                 experiment.getType().isMicroRna() ||
-                cellLineAsSampleCharacteristicButNoDiseaseAsFactor(experiment.getExperimentDesign());
+                cellLineAsSampleCharacteristicButNoDiseaseAsFactor(experimentDesign);
     }
 
     private void piecesOfEvidence(E experiment,
@@ -400,10 +401,11 @@ public class EvidenceService<X extends DifferentialExpression,
         return associationRecord;
     }
 
-    private ImmutableMap<Contrast, DiseaseAssociation> getDiseaseAssociations(DifferentialExperiment experiment) {
+    private ImmutableMap<Contrast, DiseaseAssociation> getDiseaseAssociations(DifferentialExperiment experiment,
+                                                                              ExperimentDesign experimentDesign) {
         var contrastToDiseaseBuilder = ImmutableMap.<Contrast, DiseaseAssociation>builder();
         for (var contrast: experiment.getDataColumnDescriptors()) {
-            DiseaseAssociation.tryCreate(experiment, contrast)
+            DiseaseAssociation.tryCreate(experimentDesign, experiment, contrast)
                     .ifPresent(diseaseAssociation -> contrastToDiseaseBuilder.put(contrast, diseaseAssociation));
         }
         return contrastToDiseaseBuilder.build();
@@ -423,15 +425,17 @@ public class EvidenceService<X extends DifferentialExpression,
         public abstract boolean isCttvPrimary();
         public abstract SampleCharacteristic organismPart();
 
-        public static Optional<DiseaseAssociation> tryCreate(DifferentialExperiment experiment, Contrast contrast) {
-            var biosampleInfo = getBiosampleInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
-            var diseaseInfo = getDiseaseInfo(experiment.getExperimentDesign(), contrast.getTestAssayGroup());
+        public static Optional<DiseaseAssociation> tryCreate(ExperimentDesign experimentDesign,
+                                                             DifferentialExperiment experiment, Contrast contrast) {
+
+            var biosampleInfo = getBiosampleInfo(experimentDesign, contrast.getTestAssayGroup());
+            var diseaseInfo = getDiseaseInfo(experimentDesign, contrast.getTestAssayGroup());
 
             if (biosampleInfo.isPresent() && diseaseInfo.isPresent()) {
                 return Optional.of(
                         DiseaseAssociation.create(
                                 biosampleInfo.get(),
-                                experiment.getExperimentDesign(),
+                                experimentDesign,
                                 contrast,
                                 experiment.doesContrastHaveCttvPrimaryAnnotation(contrast),
                                 diseaseInfo.get()));

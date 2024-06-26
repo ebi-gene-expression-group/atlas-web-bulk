@@ -60,10 +60,9 @@ public class DASFeaturesController extends HtmlExceptionHandlingController {
         SetMultimap<String, String> factorValuesByType = HashMultimap.create();
         for (DiffAnalytics dbe : diffAnalyticsList) {
             AssayGroup testAssayGroup = dbe.getContrastTestAssayGroup();
-            Experiment experiment = experimentTrader.getPublicExperiment(dbe.getExperimentAccession());
 
             FactorSet factorsForAssayGroup =
-                    FactorSet.create(experiment.getExperimentDesign()
+                    FactorSet.create(experimentTrader.getExperimentDesign(dbe.getExperimentAccession())
                              .getFactorValues(testAssayGroup.getFirstAssayId()));
             for (Factor factor : factorsForAssayGroup) {
                 factorValuesByType.put(factor.getType(), factor.getValue());

@@ -8,6 +8,7 @@ import com.google.common.collect.Streams;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.sample.Contrast;
@@ -47,10 +48,13 @@ public class HeatmapGroupingsService {
     }
 
     // TODO Cache results of serialized JSON
-    public static ImmutableList<HeatmapFilterGroup> getExperimentVariablesAsHeatmapFilterGroups(Experiment<?> experiment) {
+    public static ImmutableList<HeatmapFilterGroup> getExperimentVariablesAsHeatmapFilterGroups(
+            Experiment<?> experiment,
+            ExperimentDesign experimentDesign) {
+        final String experimentAccession = experiment.getAccession();
         if (!(experiment instanceof BaselineExperiment) && !(experiment instanceof DifferentialExperiment)) {
             throw new IllegalArgumentException(
-                    "Experiment " + experiment.getAccession() + " of type " + experiment.getType() + " is not " +
+                    "Experiment " + experimentAccession + " of type " + experiment.getType() + " is not " +
                     "supported for heatmap display");
         }
 
@@ -84,7 +88,7 @@ public class HeatmapGroupingsService {
                 Streams.concat(
                             Stream.of(experiment.getDisplayDefaults().getDefaultQueryFactorType()),
                             experiment.getDisplayDefaults().getFactorTypes().stream(),
-                            experiment.getExperimentDesign().getFactorHeaders().stream())
+                            experimentDesign.getFactorHeaders().stream())
                         .filter(StringUtils::isNotBlank)    // defaultQueryFactorType in diff experiments is ""
                         .map(Factor::normalize)
                         .collect(toImmutableSet());
@@ -101,17 +105,19 @@ public class HeatmapGroupingsService {
                                         experiment.getDisplayDefaults()
                                                 .defaultFilterValuesForFactor(factorHeader)
                                                 .orElse(ALL_VALUES_KEYWORD),
-                                        mapAssayGroupsToFactors(assayId2AssayGroup, factorHeader, experiment)));
+                                        mapAssayGroupsToFactors(experimentDesign, assayId2AssayGroup, factorHeader,
+                                                experiment)));
 
         Stream<HeatmapFilterGroup> sampleCharacteristicGroups =
-                experiment.getExperimentDesign().getSampleCharacteristicHeaders().stream()
+                experimentDesign.getSampleCharacteristicHeaders().stream()
                         .filter(sampleCharacteristicHeader -> !orderedFactors.contains(Factor.normalize(sampleCharacteristicHeader)))
                         .map(sampleCharacteristicHeader ->
                                 HeatmapFilterGroup.create(
                                         sampleCharacteristicHeader,
                                         primaryVariables.contains(sampleCharacteristicHeader),
                                         ALL_VALUES_KEYWORD,
-                                        mapAssayGroupsToSampleCharacteristics(assayId2AssayGroup, sampleCharacteristicHeader, experiment)));
+                                        mapAssayGroupsToSampleCharacteristics(experimentDesign, assayId2AssayGroup,
+                                                sampleCharacteristicHeader, experiment)));
 
         return Streams.concat(
                     mainFilterGroup.map(Stream::of).orElseGet(Stream::empty),
@@ -122,31 +128,29 @@ public class HeatmapGroupingsService {
 
     @NotNull
     private static ImmutableSetMultimap<String, String> mapAssayGroupsToFactors(
+            ExperimentDesign experimentDesign,
             @NotNull ImmutableMultimap<String, String> assayId2AssayGroup,
             @NotNull String factorHeader,
             @NotNull Experiment<@NotNull ?> experiment) {
         return assayId2AssayGroup.keySet().stream()
-                .filter(assayId -> experiment.getExperimentDesign().getFactor(assayId, factorHeader) != null)
+                .filter(assayId -> experimentDesign.getFactor(assayId, factorHeader) != null)
                 .collect(flatteningToImmutableSetMultimap(
-                        assayId -> experiment.getExperimentDesign().getFactor(assayId, factorHeader).getValue(),
+                        assayId -> experimentDesign.getFactor(assayId, factorHeader).getValue(),
                         assayId -> assayId2AssayGroup.get(assayId).stream()));
     }
 
     @NotNull
     private static ImmutableSetMultimap<String, String> mapAssayGroupsToSampleCharacteristics(
+            ExperimentDesign experimentDesign,
             @NotNull ImmutableMultimap<String, String> assayId2AssayGroup,
             @NotNull String sampleCharacteristicHeader,
             @NotNull Experiment<@NotNull?> experiment) {
         return assayId2AssayGroup.keySet().stream()
                 .filter(assayId ->
-                        experiment
-                                .getExperimentDesign()
-                                .getSampleCharacteristic(assayId, sampleCharacteristicHeader) != null)
+                        experimentDesign.getSampleCharacteristic(assayId, sampleCharacteristicHeader) != null)
                 .collect(flatteningToImmutableSetMultimap(
                         assayId ->
-                                experiment
-                                        .getExperimentDesign()
-                                        .getSampleCharacteristic(assayId, sampleCharacteristicHeader).getValue(),
+                                experimentDesign.getSampleCharacteristic(assayId, sampleCharacteristicHeader).getValue(),
                         assayId -> assayId2AssayGroup.get(assayId).stream()));
     }
 }
