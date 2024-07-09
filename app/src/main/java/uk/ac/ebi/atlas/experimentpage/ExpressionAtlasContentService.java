@@ -131,7 +131,7 @@ public class ExpressionAtlasContentService {
                                                  String accessKey,
                                                  ExternallyAvailableContent.ContentType contentType) {
         Experiment<?> experiment = experimentTrader.getExperiment(experimentAccession, accessKey);
-        ImmutableList.Builder<ExternallyAvailableContent> arrayExpressAndOtherExternalResourcesLinks = ImmutableList.builder();
+        var externalResourcesLinks = ImmutableList.builder();
         ImmutableList.Builder<ExternallyAvailableContent> otherExternalResourceLinks;
 
         switch (experiment.getType()) {
