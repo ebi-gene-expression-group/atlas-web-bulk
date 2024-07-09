@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
 @Component
 public class ExpressionAtlasContentService {
     private final ExternallyAvailableContentService<BaselineExperiment>
@@ -128,48 +126,48 @@ public class ExpressionAtlasContentService {
     }
 
     public ImmutableList<ExternallyAvailableContent> list(String experimentAccession,
-                                                 String accessKey,
-                                                 ExternallyAvailableContent.ContentType contentType) {
+                                      String accessKey,
+                                      ExternallyAvailableContent.ContentType contentType) {
         Experiment<?> experiment = experimentTrader.getExperiment(experimentAccession, accessKey);
-        var externalResourcesLinks = ImmutableList.builder();
+        ImmutableList.Builder<ExternallyAvailableContent> externalResourcesLinks = ImmutableList.builder();
         ImmutableList.Builder<ExternallyAvailableContent> otherExternalResourceLinks;
 
         switch (experiment.getType()) {
             case PROTEOMICS_BASELINE:
             case PROTEOMICS_BASELINE_DIA:
-                arrayExpressAndOtherExternalResourcesLinks.addAll(proteomicsBaselineExperimentExternallyAvailableContentService.list((BaselineExperiment) experiment, contentType));
+                externalResourcesLinks.addAll(proteomicsBaselineExperimentExternallyAvailableContentService.list((BaselineExperiment) experiment, contentType));
                 otherExternalResourceLinks = externalResourceLinks(experiment);
-                arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
+                externalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case RNASEQ_MRNA_BASELINE:
-                arrayExpressAndOtherExternalResourcesLinks.addAll(rnaSeqBaselineExperimentExternallyAvailableContentService.list(
+                externalResourcesLinks.addAll(rnaSeqBaselineExperimentExternallyAvailableContentService.list(
                         (BaselineExperiment) experiment, contentType));
                 otherExternalResourceLinks = externalResourceLinks(experiment);
-                arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
+                externalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case RNASEQ_MRNA_DIFFERENTIAL:
             case PROTEOMICS_DIFFERENTIAL:
-                arrayExpressAndOtherExternalResourcesLinks.addAll(bulkDifferentialExperimentExternallyAvailableContentService.list(
+                externalResourcesLinks.addAll(bulkDifferentialExperimentExternallyAvailableContentService.list(
                         (DifferentialExperiment) experiment, contentType));
                 otherExternalResourceLinks = externalResourceLinks(experiment);
-                arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
+                externalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             case MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL:
             case MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL:
             case MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL:
-                arrayExpressAndOtherExternalResourcesLinks.addAll(microarrayExperimentExternallyAvailableContentService.list((MicroarrayExperiment) experiment, contentType));
+                externalResourcesLinks.addAll(microarrayExperimentExternallyAvailableContentService.list((MicroarrayExperiment) experiment, contentType));
                 otherExternalResourceLinks = externalResourceLinks(experiment);
-                arrayExpressAndOtherExternalResourcesLinks.addAll(otherExternalResourceLinks.build());
+                externalResourcesLinks.addAll(otherExternalResourceLinks.build());
                 break;
             default:
                 throw new IllegalArgumentException(experiment.getType() + ": experiment type not supported.");
         }
 
         if (experimentAccession.matches("E-MTAB.*|E-ERAD.*|E-GEUV.*")) {
-            arrayExpressAndOtherExternalResourcesLinks.addAll(linkToArrayExpress.get(experiment));
+            externalResourcesLinks.addAll(linkToArrayExpress.get(experiment));
         }
 
-        return arrayExpressAndOtherExternalResourcesLinks.build();
+        return externalResourcesLinks.build();
     }
 
     private ImmutableList.Builder<ExternallyAvailableContent> externalResourceLinks(Experiment<?> experiment) {
@@ -184,13 +182,11 @@ public class ExpressionAtlasContentService {
                     return "OTHER";
                 }));
 
-        resourceList.replaceAll((k, v) -> v.stream().collect(toImmutableList()));
+        resourceList.entrySet().removeIf(entry -> {
+            String resource = entry.getKey();
+            var accessions = entry.getValue().stream()
+                    .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
 
-        // Remove "OTHER" key if it exists
-        resourceList.remove("OTHER");
-
-        // Add to the builder based on the resource type
-        resourceList.forEach((resource, accessions) -> {
             switch (resource) {
                 case "GEO":
                     otherExternalResourceLinks.addAll(linkToGeo.get(experiment));
@@ -198,13 +194,20 @@ public class ExpressionAtlasContentService {
                 case "EGA":
                     otherExternalResourceLinks.addAll(linkToEga.get(experiment));
                     break;
-                case "PRIDE":
-                    otherExternalResourceLinks.addAll(linkToPride.get(experiment));
-                    break;
                 case "ENA":
                     otherExternalResourceLinks.addAll(linkToEna.get(experiment));
                     break;
+                case "PRIDE":
+                    otherExternalResourceLinks.addAll(linkToPride.get(experiment));
+                    break;
+                case "OTHER":
+                    // Remove this entry by returning true
+                    return true;
             }
+
+            // Update the entry's value
+            entry.setValue(accessions);
+            return false;
         });
 
         return otherExternalResourceLinks;
