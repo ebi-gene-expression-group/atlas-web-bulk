@@ -51,7 +51,7 @@ class SitemapWriterIT {
         var baos = new ByteArrayOutputStream();
         SitemapWriter.writeSitemapIndex(baos, randomSubsetOfSpecies);
 
-        assertThat(parseXml(baos).getDocumentElement()).hasFieldOrPropertyWithValue("tagName", "sitemapindex");
+        assertThat(parseXml(baos).getDocumentElement().getTagName()).isEqualTo("sitemapindex");
     }
 
     @Test
@@ -59,7 +59,7 @@ class SitemapWriterIT {
         var baos = new ByteArrayOutputStream();
         SitemapWriter.writeExperimentsSitemap(baos);
 
-        assertThat(parseXml(baos).getDocumentElement()).hasFieldOrPropertyWithValue("tagName", "urlset");
+        assertThat(parseXml(baos).getDocumentElement().getTagName()).isEqualTo("urlset");
     }
 
     @Test
@@ -83,7 +83,7 @@ class SitemapWriterIT {
         var baos = new ByteArrayOutputStream();
         SitemapWriter.writeBioentityIdentifiersSitemap(baos, ImmutableList.of(), true);
 
-        assertThat(parseXml(baos).getDocumentElement()).hasFieldOrPropertyWithValue("tagName", "urlset");
+        assertThat(parseXml(baos).getDocumentElement().getTagName()).isEqualTo( "urlset");
     }
 
     private Document parseXml(final ByteArrayOutputStream outputStream) throws Exception {

@@ -6,8 +6,8 @@ plugins {
 group = 'uk.ac.ebi.ge'
 version = '1.0.0'
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = 17
+targetCompatibility = 17
 
 repositories {
   mavenCentral()
@@ -61,7 +61,7 @@ dependencies {
     exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
   }
 
-  testImplementation 'org.springframework:spring-test:5.1.5.RELEASE'
+  testImplementation 'org.springframework:spring-test:5.3.26'
   testImplementation 'com.h2database:h2:1.4.199'
   testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.1'
   testImplementation 'org.mockito:mockito-core:5.2.0'
