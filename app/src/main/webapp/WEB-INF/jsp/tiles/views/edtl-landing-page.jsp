@@ -44,6 +44,9 @@
       <li>
         <a href="${pageContext.request.contextPath}/experiments/E-MTAB-11671">RNA-Sequencing of whole blood samples from children with a range of acute febrile illnesses</a>
       </li>
+      <li>
+        <a href="${pageContext.request.contextPath}/experiments/E-CURD-146">Diagnosis of multisystem inflammatory syndrome in children (MIS-C) by a whole-blood transcriptional signature</a>
+      </li>
     </ul>
   </div>
 </div>
