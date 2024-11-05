@@ -12,7 +12,7 @@ import uk.ac.ebi.atlas.controllers.JsonExceptionHandlingController;
 import java.util.Map;
 
 @RestController
-@PropertySource("classpath:resources/configuration.properties")
+@PropertySource("classpath:resources/git.properties")
 public class JsonBuildInfoController extends JsonExceptionHandlingController {
     private final ImmutableMap<String, String> buildInfo;
 
