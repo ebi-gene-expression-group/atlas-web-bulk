@@ -22,8 +22,8 @@ public class DifferentialExperimentContrastLines implements Iterable<String[]> {
     private final ExperimentDesign experimentDesign;
 
     public DifferentialExperimentContrastLines(DifferentialExperiment experiment, ExperimentDesign experimentDesign) {
-        this.contrastDetails = buildContrastDetails(experiment);
         this.experimentDesign = experimentDesign;
+        this.contrastDetails = buildContrastDetails(experiment);
     }
 
     private LinkedHashSet<ImmutableList<String>> buildContrastDetails(DifferentialExperiment experiment) {
