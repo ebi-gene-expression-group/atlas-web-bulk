@@ -9,8 +9,8 @@ import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 public class DownloadController extends HtmlExceptionHandlingController {
 
     @RequestMapping(value = "/download", produces = "text/html;charset=UTF-8")
-    public String getExperimentsListParameters(Model model) {
-        model.addAttribute("mainTitle", "Download ");
+    public String downloadPage(Model model) {
+        model.addAttribute("title", "Download &lt; ");
 
         return "download";
     }
