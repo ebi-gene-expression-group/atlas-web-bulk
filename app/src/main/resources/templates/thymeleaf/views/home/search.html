@@ -1,0 +1,109 @@
+<div th:fragment="home-search">
+    <link rel="stylesheet" type="text/css" th:href="@{/resources/js/lib/jquery-ui-1.12.1.custom/jquery-ui.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/resources/js/lib/jquery-json-tag-editor/jquery.json-tag-editor.foundation.css}" media="screen">
+
+    <ul class="tabs" data-tabs id="search-tabs">
+        <li class="tabs-title is-active"><a href="#search-atlas" aria-selected="true">Search</a></li>
+        <li class="tabs-title"><a href="#search-gene-set-enrichment">Gene set enrichment</a></li>
+    </ul>
+
+    <div class="tabs-content" data-tabs-content="search-tabs">
+        <div class="tabs-panel is-active " id="search-atlas" style="background-color: #e6e6e6;">
+            <form method="get" th:action="@{/search}" id="home-search-atlas-form">
+                <div class="row expanded">
+                    <div class="small-12 medium-4 large-5 columns">
+                        <div class="row column">
+                            <label for="home-search-gene-query-input">Gene / Gene properties</label>
+                            <input id="home-search-gene-query-input" type="text" placeholder="Enter gene query…" name="geneQuery"/>
+                        </div>
+                        <div class="row column small margin-top-small">
+                            Examples: <a href='/search?geneQuery=[{"value":"REG1B"}]}'>REG1B</a>,
+                            <a href='/search?geneQuery=[{"value":"zinc finger"}]}'>zinc finger</a>,
+                            <a href='/search?geneQuery=[{"value":"O14777", "category":"uniprot"}]}'>O14777 (UniProt)</a>,
+                            <a href='/search?geneQuery=[{"value":"GO:0010468", "category":"go"}]}'>GO:0010468 (regulation of gene expression)</a>
+                        </div>
+                    </div>
+                    <div class="small-12 medium-4 large-2 columns">
+                        <label for="species">Species</label>
+                        <select id="species" name="species">
+                            <option th:each="species : ${topSpecies}" th:value="${species}" th:text="${species}"></option>
+                            <option value="━━━━━━━━━━━━━━━━" disabled>━━━━━━━━━━━━━━━━</option>
+                            <option value="" th:text="Any" selected>Any</option>
+                            <option th:each="otherSpecies : ${species}" th:value="${otherSpecies}" th:text="${otherSpecies}"></option>
+                        </select>
+                    </div>
+                    <div id="sample-properties-section" class="small-12 medium-4 large-5 columns">
+                        <div class="row column">
+                            <label for="home-search-condition-query-input">Biological conditions</label>
+                            <input id="home-search-condition-query-input" type="text" placeholder="Enter condition query…" name="conditionQuery" />
+                        </div>
+                        <div class="row column small margin-top-small">
+                            Examples: <a href='/search?conditionQuery=[{"value":"lung"}]'>lung</a>,
+                            <a href='/search?conditionQuery=[{"value":"leaf"}]'>leaf</a>,
+                            <a href='/search?conditionQuery=[{"value":"valproic acid"}]'>valproic acid</a>,
+                            <a href='/search?conditionQuery=[{"value":"cancer"}]'>cancer</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row expanded margin-top-large">
+                    <div class="small-12 columns">
+                        <input id="home-search-atlas-search-button" class="button" type="submit" value="Search"/>
+
+                        <input id="home-search-atlas-clear-button" class="secondary hollow button" type="button" value="Clear"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js"></script>
+
+    <!-- JSON Tag Editor -->
+    <script defer th:src="@{/resources/js/lib/jquery-json-tag-editor/jquery.caret.min.js}"></script>
+    <script defer th:src="@{/resources/js/lib/jquery-json-tag-editor/jquery.json-tag-editor.min.js}"></script>
+    <script defer th:src="@{/resources/js/geneQueryTagEditorModule.js}"></script>
+
+    <!-- Condition AUTOCOMPLETE -->
+    <script defer th:src="@{/resources/js/lib/arrayexpress-autocomplete/jquery.caret-range-1.0.js}"></script>
+    <script defer th:src="@{/resources/js/lib/arrayexpress-autocomplete/jquery.array-express.autocomplete-1.1.0.150319.js}"></script>
+    <script defer th:src="@{/resources/js/conditionAutocompleteModule.js}"></script>
+
+    <script defer th:src="@{/resources/js/lib/jquery-ui-1.12.1.custom/jquery-ui.min.js}"></script>
+
+    <script th:with="contextPath=@{/}">
+        document.addEventListener("DOMContentLoaded", function(event) {
+            var contextPath = '$contextPath';
+            var geneQueryPlaceHolder = 'Enter gene query…';
+
+            geneQueryTagEditorModule.init('#local-searchbox', '', function(){}, geneQueryPlaceHolder, contextPath);
+            geneQueryTagEditorModule.init('#home-search-gene-query-input', '', function(){}, geneQueryPlaceHolder, contextPath);
+            conditionAutocompleteModule.init('#home-search-condition-query-input', function(){});
+
+            $('#home-search-atlas-clear-button').on('click' , function () {
+                // Remove all tags
+                var $atlasSearchInput = $('#home-search-gene-query-input'),
+                    atlasSearchTags = $atlasSearchInput.jsonTagEditor('getTags')[0].tags;
+                atlasSearchTags.forEach(function (searchTag) {
+                    $atlasSearchInput.jsonTagEditor('removeTag', searchTag.value);
+                });
+
+                var $conditionQuery = $('#home-search-condition-query-input'),
+                    conditionQueryTags = $conditionQuery.jsonTagEditor('getTags')[0].tags;
+                conditionQueryTags.forEach(function (searchTag) {
+                    $conditionQuery.jsonTagEditor('removeTag', searchTag.value);
+                });
+            });
+
+            $('#home-search-atlas-form').submit(function(event) {
+                var $atlasSearchInput = $('#home-search-gene-query-input'),
+                    atlasSearchTags = $atlasSearchInput.jsonTagEditor('getTags')[0].tags;
+                $atlasSearchInput.val(JSON.stringify(atlasSearchTags));
+
+                var $conditionQuery = $('#home-search-condition-query-input'),
+                    conditionQueryTags = $conditionQuery.jsonTagEditor('getTags')[0].tags;
+                $conditionQuery.val(JSON.stringify(conditionQueryTags));
+            });
+        });
+    </script>
+</div>
