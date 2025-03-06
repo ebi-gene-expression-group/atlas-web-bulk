@@ -1,10 +1,9 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
-
 <div id="experiments"></div>
 
-<script defer src="${pageContext.request.contextPath}/resources/js-bundles/experimentTable.bundle.js"></script>
+<script defer th:src="@{/resources/js-bundles/experimentTable.bundle.js}"></script>
 
-<script>
+<script th:inline="javascript" th:with="contextPath=@{/}">
+    const contextPath = /*[[${contextPath}]]*/ '';
     document.addEventListener('DOMContentLoaded', function(event) {
       experimentTable.renderRouter(
         {
@@ -16,17 +15,17 @@
               width: 0.5,
               image: {
                 Differential: {
-                  src: '${pageContext.request.contextPath}/resources/images/experiments-table/differential.png',
+                  src: contextPath + '/resources/images/experiments-table/differential.png',
                   alt: 'Differential experiment',
                   title: 'Differential experiment'
                 },
                 Baseline: {
-                  src: '${pageContext.request.contextPath}/resources/images/experiments-table/baseline.png',
+                  src: contextPath + '/resources/images/experiments-table/baseline.png',
                   alt: 'Baseline experiment',
                   title: 'Baseline experiment'
                 }
               },
-              linkTo: function(dataRow) { return '${pageContext.request.contextPath}/experiments?experimentType=' + dataRow.experimentType.toLowerCase(); }
+              linkTo: function(dataRow) { return contextPath + '/experiments?experimentType=' + dataRow.experimentType.toLowerCase(); }
             },
             {
               label: 'Load date',
@@ -80,7 +79,7 @@
           rowSelectionColumn: {
             label: 'Download',
             dataKey: 'experimentAccession',
-            tableHeaderCellOnClick: experimentTable._validateAndDownloadExperimentFiles('${pageContext.request.contextPath}/'),
+            tableHeaderCellOnClick: experimentTable._validateAndDownloadExperimentFiles('$contextPath/'),
             tooltipContent:
               '<ul>' +
               '<li>Expression matrices in TPMs or log<sub>2</sub>fold-change</li>' +
@@ -88,8 +87,8 @@
               '</ul>',
             width: 0.75
           },
-          basename: '${pageContext.request.contextPath}',
-          host: '${pageContext.request.contextPath}/',
+          basename: contextPath,
+          host: contextPath + '/',
           resource: 'json/experiments'
         },
         'experiments');

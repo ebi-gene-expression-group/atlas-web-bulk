@@ -42,7 +42,7 @@ public class HomeController extends HtmlExceptionHandlingController {
 
     @RequestMapping(value = "/home", produces = "text/html;charset=UTF-8")
     public String getHome(Model model) {
-        model.addAttribute("title", "Home &lt; ");
+        model.addAttribute("title", "Home");
 
         var species = ImmutableSortedSet.copyOf(speciesSummaryService.getSpecies());
 

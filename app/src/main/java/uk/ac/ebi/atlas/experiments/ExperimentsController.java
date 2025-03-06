@@ -9,7 +9,7 @@ import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 public class ExperimentsController extends HtmlExceptionHandlingController {
     @RequestMapping(value = "/experiments", produces = "text/html;charset=UTF-8")
     public String getExperimentsListParameters(Model model) {
-        model.addAttribute("mainTitle", "Experiments ");
+        model.addAttribute("title", "Experiments");
         return "experiments";
     }
 }
