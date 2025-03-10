@@ -66,7 +66,7 @@ public class JsonBaselineGeneInExperimentController extends JsonExperimentContro
         preferences.setCutoff(0.0);
 
         // If experiment is not GTEx TODO Fix transcripts so that GTEx doesn't have performance issues
-        if (!experimentAccession.equalsIgnoreCase("E-MTAB-5214")) {
+        if (!experimentAccession.equalsIgnoreCase("E-GTEX-8")) {
             GeneProfilesList<BaselineExpressionPerReplicateProfile> transcriptExpression =
                     baselineTranscriptProfileStreamFactory.getAllMatchingProfiles(
                             experiment,
