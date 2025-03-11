@@ -8,7 +8,8 @@ import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 @Controller
 public class EdtlExperimentsController extends HtmlExceptionHandlingController {
     @GetMapping(value = "/edtl/experiments", produces = "text/html;charset=UTF-8")
-    public String getEdtlExperimentsPage() {
+    public String getEdtlExperimentsPage(Model model) {
+        model.addAttribute("title", "EDTL experiments");
         return "edtl-landing-page";
     }
 }

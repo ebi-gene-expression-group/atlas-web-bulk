@@ -10,7 +10,6 @@ import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -33,7 +32,7 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
                         .collect(toImmutableSet());
 
         Comparator<String> displayNameComparator = Comparator.comparing(experimentDisplayNames::get);
-        var baselineExperimentAccessionsBySpecies = TreeMultimap.create(String::compareTo, displayNameComparator);
+        var experimentAccessionsBySpecies = TreeMultimap.create(String::compareTo, displayNameComparator);
         var numDifferentialExperimentsBySpecies = new TreeMap<String, Integer>();
 
         for (var experiment : publicPlantExperiments) {
@@ -44,7 +43,7 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
             );
 
             if (experiment.getType().isBaseline()) {
-                baselineExperimentAccessionsBySpecies.put(experiment.getSpecies().getName(), accession);
+                experimentAccessionsBySpecies.put(experiment.getSpecies().getName(), accession);
             }
             else if (experiment.getType().isDifferential()) {
                 var speciesReferenceName = StringUtils.capitalize(experiment.getSpecies().getReferenceName());
@@ -55,13 +54,8 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
             }
         }
 
-        var baselineExperimentsData = new LinkedHashMap<String, LinkedHashMap<String, String>>();
-
-        baselineExperimentAccessionsBySpecies.asMap().forEach((species, accessions) -> {
-            var nameByAccession = new LinkedHashMap<String, String>();
-            accessions.forEach(accession -> nameByAccession.put(accession, experimentDisplayNames.get(accession)));
-            baselineExperimentsData.put(species, nameByAccession);
-        });
+        var baselineExperimentsData =
+            ExperimentsUtil.getBaselineExperiments(experimentAccessionsBySpecies, experimentDisplayNames);
 
         model.addAttribute("baselineExperimentsData", baselineExperimentsData);
         model.addAttribute("numDifferentialExperimentsBySpecies", numDifferentialExperimentsBySpecies);

@@ -4,16 +4,6 @@
         "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
 
 <tiles-definitions>
-<!--    <definition name="plants-landing-page" extends="base">-->
-<!--        <put-attribute name="title" value="Plant experiments &lt; "/>-->
-<!--        <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/plants-landing-page.jsp"/>-->
-<!--    </definition>-->
-
-    <definition name="edtl-landing-page" extends="base">
-        <put-attribute name="title" value="EDTL experiments &lt; "/>
-        <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/edtl-landing-page.jsp"/>
-    </definition>
-
     <definition name="experiment-page" extends="base">
         <put-attribute name="title" value="Experiment &lt; "/>
         <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/experiment-page.jsp"/>

@@ -10,7 +10,6 @@ import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 @Controller
 public class BaselineExperimentsController extends HtmlExceptionHandlingController {
@@ -49,15 +48,8 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
             experimentAccessionsBySpecies.put(experiment.getSpecies().getName(), accession);
         }
 
-        var baselineExperimentsData = new LinkedHashMap<String, LinkedHashMap<String, String>>();
-
-        experimentAccessionsBySpecies.asMap().forEach((species, accessions) -> {
-            var nameByAccession = new LinkedHashMap<String, String>();
-            accessions.forEach(accession -> {
-                nameByAccession.put(accession, experimentDisplayNames.get(accession));
-            });
-            baselineExperimentsData.put(species, nameByAccession);
-        });
+        var baselineExperimentsData =
+            ExperimentsUtil.getBaselineExperiments(experimentAccessionsBySpecies, experimentDisplayNames);
 
         model.addAttribute("baselineExperimentsData", baselineExperimentsData);
         model.addAttribute("speciesIconSelector", SpeciesIconSelector.getEnumMap());
