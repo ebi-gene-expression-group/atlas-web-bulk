@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
-import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.sdrf.Factor;
 import uk.ac.ebi.atlas.model.experiment.sdrf.FactorSet;
 import uk.ac.ebi.atlas.search.SemanticQuery;
@@ -71,6 +70,10 @@ public class DASFeaturesController extends HtmlExceptionHandlingController {
 
         model.addAttribute("geneId", geneId);
         model.addAttribute("geneName", geneName);
+        var baseUrl = "http://www.ebi.ac.uk/";
+        model.addAttribute("baseURL", baseUrl);
+        model.addAttribute("geneUrl", baseUrl + "genes/" + geneId);
+        model.addAttribute("geneFactorTypeUrl", baseUrl + "query?geneQuery=" + geneId + "&condition=");
 
         for (String factorValue:
                 ImmutableList.of("ORGANISM_PART", "DISEASE", "CELL_TYPE", "CELL_LINE", "COMPOUND",
