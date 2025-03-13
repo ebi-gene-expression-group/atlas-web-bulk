@@ -4,7 +4,7 @@
 
 <script th:inline="javascript" th:with="contextPath=@{/}">
     const contextPath = /*[[${contextPath}]]*/ '';
-    document.addEventListener('DOMContentLoaded', function(event) {
+    document.addEventListener('DOMContentLoaded', function() {
       experimentTable.renderRouter(
         {
           tableHeaders: [
@@ -15,17 +15,17 @@
               width: 0.5,
               image: {
                 Differential: {
-                  src: contextPath + '/resources/images/experiments-table/differential.png',
+                  src: contextPath + 'resources/images/experiments-table/differential.png',
                   alt: 'Differential experiment',
                   title: 'Differential experiment'
                 },
                 Baseline: {
-                  src: contextPath + '/resources/images/experiments-table/baseline.png',
+                  src: contextPath + 'resources/images/experiments-table/baseline.png',
                   alt: 'Baseline experiment',
                   title: 'Baseline experiment'
                 }
               },
-              linkTo: function(dataRow) { return contextPath + '/experiments?experimentType=' + dataRow.experimentType.toLowerCase(); }
+              linkTo: function(dataRow) { return contextPath + 'experiments?experimentType=' + dataRow.experimentType.toLowerCase(); }
             },
             {
               label: 'Load date',
@@ -79,7 +79,7 @@
           rowSelectionColumn: {
             label: 'Download',
             dataKey: 'experimentAccession',
-            tableHeaderCellOnClick: experimentTable._validateAndDownloadExperimentFiles('$contextPath/'),
+            tableHeaderCellOnClick: experimentTable._validateAndDownloadExperimentFiles(contextPath),
             tooltipContent:
               '<ul>' +
               '<li>Expression matrices in TPMs or log<sub>2</sub>fold-change</li>' +
@@ -88,7 +88,7 @@
             width: 0.75
           },
           basename: contextPath,
-          host: contextPath + '/',
+          host: contextPath,
           resource: 'json/experiments'
         },
         'experiments');
