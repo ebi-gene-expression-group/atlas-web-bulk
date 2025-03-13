@@ -4,7 +4,6 @@
 
     <ul class="tabs" data-tabs id="search-tabs">
         <li class="tabs-title is-active"><a href="#search-atlas" aria-selected="true">Search</a></li>
-        <li class="tabs-title"><a href="#search-gene-set-enrichment">Gene set enrichment</a></li>
     </ul>
 
     <div class="tabs-content" data-tabs-content="search-tabs">
@@ -72,7 +71,7 @@
     <script defer th:src="@{/resources/js/lib/jquery-ui-1.12.1.custom/jquery-ui.min.js}"></script>
 
     <script th:with="contextPath=@{/}">
-        document.addEventListener("DOMContentLoaded", function(event) {
+        document.addEventListener("DOMContentLoaded", function() {
             var contextPath = '$contextPath';
             var geneQueryPlaceHolder = 'Enter gene query…';
 
@@ -95,7 +94,7 @@
                 });
             });
 
-            $('#home-search-atlas-form').submit(function(event) {
+            $('#home-search-atlas-form').submit(function() {
                 var $atlasSearchInput = $('#home-search-gene-query-input'),
                     atlasSearchTags = $atlasSearchInput.jsonTagEditor('getTags')[0].tags;
                 $atlasSearchInput.val(JSON.stringify(atlasSearchTags));
