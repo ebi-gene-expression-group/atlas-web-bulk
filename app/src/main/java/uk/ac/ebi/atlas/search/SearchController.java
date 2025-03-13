@@ -3,6 +3,8 @@ package uk.ac.ebi.atlas.search;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
 import org.apache.solr.common.SolrException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,7 @@ import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.solr.analytics.AnalyticsSearchService;
 import uk.ac.ebi.atlas.solr.analytics.baseline.BaselineAnalyticsSearchService;
+import uk.ac.ebi.atlas.solr.analytics.query.AnalyticsQueryClient;
 import uk.ac.ebi.atlas.species.Species;
 import uk.ac.ebi.atlas.species.SpeciesFactory;
 
@@ -34,6 +37,7 @@ public class SearchController extends HtmlExceptionHandlingController {
     private final AnalyticsSearchService analyticsSearchService;
     private final BaselineAnalyticsSearchService baselineAnalyticsSearchService;
     private final SpeciesFactory speciesFactory;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchController.class);
 
     @Inject
     public SearchController(AnalyticsSearchService analyticsSearchService,
@@ -60,7 +64,8 @@ public class SearchController extends HtmlExceptionHandlingController {
 
         Species species = speciesFactory.create(speciesString);
 
-        model.addAttribute("searchDescription", SearchDescription.get(geneQuery, conditionQuery, speciesString));
+        String searchDescription = SearchDescription.get(geneQuery, conditionQuery, speciesString);
+        model.addAttribute("searchDescription", searchDescription);
         model.addAttribute("geneQuery", geneQuery.toUrlEncodedJson());
         model.addAttribute("conditionQuery", conditionQuery.toUrlEncodedJson());
         model.addAttribute("species", species.getReferenceName());
@@ -126,7 +131,10 @@ public class SearchController extends HtmlExceptionHandlingController {
             model.addAttribute("hasDifferentialResults", hasDifferentialResults);
             model.addAttribute("hasBaselineResults", hasBaselineResults);
 
-
+            LOGGER.debug("Search results for {} in {} ms: {}",
+                    searchDescription,
+                    stopWatch.getTotalTimeMillis(),
+                    stopWatch.prettyPrint());
 
             return "search-results";
         }
