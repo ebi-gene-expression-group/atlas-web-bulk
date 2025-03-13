@@ -46,6 +46,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/templates/**")
+            .addResourceLocations("classpath:/templates/");
+
         registry.addResourceHandler("/resources/**")
                 .addResourceLocations("/resources/")
                 .setCacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePublic());
@@ -81,6 +84,7 @@ public class WebConfig implements WebMvcConfigurer {
         resolver.setSuffix(".html");
         resolver.setTemplateMode(TemplateMode.HTML);
         resolver.setCharacterEncoding("UTF-8");
+        resolver.setOrder(0);
         resolver.setCheckExistence(true);
         return resolver;
     }
@@ -92,6 +96,7 @@ public class WebConfig implements WebMvcConfigurer {
         resolver.setSuffix(".html");
         resolver.setTemplateMode(TemplateMode.HTML);
         resolver.setCharacterEncoding("UTF-8");
+        resolver.setOrder(1);
         resolver.setCheckExistence(true);
         return resolver;
     }
@@ -99,8 +104,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public SpringTemplateEngine thymeleafTemplateEngine() {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-        templateEngine.addTemplateResolver(viewsThymeleafTemplateResolver());
         templateEngine.addTemplateResolver(rootThymeleafTemplateResolver());
+        templateEngine.addTemplateResolver(viewsThymeleafTemplateResolver());
         return templateEngine;
     }
 
@@ -114,8 +119,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
-        registry.viewResolver(urlBasedViewResolver());
         registry.viewResolver(thymeleafViewResolver());
+        registry.viewResolver(urlBasedViewResolver());
     }
 
     @InitBinder
