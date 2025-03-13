@@ -10,7 +10,7 @@ public class DownloadController extends HtmlExceptionHandlingController {
 
     @RequestMapping(value = "/download", produces = "text/html;charset=UTF-8")
     public String downloadPage(Model model) {
-        model.addAttribute("title", "Download &lt; ");
+        model.addAttribute("title", "Download");
 
         return "download";
     }

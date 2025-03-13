@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title th:text="${title}">Expression Atlas &lt; EMBL-EBI</title>
+    <title th:text="${title} + ' &lt; Expression Atlas &lt; EMBL-EBI'"></title>
     <meta name="description" content="EMBL-EBI Expression Atlas, an open public repository of gene expression pattern data under different biological conditions">
     <meta name="keywords" content="expression atlas, gene expression, baseline expression, differential expression, functional genomics, public repository, repository, bioinformatics, europe, institute">
     <meta name="author" content="EBI Functional Genomics Team – https://www.ebi.ac.uk/people/person/christina-ernst">
@@ -23,16 +23,16 @@
 
     <!-- favicons generated at realfavicongenerator.net, and merged with https://github.com/ebiwd/EBI-Pattern-library/blob/gh-pages/sample-site/boilerplate/blank.html -->
     <!-- If you have custom icon, replace these as appropriate. You can generate them at realfavicongenerator.net -->
-    <link rel="icon" type="image/x-icon" href="resources/favicons/favicon.ico" />
-    <link rel="icon" type="image/png" href="resources/favicons/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="192×192" href="resources/favicons/android-chrome-192x192.png" /> <!-- Android (192px) -->
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="resources/favicons/apple-icon-114x114.png" /> <!-- For iPhone 4 Retina display (114px) -->
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="resources/favicons/apple-icon-72x72.png" /> <!-- For iPad (72px) -->
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="resources/favicons/apple-icon-144x144.png" /> <!-- For iPad retina (144px) -->
-    <link rel="apple-touch-icon-precomposed" href="resources/favicons/apple-icon-57x57.png" /> <!-- For iPhone (57px) -->
-    <link rel="mask-icon" href="resources/favicons/safari-pinned-tab.svg" color="#ffffff" /> <!-- Safari icon for pinned tab -->
+    <link rel="icon" type="image/x-icon" th:href="@{/resources/favicons/favicon.ico}" />
+    <link rel="icon" type="image/png" th:href="@{/resources/favicons/favicon-32x32.png}" />
+    <link rel="icon" type="image/png" sizes="192×192" th:href="@{/resources/favicons/android-chrome-192x192.png}" /> <!-- Android (192px) -->
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" th:href="@{/resources/favicons/apple-icon-114x114.png}" /> <!-- For iPhone 4 Retina display (114px) -->
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" th:href="@{/resources/favicons/apple-icon-72x72.png}" /> <!-- For iPad (72px) -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" th:href="@{/resources/favicons/apple-icon-144x144.png}" /> <!-- For iPad retina (144px) -->
+    <link rel="apple-touch-icon-precomposed" th:href="@{/resources/favicons/apple-icon-57x57.png}" /> <!-- For iPhone (57px) -->
+    <link rel="mask-icon" th:href="@{/resources/favicons/safari-pinned-tab.svg}" color="#ffffff" /> <!-- Safari icon for pinned tab -->
     <meta name="msapplication-TileColor" content="#2b5797" /> <!-- MS Icons -->
-    <meta name="msapplication-TileImage" content="resources/favicons/mstile-144x144.png" />
+    <meta name="msapplication-TileImage" th:content="@{/resources/favicons/mstile-144x144.png}" />
 
     <!-- CSS: implied media=all -->
     <!-- CSS concatenated and minified via ant build script-->
@@ -41,15 +41,15 @@
 
     <!-- If you have a custom header image or colour -->
     <meta name="ebi:masthead-color" content="rgb(0,124,130)" />
-    <meta name="ebi:masthead-image" content="resources/images/dots-matrix-background.png" />
+    <meta name="ebi:masthead-image" th:content="@{/resources/images/dots-matrix-background.png}" />
 
     <!-- you can replace this with theme-[projectname].css. See http://www.ebi.ac.uk/web/style/colour for details of how to do this -->
     <!-- also inform ES so we can host your colour palette file -->
     <!-- <link rel="stylesheet" href="https://dev.ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.3/css/theme-embl-petrol.css" type="text/css" media="all" /> -->
-    <link rel="stylesheet" href="resources/css/foundation/atlas.css" type="text/css" media="all">
+    <link rel="stylesheet" th:href="@{/resources/css/foundation/atlas.css}" type="text/css" media="all">
 
     <!-- Use this CSS file for any custom styling -->
-    <link rel="stylesheet" href="resources/css/foundation/theme-atlas.css" type="text/css" media="all">
+    <link rel="stylesheet" th:href="@{/resources/css/foundation/theme-atlas.css}" type="text/css" media="all">
     <!-- end CSS-->
 
 </head>
@@ -81,10 +81,10 @@
 <script src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script>
 
 <!-- Don’t defer or async, these two need to be loaded before other bundles, which are effectively deferred -->
-<script src="resources/js/lib/babel-polyfill.min.js"></script>
-<script src="resources/js/lib/fetch-polyfill.min.js"></script>
-<script src="resources/js-bundles/vendorCommons.bundle.js"></script>
-<script src="resources/js-bundles/informationBanner.bundle.js"></script>
+<script th:src="@{/resources/js/lib/babel-polyfill.min.js}"></script>
+<script th:src="@{/resources/js/lib/fetch-polyfill.min.js}"></script>
+<script th:src="@{/resources/js-bundles/vendorCommons.bundle.js}"></script>
+<script th:src="@{/resources/js-bundles/informationBanner.bundle.js}"></script>
 
 <!-- JavaScript -->
 <script defer="defer" src="https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.3/js/script.js"></script>
@@ -95,8 +95,8 @@
 <script>$(document).foundation();</script>
 <script>$(document).foundationExtendEBI();</script>
 
-<link rel="stylesheet" type="text/css" href="resources/js/lib/jquery-ui-1.12.1.custom/jquery-ui.min.css">
-<link rel="stylesheet" type="text/css" href="resources/js/lib/jquery-json-tag-editor/jquery.json-tag-editor.foundation.css" media="screen">
+<link rel="stylesheet" type="text/css" th:href="@{/resources/js/lib/jquery-ui-1.12.1.custom/jquery-ui.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/resources/js/lib/jquery-json-tag-editor/jquery.json-tag-editor.foundation.css}" media="screen">
 <!-- end CSS-->
 
 <!-- Google Analytics details -->

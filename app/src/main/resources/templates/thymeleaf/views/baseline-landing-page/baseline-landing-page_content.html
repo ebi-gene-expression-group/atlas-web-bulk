@@ -1,0 +1,61 @@
+<link rel="stylesheet" th:href="@{/resources/css/baseline_plant-experiments.css}" type="text/css"/>
+
+<div class="row">
+    <div class="small-12 columns">
+        <h3>Browse baseline experiments</h3>
+        <p>
+            These datasets show baseline gene expression for many different tissues and cell types from a wide range of
+            species, from human and mouse to Arabidopsis and maize. In Expression Atlas, "baseline" expression is the
+            expression level of each gene in normal, untreated conditions. All baseline experiments are either RNA-seq
+            or proteomics data. Each experiment is manually curated to a high standard, and RNA expression levels are
+            calculated using the <a href="https://github.com/nunofonseca/irap">iRAP</a> pipeline.
+        </p>
+        <div class="row small-up-1 medium-up-2 large-up-3">
+            <div class="column column-block species_item margin-top-xxlarge"
+                 th:each="experimentsBySpecies : ${baselineExperimentsData.entrySet()}"
+                 th:with="species=${experimentsBySpecies.getKey()},
+                            nameByAccessions=${experimentsBySpecies.getValue()},
+                            total=${#maps.size(nameByAccessions)}">
+                <h4 th:text="${species}">Species</h4>
+                <span th:class="'icon icon-species ' + ${speciesIconSelector.get(species).get('speciesColorCode')}"
+                      th:data-icon="${speciesIconSelector.get(species).get('speciesIconCode')}"></span>
+                <ul class="show_more" style="list-style:none;padding-left:0; margin-left:0;">
+                    <li th:each="nameByAccession : ${nameByAccessions}"
+                        th:with="accession=${nameByAccession.getKey()},displayName=${nameByAccession.getValue()}">
+                        <a th:href="@{/experiments/${accession}}"
+                           th:text="${displayName}"
+                           style="color:#337ab7; border-bottom: none;">
+                        </a>
+                    </li>
+                    <div th:if="${total &gt; 5}" class="show_more_buttons">
+                        <button class="button small show_button"> See more…</button>
+                        <button class="button small hide_button"> Hide…</button>
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        //hide/show when there is more than 5 items in the list
+        $(function() {
+            var $ul = $(".species_item ul");
+            $ul.find(".hide_button").hide();//temp - to add in css by default
+            $ul.find("li:gt(4)").hide();//hide extra list item
+
+            var $ulShowMore = $("ul.show_more");
+            $ulShowMore.find(".show_button").click(function() {
+                $(this).parent().parent().find("li:gt(4)").show();
+                $(this).hide();
+                $(this).parent().find(".hide_button").show();
+            });
+            $ulShowMore.find(".hide_button").click(function() {
+                $(this).parent().parent().find("li:gt(4)").hide();
+                $(this).hide();
+                $(this).parent().find(".show_button").show();
+            });
+        });
+    })
+</script>

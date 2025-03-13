@@ -4,26 +4,6 @@
         "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
 
 <tiles-definitions>
-    <definition name="experiments" extends="base">
-        <put-attribute name="title" value="Experiments &lt; "/>
-        <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/experiments.jsp"/>
-    </definition>
-
-    <definition name="baseline-landing-page" extends="base">
-        <put-attribute name="title" value="Baseline experiments &lt; "/>
-        <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/baseline-landing-page.jsp"/>
-    </definition>
-
-    <definition name="plants-landing-page" extends="base">
-        <put-attribute name="title" value="Plant experiments &lt; "/>
-        <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/plants-landing-page.jsp"/>
-    </definition>
-
-    <definition name="edtl-landing-page" extends="base">
-        <put-attribute name="title" value="EDTL experiments &lt; "/>
-        <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/edtl-landing-page.jsp"/>
-    </definition>
-
     <definition name="experiment-page" extends="base">
         <put-attribute name="title" value="Experiment &lt; "/>
         <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/experiment-page.jsp"/>
@@ -48,10 +28,5 @@
     </definition>
 
     <definition name="das-features" template="/WEB-INF/jsp/tiles/views/das-features.jsp">
-    </definition>
-
-    <definition name="request-diagnostics" extends="base">
-        <put-attribute name="title" value="Request diagnostics &lt; "/>
-        <put-attribute name="content" value="/WEB-INF/jsp/tiles/views/request-diagnostics.jsp"/>
     </definition>
 </tiles-definitions>

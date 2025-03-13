@@ -1,7 +1,7 @@
 <header th:fragment="global-masthead" id="masthead-black-bar" class="clearfix masthead-black-bar expanded">
     <script>
         // Hack that solves https://github.com/ebiwd/EBI-Framework/pull/139 (I got tired of waiting)
-        window.addEventListener('load', function(event) {
+        window.addEventListener('load', function() {
             $('#masthead-black-bar nav')[2].className='row expanded';
         });
     </script>
@@ -16,7 +16,7 @@
                     <a href="home" title="Back to Expression Atlas homepage">
                         <div class="media-object" id="local-title">
                             <div class="media-object-section hide-for-small-only">
-                                <img src="resources/images/expression-atlas.png" alt="Expression Atlas logo" style="height: 7em">
+                                <img th:src="@{/resources/images/expression-atlas.png}" alt="Expression Atlas logo" style="height: 7em">
                             </div>
                             <div class="media-object-section">
                                 <h1>Expression&nbsp;Atlas</h1>
@@ -36,14 +36,14 @@
 
                 <nav>
                     <ul id="local-nav" class="dropdown menu float-left" data-description="navigational">
-                        <li id="local-nav-home"><a href="home"><i class="icon icon-generic padding-right-medium" data-icon="H"></i>Home</a></li>
-                        <li id="local-nav-experiments"><a href="experiments"><i class="icon icon-functional padding-right-medium" data-icon="C"></i>Browse experiments</a></li>
-                        <li id="local-nav-download"><a href="download"><i class="icon icon-functional padding-right-medium" data-icon="="></i>Download</a></li>
-                        <li id="local-nav-release-notes"><a href="release-notes.html"><i class="icon icon-generic padding-right-medium" data-icon=";"></i>Release notes</a></li>
-                        <li id="local-nav-faq"><a href="FAQ.html"><i class="icon icon-generic padding-right-medium" data-icon="G"></i>FAQ</a></li>
-                        <li id="local-nav-help"><a href="help/index.html"><i class="icon icon-generic padding-right-medium" data-icon="?"></i>Help</a></li>
-                        <li id="local-nav-licence"><a href="licence.html"><i class="icon icon-common padding-right-medium" data-icon="&#xf573;"></i>Licence</a></li>
-                        <li id="local-nav-about"><a href="about.html"><i class="icon icon-generic padding-right-medium" data-icon="i"></i>About</a></li>
+                        <li id="local-nav-home"><a th:href="@{/home}"><i class="icon icon-generic padding-right-medium" data-icon="H"></i>Home</a></li>
+                        <li id="local-nav-experiments"><a th:href="@{/experiments}"><i class="icon icon-functional padding-right-medium" data-icon="C"></i>Browse experiments</a></li>
+                        <li id="local-nav-download"><a th:href="@{/download}"><i class="icon icon-functional padding-right-medium" data-icon="="></i>Download</a></li>
+                        <li id="local-nav-release-notes"><a th:href="@{/release-notes.html}"><i class="icon icon-generic padding-right-medium" data-icon=";"></i>Release notes</a></li>
+                        <li id="local-nav-faq"><a th:href="@{/FAQ.html}"><i class="icon icon-generic padding-right-medium" data-icon="G"></i>FAQ</a></li>
+                        <li id="local-nav-help"><a th:href="@{/help/index.html}"><i class="icon icon-generic padding-right-medium" data-icon="?"></i>Help</a></li>
+                        <li id="local-nav-licence"><a th:href="@{/licence.html}"><i class="icon icon-common padding-right-medium" data-icon="&#xf573;"></i>Licence</a></li>
+                        <li id="local-nav-about"><a th:href="@{/about.html}"><i class="icon icon-generic padding-right-medium" data-icon="i"></i>About</a></li>
                         <li id="local-nav-feedback"><a href="https://www.ebi.ac.uk/support/gxa" target="_blank" data-icon="X"><i class="icon icon-generic padding-right-medium" data-icon="s"></i>Support</a></li>
                     </ul>
                 </nav>
