@@ -16,10 +16,14 @@
                             <input id="home-search-gene-query-input" type="text" placeholder="Enter gene query…" name="geneQuery"/>
                         </div>
                         <div class="row column small margin-top-small">
-                            Examples: <a href='/search?geneQuery=[{"value":"REG1B"}]}'>REG1B</a>,
-                            <a href='/search?geneQuery=[{"value":"zinc finger"}]}'>zinc finger</a>,
-                            <a href='/search?geneQuery=[{"value":"O14777", "category":"uniprot"}]}'>O14777 (UniProt)</a>,
-                            <a href='/search?geneQuery=[{"value":"GO:0010468", "category":"go"}]}'>GO:0010468 (regulation of gene expression)</a>
+                            <!--[{"value":"REG1B"}]-->
+                            Examples: <a th:href="@{'/search?geneQuery=%5B%7B%22value%22%3A%22REG1B%22%7D%5D'}">REG1B</a>,
+                            <!--[{"value":"zinc finger"}]-->
+                            <a th:href="@{'/search?geneQuery=%5B%7B%22value%22%3A%22zinc%20finger%22%7D%5D'}">zinc finger</a>,
+                            <!--[{"value":"O14777", "category":"uniprot"}]-->
+                            <a th:href="@{'/search?geneQuery=%5B%7B%22value%22%3A%22O14777%22%2C%20%22category%22%3A%22uniprot%22%7D%5D'}">O14777 (UniProt)</a>,
+                            <!--[{"value":"GO:0010468", "category":"go"}]-->
+                            <a th:href="@{'/search?geneQuery=%5B%7B%22value%22%3A%22GO%3A0010468%22%2C%20%22category%22%3A%22go%22%7D%5D'}">GO:0010468 (regulation of gene expression)</a>
                         </div>
                     </div>
                     <div class="small-12 medium-4 large-2 columns">
@@ -37,10 +41,14 @@
                             <input id="home-search-condition-query-input" type="text" placeholder="Enter condition query…" name="conditionQuery" />
                         </div>
                         <div class="row column small margin-top-small">
-                            Examples: <a href='/search?conditionQuery=[{"value":"lung"}]'>lung</a>,
-                            <a href='/search?conditionQuery=[{"value":"leaf"}]'>leaf</a>,
-                            <a href='/search?conditionQuery=[{"value":"valproic acid"}]'>valproic acid</a>,
-                            <a href='/search?conditionQuery=[{"value":"cancer"}]'>cancer</a>
+                            <!--[{"value":"lung"}]-->
+                            Examples: <a th:href="@{'/search?conditionQuery=%5B%7B%22value%22%3A%22lung%22%7D%5D'}">lung</a>,
+                            <!--[{"value":"leaf"}]-->
+                            <a th:href="@{'/search?conditionQuery=%5B%7B%22value%22%3A%22leaf%22%7D%5D'}">leaf</a>,
+                            <!--[{"value":"valproic acid"}]-->
+                            <a th:href="@{'/search?conditionQuery=%5B%7B%22value%22%3A%22valproic%20acid%22%7D%5D'}">valproic acid</a>,
+                            <!--[{"value":"cancer"}]-->
+                            <a th:href="@{'/search?conditionQuery=%5B%7B%22value%22%3A%22cancer%22%7D%5D'}">cancer</a>
                         </div>
                     </div>
                 </div>
