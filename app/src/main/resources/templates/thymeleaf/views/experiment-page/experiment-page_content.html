@@ -17,7 +17,7 @@
 
 <script defer th:src="@{/resources/js-bundles/experimentPage.bundle.js}"></script>
 
-<script th:inline="javascript" th:with="contextPath=@{/}">
+<script th:inline="javascript">
   document.addEventListener("DOMContentLoaded", function() {
     experimentPage.render({
       atlasUrl: '[(@{/})]',

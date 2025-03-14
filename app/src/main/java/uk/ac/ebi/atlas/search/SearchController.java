@@ -21,7 +21,6 @@ import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.solr.analytics.AnalyticsSearchService;
 import uk.ac.ebi.atlas.solr.analytics.baseline.BaselineAnalyticsSearchService;
-import uk.ac.ebi.atlas.solr.analytics.query.AnalyticsQueryClient;
 import uk.ac.ebi.atlas.species.Species;
 import uk.ac.ebi.atlas.species.SpeciesFactory;
 
@@ -130,6 +129,8 @@ public class SearchController extends HtmlExceptionHandlingController {
 
             model.addAttribute("hasDifferentialResults", hasDifferentialResults);
             model.addAttribute("hasBaselineResults", hasBaselineResults);
+
+            model.addAttribute("title", "Search results");
 
             LOGGER.debug("Search results for {} in {} ms: {}",
                     searchDescription,
