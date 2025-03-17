@@ -6,14 +6,15 @@
 
 <th:block th:if="${hasBaselineResults}">
     <script th:inline="javascript">
+        const conditionQuery = /*[[${conditionQuery != null ? conditionQuery : '[]'}]]*/ [];
         document.addEventListener("DOMContentLoaded", function() {
             $(function () {
                 expressionAtlasBaselineExpression.render(
                     {
                         atlasUrl: '[(@{/})]',
                         facetsTreeData: /*[(${jsonFacets})]*/ {},
-                        geneQuery: /*[[${geneQuery}]]*/ {},
-                        conditionQuery: /*[[${conditionQuery}]]*/ {},
+                        geneQuery: /*[[${geneQuery}]]*/ [],
+                        conditionQuery: conditionQuery,
                         species: /*[[${species}]]*/ ''
                     }, 'gxaBaselineTab');
             });

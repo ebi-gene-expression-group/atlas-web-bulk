@@ -75,6 +75,10 @@ public abstract class BioentityPageController extends HtmlExceptionHandlingContr
                 bioEntityCardModelFactory.modelAttributes(
                         identifier, species, desiredOrderOfPropertyNames, entityName, propertyValuesByType));
 
+        if (!model.containsAttribute("conditionQuery")) {
+            model.addAttribute("conditionQuery", "");
+        }
+
         model.addAttribute("title", "Search results");
 
         return "search-results";
