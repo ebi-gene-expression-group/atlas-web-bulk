@@ -52,6 +52,7 @@ public abstract class BioentityPageController extends HtmlExceptionHandlingContr
 
         if (!hasDifferentialResults && !hasBaselineResults) {
             model.addAttribute("searchDescription", identifier);
+            model.addAttribute("title", "No results");
             return "no-results";
         }
 

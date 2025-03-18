@@ -92,7 +92,8 @@ public class SearchController extends HtmlExceptionHandlingController {
                         geneQuery, conditionQuery, species.getReferenceName());
         stopWatch.stop();
         // No gene IDs -> empty results page
-        if (geneIds.size() == 0) {
+        if (geneIds.isEmpty()) {
+            model.addAttribute("title", "No results");
             return "no-results";
         }
 
@@ -111,6 +112,7 @@ public class SearchController extends HtmlExceptionHandlingController {
             boolean hasBaselineResults = ExperimentType.containsBaseline(experimentTypes);
 
             if (!hasDifferentialResults && !hasBaselineResults) {
+                model.addAttribute("title", "No results");
                 return "no-results";
             }
 
