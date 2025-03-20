@@ -16,7 +16,7 @@
                    title="'View array design in ArrayExpress'"
                    th:href="'https://www.ebi.ac.uk/arrayexpress/arrays/' + ${arrayDesignAccession}"
                    target="_blank"
-                   th:text="${#sets.toList(arrayDesignNames)[iterStat.index]}">
+                   th:text="${arrayDesignNames[iterStat.index]}">
                 </a>
             </div>
         </div>
