@@ -107,6 +107,14 @@
             <param-name>hstsEnabled</param-name>
             <param-value>true</param-value>
         </init-param>
+        <init-param>
+            <param-name>antiClickJackingOption</param-name>
+            <param-value>ALLOW-FROM</param-value> <!-- Options: DENY or SAMEORIGIN -->
+        </init-param>
+        <init-param>
+            <param-name>antiClickJackingUri</param-name>
+            <param-value>https://www.ebi.ac.uk/</param-value> <!-- Customize to your desired URL -->
+        </init-param>
     </filter>
     <filter-mapping>
         <filter-name>httpHeaderSecurity</filter-name>
