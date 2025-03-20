@@ -2,6 +2,7 @@ package uk.ac.ebi.atlas.experimentpage.qc;
 
 import com.google.common.base.Preconditions;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -43,7 +44,8 @@ public class QcReportController {
                             @PathVariable final String arrayDesign,
                             @PathVariable String resource,
                             @RequestParam(value = "accessKey", required = false) String accessKey,
-                            RedirectAttributes ra) {
+                            RedirectAttributes ra,
+                            Model model) {
 
         if (!resource.equals("index.html")) {
             // NB: resources do not need access key
@@ -62,7 +64,9 @@ public class QcReportController {
                                                 "Not found: QC report for experiment {0} and array design {1}",
                                                 experimentAccession, arrayDesign))));
 
-        return "qc-template";
+        model.addAttribute("qcReportContent", QcReportUtil.getContent(request));
+
+        return "experiment-page-qc-template";
     }
 
     // forwards to a url that is handled by the mvc:resources handler, see WebConfig.java
