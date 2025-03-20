@@ -3,6 +3,7 @@ package uk.ac.ebi.atlas.controllers.page;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.ServletContextResourceLoader;
@@ -23,14 +24,16 @@ public class StaticPageController extends HtmlExceptionHandlingController {
     }
 
     @RequestMapping("/{pageName}.html")
-    public String getStaticPage(@PathVariable String pageName) {
-        checkPageExists(String.format("/resources/html/%s.html", pageName), pageName);
+    public String getStaticPage(@PathVariable String pageName, Model model) {
+        checkPageExists(String.format("classpath:/templates/thymeleaf/views/%s.html", pageName), pageName);
+        model.addAttribute("title", pageName);
         return pageName;
     }
 
     @RequestMapping("/help/{pageName}.html")
-    public String getHelpPage(@PathVariable String pageName) {
-        checkPageExists(String.format("/resources/html/help/%s.html", pageName), pageName);
+    public String getHelpPage(@PathVariable String pageName, Model model) {
+        checkPageExists(String.format("classpath:/templates/thymeleaf/views/help/%s.html", pageName), pageName);
+        model.addAttribute("title", "Help page");
         return "help/" + pageName;
     }
 
