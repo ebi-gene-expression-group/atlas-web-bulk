@@ -19,6 +19,7 @@ import uk.ac.ebi.atlas.solr.analytics.differential.DifferentialAnalyticsSearchSe
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Set;
 
@@ -46,6 +47,7 @@ public class DASFeaturesController extends HtmlExceptionHandlingController {
     public String getDifferentialJsonResults(
             @RequestParam(value = "segment", required = false, defaultValue = "") String geneId,
             @RequestParam(value = "conditionQuery", required = false, defaultValue = "") SemanticQuery conditionQuery,
+            HttpServletRequest request,
             Model model) {
 
         checkArgument(isNotBlank(geneId) || conditionQuery.isNotEmpty());
@@ -70,10 +72,10 @@ public class DASFeaturesController extends HtmlExceptionHandlingController {
 
         model.addAttribute("geneId", geneId);
         model.addAttribute("geneName", geneName);
-        var baseUrl = "http://www.ebi.ac.uk/";
+        var baseUrl = getBaseURL(request);
         model.addAttribute("baseURL", baseUrl);
-        model.addAttribute("geneUrl", baseUrl + "genes/" + geneId);
-        model.addAttribute("geneFactorTypeUrl", baseUrl + "query?geneQuery=" + geneId + "&condition=");
+        model.addAttribute("geneUrl", baseUrl + "/genes/" + geneId);
+        model.addAttribute("geneFactorTypeUrl", baseUrl + "/query?geneQuery=" + geneId + "&condition=");
 
         for (String factorValue:
                 ImmutableList.of("ORGANISM_PART", "DISEASE", "CELL_TYPE", "CELL_LINE", "COMPOUND",
@@ -84,6 +86,22 @@ public class DASFeaturesController extends HtmlExceptionHandlingController {
         }
 
         return "das-features";
+    }
+
+    private String getBaseURL(HttpServletRequest request) {
+        String scheme = request.getScheme(); // "http" or "https"
+        String serverName = request.getServerName(); // e.g., "example.com"
+        int serverPort = request.getServerPort(); // Port number, e.g., 80 or 443
+        String contextPath = request.getContextPath(); // e.g., "/myapp"
+
+        return scheme + "://"
+            + serverName
+            + getPortIfNeeded(serverPort)
+            + contextPath;
+    }
+
+    private String getPortIfNeeded(int serverPort) {
+        return serverPort != 80 && serverPort != 443 ? ":" + serverPort : "";
     }
 
     private String formatFactorValuesLabel(Set<String> factorValues) {

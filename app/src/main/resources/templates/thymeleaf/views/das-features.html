@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <DASGFF>
-    <GFF th:href="${baseURL + 'das/s4/features?segment=' + geneId}">
+    <GFF th:href="${baseURL + '/das/s4/features?segment=' + geneId}">
         <SEGMENT th:id="${geneId}" start="1" stop="1" total="11" version="1.0" th:label="'Expression Atlas annotation for ' + ${geneId}">
             <FEATURE th:id="${geneId}" label="Expression summary">
                 <TYPE id="description" category="description">001. Gene</TYPE>
