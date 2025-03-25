@@ -21,7 +21,6 @@ import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.solr.analytics.AnalyticsSearchService;
 import uk.ac.ebi.atlas.solr.analytics.baseline.BaselineAnalyticsSearchService;
-import uk.ac.ebi.atlas.solr.analytics.query.AnalyticsQueryClient;
 import uk.ac.ebi.atlas.species.Species;
 import uk.ac.ebi.atlas.species.SpeciesFactory;
 
@@ -93,7 +92,8 @@ public class SearchController extends HtmlExceptionHandlingController {
                         geneQuery, conditionQuery, species.getReferenceName());
         stopWatch.stop();
         // No gene IDs -> empty results page
-        if (geneIds.size() == 0) {
+        if (geneIds.isEmpty()) {
+            model.addAttribute("title", "No results");
             return "no-results";
         }
 
@@ -112,6 +112,7 @@ public class SearchController extends HtmlExceptionHandlingController {
             boolean hasBaselineResults = ExperimentType.containsBaseline(experimentTypes);
 
             if (!hasDifferentialResults && !hasBaselineResults) {
+                model.addAttribute("title", "No results");
                 return "no-results";
             }
 
@@ -130,6 +131,8 @@ public class SearchController extends HtmlExceptionHandlingController {
 
             model.addAttribute("hasDifferentialResults", hasDifferentialResults);
             model.addAttribute("hasBaselineResults", hasBaselineResults);
+
+            model.addAttribute("title", "Search results");
 
             LOGGER.debug("Search results for {} in {} ms: {}",
                     searchDescription,

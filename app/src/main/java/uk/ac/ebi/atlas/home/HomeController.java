@@ -40,6 +40,11 @@ public class HomeController extends HtmlExceptionHandlingController {
         this.experimentTrader = experimentTrader;
     }
 
+    @RequestMapping(value = {"/", "/index"})
+    public String redirectHome() {
+        return "redirect:/home";
+    }
+
     @RequestMapping(value = "/home", produces = "text/html;charset=UTF-8")
     public String getHome(Model model) {
         model.addAttribute("title", "Home");

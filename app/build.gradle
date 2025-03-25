@@ -51,13 +51,10 @@ dependencies {
     implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
     implementation 'org.thymeleaf:thymeleaf-spring5:3.1.2.RELEASE'
 
-    runtimeOnly 'org.apache.tiles:tiles-extras:3.0.8'
     // For URL rewrite (see WEB-INF/web.xml), or your Filter will fail with the most confusing error messages
     runtimeOnly 'org.tuckey:urlrewritefilter:4.0.3'
-    runtimeOnly 'jstl:jstl:1.2'
 
     testImplementation 'commons-beanutils:commons-beanutils:1.9.3'
-    testImplementation 'javax.servlet.jsp:jsp-api:2.2'
 
     testImplementation 'com.zaxxer:HikariCP:3.3.1'
 }

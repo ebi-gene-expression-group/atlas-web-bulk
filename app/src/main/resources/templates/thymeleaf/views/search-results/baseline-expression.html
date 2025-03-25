@@ -1,0 +1,23 @@
+<link rel="stylesheet" type="text/css" th:href="@{/resources/css/alt-customized-bootstrap-3.3.5.css}"/>
+
+<div id="gxaBaselineTab"></div>
+
+<script defer th:src="@{/resources/js-bundles/expressionAtlasBaselineExpression.bundle.js}"></script>
+
+<th:block th:if="${hasBaselineResults}">
+    <script th:inline="javascript">
+        const conditionQuery = /*[[${conditionQuery != null ? conditionQuery : '[]'}]]*/ [];
+        document.addEventListener("DOMContentLoaded", function() {
+            $(function () {
+                expressionAtlasBaselineExpression.render(
+                    {
+                        atlasUrl: '[(@{/})]',
+                        facetsTreeData: /*[(${jsonFacets})]*/ {},
+                        geneQuery: /*[[${geneQuery}]]*/ [],
+                        conditionQuery: conditionQuery,
+                        species: /*[[${species}]]*/ ''
+                    }, 'gxaBaselineTab');
+            });
+        })
+    </script>
+</th:block>

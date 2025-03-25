@@ -33,7 +33,7 @@ public class StaticPageControllerWIT {
     public void about() throws Exception {
         this.mockMvc.perform(get("/about.html"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("static"));
+                .andExpect(view().name("about"));
     }
 
     @Test
@@ -47,7 +47,6 @@ public class StaticPageControllerWIT {
     public void help() throws Exception {
         this.mockMvc.perform(get("/help/index.html"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("static"));
+                .andExpect(view().name("help/index"));
     }
-
 }

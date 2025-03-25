@@ -52,6 +52,7 @@ public abstract class BioentityPageController extends HtmlExceptionHandlingContr
 
         if (!hasDifferentialResults && !hasBaselineResults) {
             model.addAttribute("searchDescription", identifier);
+            model.addAttribute("title", "No results");
             return "no-results";
         }
 
@@ -74,6 +75,12 @@ public abstract class BioentityPageController extends HtmlExceptionHandlingContr
         model.addAllAttributes(
                 bioEntityCardModelFactory.modelAttributes(
                         identifier, species, desiredOrderOfPropertyNames, entityName, propertyValuesByType));
+
+        if (!model.containsAttribute("conditionQuery")) {
+            model.addAttribute("conditionQuery", "");
+        }
+
+        model.addAttribute("title", "Search results");
 
         return "search-results";
     }

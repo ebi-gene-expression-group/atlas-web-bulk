@@ -1,0 +1,83 @@
+<link rel="stylesheet" type="text/css" th:href="@{/resources/css/foundation/bioentities-box.css}"/>
+
+<style>
+    #feedback-button {
+        display: inline;
+    }
+    #feedback-button h1 {
+        color: black;
+    }
+</style>
+
+<div class="row expanded">
+    <div class="small-12 columns">
+
+        <div th:if="${entityBriefName == null or entityBriefName == ''}">
+            <h3 class="gxaSearchTermDescription">
+                Results for <span class="searchterm" th:text="${searchDescription}"></span>
+            </h3>
+        </div>
+
+        <div th:unless="${entityBriefName == null or entityBriefName == ''}" class="gxaBioentityHeader">
+            <p class="gxaBioentityName" th:text="${entityFullName}"></p>
+            <p class="gxaBioentitySpecies" th:text="${species}"></p>
+            <p class="gxaBioentityDescription" th:text="${bioEntityDescription}"></p>
+        </div>
+
+        <div th:with="baselineTabClass=${hasBaselineResults and hasDifferentialResults ? 'is-active' :
+                                (hasBaselineResults and not hasDifferentialResults ? 'is-active' :
+                                (not hasBaselineResults and hasDifferentialResults ? 'tab-disabled' : ''))},
+                      differentialTabClass=${hasBaselineResults and hasDifferentialResults ? '' :
+                                (hasBaselineResults and not hasDifferentialResults ? 'tab-disabled' :
+                                (not hasBaselineResults and hasDifferentialResults ? 'is-active' : ''))}">
+
+            <ul class="tabs" data-tabs data-deep-link="true" data-update-history="true" id="expression-tabs">
+                <li th:class="'tabs-title ' + ${baselineTabClass}">
+                    <a href="#baseline">Baseline expression</a>
+                </li>
+                <li th:class="'tabs-title ' + ${differentialTabClass}">
+                    <a href="#differential">Differential expression</a>
+                </li>
+                <li th:if="${entityBriefName != null and entityBriefName != ''}" class="tabs-title">
+                    <a href="#information" th:text="${entityBriefName} + ' information'"></a>
+                </li>
+            </ul>
+
+            <div class="tabs-content" data-tabs-content="expression-tabs">
+                <div th:class="'tabs-panel ' + ${baselineTabClass}"
+                     id="baseline"
+                     th:insert="~{views/search-results/baseline-expression}">
+                </div>
+                <div th:class="'tabs-panel ' + ${differentialTabClass}"
+                     id="differential"
+                     th:insert="~{views/search-results/differential-expression}">
+                </div>
+
+                <div th:if="${entityBriefName != null and entityBriefName != ''}"
+                     class="tabs-panel" id="information"
+                     th:insert="~{views/search-results/bioentity-information}">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="feedback-button"></div>
+
+<link rel="stylesheet" th:href="@{/resources/css/react-popup.css}" type="text/css" media="all">
+<script defer th:src="@{/resources/js-bundles/feedbackForm.bundle.js}"></script>
+
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.17.0/URI.min.js"></script>
+<script th:inline="javascript">
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!window.location.hash) {
+      const initialHash = /*[[${hasBaselineResults} ? '#baseline' : '#differential']]*/ '';
+      const newURL = URI(window.location).hash(initialHash).toString();
+      history.replaceState(null, '', newURL);
+    }
+    feedbackForm.render({
+      feedbackFormLink: 'https://www.ebi.ac.uk/support/gxa',
+      gaId: 'UA-37676851-1'
+    }, 'feedback-button');
+  })
+</script>

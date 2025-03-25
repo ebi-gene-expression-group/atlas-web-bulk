@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'uk.ac.ebi.ge'
-version = '36.8.0'
+version = '37.0.2'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -16,7 +16,7 @@ repositories {
   // unless we’re on the VPN, in which case the build fails
   mavenLocal()
   maven {
-    url "http://45.88.81.166/artifactory/maven-local/"
+    url "http://45.88.81.151/artifactory/maven-local/"
     allowInsecureProtocol true
   }
 }
