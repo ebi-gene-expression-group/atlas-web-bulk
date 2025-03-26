@@ -1,6 +1,6 @@
 package uk.ac.ebi.atlas.home;
 
-import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.ImmutableSortedSet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +60,6 @@ class HomeControllerWIT {
     @Test
     void speciesAreSortedAlphabetically() throws Exception {
         assertThat(mockMvc.perform(get("/home")).andReturn().getModelAndView().getModel().get("species"))
-                .isInstanceOf(ImmutableSortedMap.class);
+                .isInstanceOf(ImmutableSortedSet.class);
     }
 }

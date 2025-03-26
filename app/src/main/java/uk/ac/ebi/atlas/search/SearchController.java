@@ -1,11 +1,15 @@
 package uk.ac.ebi.atlas.search;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonObject;
 import org.apache.solr.common.SolrException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,6 +36,7 @@ public class SearchController extends HtmlExceptionHandlingController {
     private final AnalyticsSearchService analyticsSearchService;
     private final BaselineAnalyticsSearchService baselineAnalyticsSearchService;
     private final SpeciesFactory speciesFactory;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchController.class);
 
     @Inject
     public SearchController(AnalyticsSearchService analyticsSearchService,
@@ -58,7 +63,8 @@ public class SearchController extends HtmlExceptionHandlingController {
 
         Species species = speciesFactory.create(speciesString);
 
-        model.addAttribute("searchDescription", SearchDescription.get(geneQuery, conditionQuery, speciesString));
+        String searchDescription = SearchDescription.get(geneQuery, conditionQuery, speciesString);
+        model.addAttribute("searchDescription", searchDescription);
         model.addAttribute("geneQuery", geneQuery.toUrlEncodedJson());
         model.addAttribute("conditionQuery", conditionQuery.toUrlEncodedJson());
         model.addAttribute("species", species.getReferenceName());
@@ -79,12 +85,15 @@ public class SearchController extends HtmlExceptionHandlingController {
             return stringBuilder.toString();
         }
 
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start("analyticsSearchService.searchMoreThanOneBioentityIdentifier");
         ImmutableSet<String> geneIds =
                 analyticsSearchService.searchMoreThanOneBioentityIdentifier(
                         geneQuery, conditionQuery, species.getReferenceName());
-
+        stopWatch.stop();
         // No gene IDs -> empty results page
-        if (geneIds.size() == 0) {
+        if (geneIds.isEmpty()) {
+            model.addAttribute("title", "No results");
             return "no-results";
         }
 
@@ -93,30 +102,42 @@ public class SearchController extends HtmlExceptionHandlingController {
             copyModelAttributesToFlashAttributes(model, redirectAttributes);
             return "redirect:/genes/" + geneIds.iterator().next();
         } else {
+            stopWatch.start("analyticsSearchService.fetchExperimentTypes");
             // Resolves to multiple IDs or the query includes a condition -> General results page
             ImmutableSet<String> experimentTypes =
                     analyticsSearchService.fetchExperimentTypes(
                             geneQuery, conditionQuery, species.getReferenceName());
-
+            stopWatch.stop();
             boolean hasDifferentialResults = ExperimentType.containsDifferential(experimentTypes);
             boolean hasBaselineResults = ExperimentType.containsBaseline(experimentTypes);
 
             if (!hasDifferentialResults && !hasBaselineResults) {
+                model.addAttribute("title", "No results");
                 return "no-results";
             }
 
             // TODO Should BaselineFacetsTree.jsx do a request to the endpoint in JsonBaselineExperimentsController?
             if (hasBaselineResults) {
+                stopWatch.start("baselineAnalyticsSearchService.findFacetsForTreeSearch");
+                JsonObject facetsForTreeSearch = baselineAnalyticsSearchService.findFacetsForTreeSearch(
+                        geneQuery, conditionQuery, species);
+                stopWatch.stop();
+                stopWatch.start("toJson(facetsForTreeSearch)");
                 model.addAttribute(
                         "jsonFacets",
-                        GSON.toJson(baselineAnalyticsSearchService.findFacetsForTreeSearch(
-                                geneQuery, conditionQuery, species)));
+                        GSON.toJson(facetsForTreeSearch));
+                stopWatch.stop();
             }
 
             model.addAttribute("hasDifferentialResults", hasDifferentialResults);
             model.addAttribute("hasBaselineResults", hasBaselineResults);
 
+            model.addAttribute("title", "Search results");
 
+            LOGGER.debug("Search results for {} in {} ms: {}",
+                    searchDescription,
+                    stopWatch.getTotalTimeMillis(),
+                    stopWatch.prettyPrint());
 
             return "search-results";
         }

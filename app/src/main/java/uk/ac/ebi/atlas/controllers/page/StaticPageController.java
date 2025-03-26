@@ -3,6 +3,7 @@ package uk.ac.ebi.atlas.controllers.page;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.ServletContextResourceLoader;
@@ -11,7 +12,6 @@ import uk.ac.ebi.atlas.controllers.ResourceNotFoundException;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 
 @Profile("!cli")
 @Controller
@@ -24,25 +24,23 @@ public class StaticPageController extends HtmlExceptionHandlingController {
     }
 
     @RequestMapping("/{pageName}.html")
-    public String getStaticPage(HttpServletRequest request, @PathVariable String pageName) {
-        String path = String.format("/resources/html/%s.html", pageName);
-        request.setAttribute("contentResource", fetchResource(path, request.getRequestURI()));
-        return "static";
+    public String getStaticPage(@PathVariable String pageName, Model model) {
+        checkPageExists(String.format("classpath:/templates/thymeleaf/views/%s.html", pageName), pageName);
+        model.addAttribute("title", pageName);
+        return pageName;
     }
 
     @RequestMapping("/help/{pageName}.html")
-    public String getHelpPage(HttpServletRequest request, @PathVariable String pageName) {
-        String path = String.format("/resources/html/help/%s.html", pageName);
-        request.setAttribute("contentResource", fetchResource(path, request.getRequestURI()));
-        return "static";
+    public String getHelpPage(@PathVariable String pageName, Model model) {
+        checkPageExists(String.format("classpath:/templates/thymeleaf/views/help/%s.html", pageName), pageName);
+        model.addAttribute("title", "Help page");
+        return "help/" + pageName;
     }
 
-    private Resource fetchResource(String path, String requestUrl) {
+    private void checkPageExists(String path, String pageName) {
         Resource resource = servletContextResourceLoader.getResource(path);
         if (!resource.exists() || !resource.isReadable()) {
-            throw new ResourceNotFoundException("Resource " + requestUrl + " does not exist");
+            throw new ResourceNotFoundException("Resource " + pageName + " does not exist");
         }
-        return resource;
     }
-
 }

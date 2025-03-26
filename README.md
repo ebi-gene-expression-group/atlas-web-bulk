@@ -76,7 +76,7 @@ This script, unless it’s run with the `-r` flag, can be interrupted without lo
 directories via FTP, and can resume after cancellation. It can be re-run to update the data in the volumes should the
 contents of the source directories change. This is especially useful when experiments are re-analysed/re-annotated,
 or the bioentity properties directory is updated after a release of  Ensembl, WormBase ParaSite, Reactome, Gene
-Ontoloy, Plant Ontology or InterPro.
+Ontology, Plant Ontology or InterPro.
 
 ### How to add a private experiment bundle
 
@@ -84,15 +84,22 @@ Private experiments are not available to download from our FTP site. You can dow
 
 1. These steps should be done before the `PostGreSQL` and `Solr` steps. 
 2. After logged in to the `codon-cluster` check if the experiment bundle can be found under this path:
-```/nfs/production/irene/ma/experiments/```.
-2. If it is there, then go to the folder on your local computer where you would like to download the bundle.
-3. Download it by this command:
-```scp -r codon-login:/nfs/production/irene/ma/experiments/<EXPERIMENT_ACCESSION_ID> .```.
-4. Create a temp container with mounting the already existing data volume for our local experiments: 
-````docker container create --name expVol -v gxa_atlas-data-exp:/atlas-data/exp ubuntu:jammy````
-5. Copy the file bundles of the downloaded private experiment into the volume: ```docker cp <EXPERIMENT_ACCESSION_ID> expVol:/atlas-data/exp/magetab/```
-6. Add `<EXPERIMENT_ACCESSION_ID>` into the `PRIVATE_EXP_IDS` variable. It is in to `test-data.env` file under the `docker/prepare-dev-environment` folder. If it is not there, then please create it.
-7. The experiment accession IDs in that variable should be separated by SPACE.
+`/nfs/production/irene/ma/experiments/`.
+3. If it is there, then go to the folder on your local computer where you would like to download the bundle.
+4. Download it by this command:
+    ```bash
+    scp -r codon-login:/nfs/production/irene/ma/experiments/<EXPERIMENT_ACCESSION_ID> .
+    ```
+5. Create a temp container with mounting the already existing data volume for our local experiments:
+    ```bash
+    docker container create --name expVol -v gxa_atlas-data-exp:/atlas-data/exp ubuntu:jammy
+    ```
+6. Copy the file bundles of the downloaded private experiment into the volume: 
+    ```bash 
+    docker cp <EXPERIMENT_ACCESSION_ID> expVol:/atlas-data/exp/magetab/
+    ```
+7. Add `<EXPERIMENT_ACCESSION_ID>` into the `PRIVATE_EXP_IDS` variable. It is in to `test-data.env` file under the `docker/prepare-dev-environment` folder. If it is not there, then please create it.
+8. The experiment accession IDs in that variable should be separated by SPACE.
 
 
 

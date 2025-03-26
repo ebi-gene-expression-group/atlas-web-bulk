@@ -49,7 +49,8 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
         super(experimentTrader);
 
         this.baselineExperimentPageService =
-                new BaselineExperimentPageService(baselineExperimentProfilesService, coexpressedGenesService);
+                new BaselineExperimentPageService(
+                        baselineExperimentProfilesService, coexpressedGenesService);
 
         this.rnaSeqHistograms =
                 new HistogramService.RnaSeq(rnaSeqBaselineProfileStreamFactory, experimentTrader);
@@ -67,6 +68,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
         return GSON.toJson(
                 baselineExperimentPageService.getResultsForExperiment(
                         (BaselineExperiment) experimentTrader.getExperiment(experimentAccession, accessKey),
+                        experimentTrader.getExperimentDesign(experimentAccession),
                         accessKey,
                         preferences));
     }

@@ -22,7 +22,7 @@ import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 @Scope("request")
 public class ContrastSummaryController {
 
-    private ExperimentTrader experimentTrader;
+    private final ExperimentTrader experimentTrader;
 
     @Inject
     public ContrastSummaryController(ExperimentTrader experimentTrader) {
@@ -44,7 +44,7 @@ public class ContrastSummaryController {
             throw new IllegalArgumentException("No contrast with ID " + contrastId + " found.");
         }
 
-        ExperimentDesign experimentDesign = differentialExperiment.getExperimentDesign();
+        ExperimentDesign experimentDesign = experimentTrader.getExperimentDesign(experimentAccession);
 
         ContrastSummary contrastSummary = new ContrastSummaryBuilder()
                 .withExperimentDesign(experimentDesign)

@@ -22,6 +22,7 @@ import uk.ac.ebi.atlas.model.experiment.ExperimentDesignTable;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.experiment.sample.ReportsGeneExpression;
 import uk.ac.ebi.atlas.resource.DataFileHub;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.utils.GsonProvider;
 
 import java.util.List;
@@ -39,10 +40,14 @@ public class ExperimentPageContentService {
 
     private final DataFileHub dataFileHub;
     private final ExpressionAtlasContentService expressionAtlasContentService;
+    private final ExperimentTrader experimentTrader;
 
-    public ExperimentPageContentService(DataFileHub dataFileHub, ExpressionAtlasContentService expressionAtlasContentService) {
+    public ExperimentPageContentService(DataFileHub dataFileHub,
+                                        ExpressionAtlasContentService expressionAtlasContentService,
+                                        ExperimentTrader experimentTrader) {
         this.dataFileHub = dataFileHub;
         this.expressionAtlasContentService = expressionAtlasContentService;
+        this.experimentTrader = experimentTrader;
     }
 
     @Cacheable(cacheNames = "experimentContent", key = "#experiment.getAccession()")
@@ -66,7 +71,8 @@ public class ExperimentPageContentService {
         // everything wants to have a heatmap
         availableTabs.add(
                 heatmapTab(
-                        GSON.toJsonTree(getExperimentVariablesAsHeatmapFilterGroups(experiment)).getAsJsonArray(),
+                        GSON.toJsonTree(getExperimentVariablesAsHeatmapFilterGroups(experiment,
+                                experimentTrader.getExperimentDesign(experiment.getAccession()))).getAsJsonArray(),
                         JsonBaselineExperimentController.geneDistributionUrl(
                                 experiment.getAccession(),
                                 accessKey,
@@ -90,7 +96,7 @@ public class ExperimentPageContentService {
 
         if (dataFileHub.getExperimentFiles(experiment.getAccession()).experimentDesign.exists()) {
             availableTabs.add(
-                    experimentDesignTab(new ExperimentDesignTable(experiment).asJson(),
+                    experimentDesignTab(new ExperimentDesignTable(experimentTrader, experiment).asJson(),
                             ExperimentDesignFile.makeUrl(experiment.getAccession(), accessKey)));
         }
 

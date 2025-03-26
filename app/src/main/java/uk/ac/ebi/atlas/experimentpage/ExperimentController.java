@@ -34,8 +34,9 @@ public class ExperimentController extends HtmlExceptionHandlingController {
 
         model.addAllAttributes(experimentAttributesService.getAttributes(experiment));
         model.addAttribute(
-                "content",
+                "experimentContent",
                 experimentPageContentService.jsonSerializeContentForExperiment(experiment, accessKey));
+        model.addAttribute("title", "Experiment");
 
         return "experiment-page";
     }
