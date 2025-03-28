@@ -14,8 +14,6 @@ dependencies {
     implementation project(':atlas-web-core')
     implementation project(':app')
 
-    runtimeOnly 'javax.servlet.jsp:jsp-api:2.2'
-
     implementation 'info.picocli:picocli:4.6.1'
     implementation 'info.picocli:picocli-spring-boot-starter:4.6.1'
 
