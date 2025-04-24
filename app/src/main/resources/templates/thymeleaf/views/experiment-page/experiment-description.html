@@ -27,23 +27,23 @@
                     th:text="'Publication' + ${pluralityPostFix}"></span>
             <ul>
                 <li th:each="publication : ${publications}">
-                    <span th:if="${publication.authors != null}"
-                          th:text="${publication.authors} + ' (' + publication.publicationYear + ')'">
+                    <span th:if="${publication.getAuthors() != null}"
+                          th:text="${publication.getAuthors() + ' (' + publication.getPublicationYear() + ')'}">
                     </span>
                     <i>
-                        <a th:if="${publication.pubmedId != null}"
+                        <a th:if="${publication.getPubmedId() != null}"
                            class="pubmed-id"
-                           th:href="'https://europepmc.org/abstract/MED/' + ${publication.pubmedId}"
+                           th:href="'https://europepmc.org/abstract/MED/' + ${publication.getPubmedId()}"
                            title="Read publication"
                            target="_blank"
-                           th:text="${publication.title}" >
+                           th:text="${publication.getTitle()}" >
                         </a>
-                        <a th:unless="${publication.pubmedId != null}"
+                        <a th:unless="${publication.getPubmedId() != null}"
                            class="pubmed-id"
-                           th:href="'https://doi.org/' + ${publication.doi}"
+                           th:href="'https://doi.org/' + ${publication.getDoi()}"
                            title="Read publication"
                            target="_blank"
-                           th:text="${publication.title}" >
+                           th:text="${publication.getTitle()}" >
                         </a>
                     </i>
                 </li>
