@@ -13,11 +13,11 @@
 ### Requirements
 - Docker v20+ with the [Compose plugin](https://docs.docker.com/compose/install/)
 - 100 GB of available storage for the following Docker volumes:
-    - Experiment files
-    - Bioentity properties (i.e. gene annotations)
-    - PostgreSQL
-    - SolrCloud and ZooKeeper
-    - Tomcat configuration files
+  - Experiment files
+  - Bioentity properties (i.e. gene annotations)
+  - PostgreSQL
+  - SolrCloud and ZooKeeper
+  - Tomcat configuration files
 
 Files written by Solr, PostgreSQL and Tomcat are kept in volumes which will be reused even if the containers are
 removed (e.g. when running `docker-compose down`).  If you want to start afresh delete the old volume(s) (e.g. for
@@ -76,26 +76,62 @@ This script, unless it’s run with the `-r` flag, can be interrupted without lo
 directories via FTP, and can resume after cancellation. It can be re-run to update the data in the volumes should the
 contents of the source directories change. This is especially useful when experiments are re-analysed/re-annotated,
 or the bioentity properties directory is updated after a release of  Ensembl, WormBase ParaSite, Reactome, Gene
-Ontoloy, Plant Ontology or InterPro.
+Ontology, Plant Ontology or InterPro.
+
+### How to add a private experiment bundle
+
+Private experiments are not available to download from our FTP site. You can download them from the `codon-cluster` by using the following steps:
+
+1. These steps should be done before the `PostGreSQL` and `Solr` steps. 
+2. After logged in to the `codon-cluster` check if the experiment bundle can be found under this path:
+`/nfs/production/irene/ma/experiments/`.
+3. If it is there, then go to the folder on your local computer where you would like to download the bundle.
+4. Download it by this command:
+    ```bash
+    scp -r codon-login:/nfs/production/irene/ma/experiments/<EXPERIMENT_ACCESSION_ID> .
+    ```
+5. Create a temp container with mounting the already existing data volume for our local experiments:
+    ```bash
+    docker container create --name expVol -v gxa_atlas-data-exp:/atlas-data/exp ubuntu:jammy
+    ```
+6. Copy the file bundles of the downloaded private experiment into the volume: 
+    ```bash 
+    docker cp <EXPERIMENT_ACCESSION_ID> expVol:/atlas-data/exp/magetab/
+    ```
+7. Add `<EXPERIMENT_ACCESSION_ID>` into the `PRIVATE_EXP_IDS` variable. It is in to `test-data.env` file under the `docker/prepare-dev-environment` folder. If it is not there, then please create it.
+8. The experiment accession IDs in that variable should be separated by SPACE.
+
+
 
 ### PostGreSQL
 
-To create our PostGreSQL database and run the schema migrations up to the latest version please execute this script:  
+To create our PostGreSQL database and run the schema migrations up to the latest version please execute this script:
 ```bash
 ./docker/prepare-dev-environment/postgres/run.sh -r -l pg.log
 ```
 
 ### Solr
-To create the collections, their schemas and populate them, please run the following script.
+To create the collections, their schemas and populate them, please run the following scripts.
 
+Currently, this step is separated into 2 sub-steps by Solr collections. 
+There is an inconsistency in our web apps and various shell scripts - that we use together with the Data Prod Team -
+how we use the `SOLR_HOST` and `SOLR_HOSTS` variables. We need to sort this out, 
+but while it is not solved we probably have to keep this 2 sub-steps, unless we find a way to merge them.
+
+To create and populate the `bioentities` collection:
 ```bash
-./docker/prepare-dev-environment/solr/run.sh -r -l solr.log
+./docker/prepare-dev-environment/solr-bioentities/run.sh -r -l solr-bioentities.log
+```
+
+To create and populate the `bulk-analytics` collection:
+```bash
+./docker/prepare-dev-environment/solr-analytics/run.sh -l solr-analytics.log
 ```
 
 Run the script with the `-h` flag for more details.
 
 You may want to speed up the process by raising the value of the environment variable `NUM_DOCS_PER_BATCH` (L81 of the
-`run.sh` script). On [a fairly powerful laptop at the time of 
+`run.sh` script). On [a fairly powerful laptop at the time of
 writing](https://www.lenovo.com/gb/en/p/laptops/thinkpad/thinkpadx1/x1-extreme-gen-2/22tp2txx1e2) 20,000 has been
 found to be a reliable number via painstaking trail and error, but your mileage may vary. Ensure that there are no
 errors in the script logs, or update your test data by add the necessary species names and experiment accessions in the `test-dev.env` file and rebuild the development
@@ -239,70 +275,65 @@ The script `debug-single-test.sh` is a shortcut for this task. It takes the same
 ```
 
 ## Run web application
+
+Please check this first in the troubleshooting session: [Known Build Issue](#known-build-issue)
+
 The web application is compiled in two stages:
 1. Front end JavaScript packages are transpiled into “bundles” with [Webpack](https://webpack.js.org/)
-2. Bundles and back end Java code are built as a WAR file to deploy and serve with Tomcat (other Java EE web servers
-   might work but no testing has been carried out in this regard)
+2. Bundles and back end Java code are built as a WAR file
 
-To generate the Webpack bundles run the following script:
+Lastly, Tomcat deploys the WAR file according to `app/src/main/webapp/META-INF/context.xml`; other Java EE web servers
+might work but no testing has been carried out in this regard.
+
+For the first step you can run the following script:
 ```bash
  ./compile-front-end-packages.sh -iu
 ```
 
-If the script encounters no compilation errors it will open your default browser with a graphical diagram of the
-bundles and their contents.
-
-Run the script with `-h` to know more about its usage.
-You can add `-p` to generate production bundles, which will minify the code and omit browser console warnings. Certain
-React rendering tasks are also faster but it makes debugging very hard.
-
-Then run the Gradle task `war` in the `atlas-web-bulk` directory:
+The second step is simply:
 ```bash
-./gradlew clean :app:war
+./gradlew :app:war
 ```
 
-You should now have the file `webapps/gxa.war`.
+The script `build-and-deploy-webapp.sh` puts it altogether and will eventually launch a Tomcat container with a running
+dev instance of Single Cell Expression Atlas. The script before launching the web application can build only the back-end or front-end component or both.
 
-You can now deploy it in Tomcat’s container with the following:
-```bash
-docker-compose \
---env-file=./docker/dev.env \
--f ./docker/docker-compose-solrcloud.yml \
--f ./docker/docker-compose-postgres.yml \
--f ./docker/docker-compose-tomcat.yml \
-up
-```
+Here is the usage of this script:
 
-You can also set a Docker Compose *Run* configuration in IntelliJ IDEA with the `dev.env` in environment files.
+- -n Use this flag if you would not like to do any build, just execute the application.
+- -f Use this flag if you would like to build the front-end javascript packages.
+- -b Use this flag if you would like to build the back-end of the web application.
+- -h Displaying the help file of this script.
 
-After bringing up the containers, you may want to inspect the logs to see that all services are running fine. The last
-log should come from Tomcat, and it should be similar to:
-```
-scxa-tomcat    | 18-Dec-2020 13:40:58.907 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in 6705 ms
-...
-scxa-tomcat    | 12-Jan-2021 14:59:47.566 INFO [Catalina-utility-1] org.apache.catalina.startup.HostConfig.deployWAR Deployment of web application archive [/usr/local/tomcat/webapps/gxa.war] has finished in [5,510] ms
-```
-
-Point your browser at `http://localhost:8080/gxa` and voilà!
-
-Every time you re-run the `war` task the web app will be automatically re-deployed by Tomcat.
-
-If you get any redeployment issues or want to start again afresh, remove all containers using this:
-```bash
-docker-compose \
---env-file=./docker/dev.env \
--f ./docker/docker-compose-solrcloud.yml \
--f ./docker/docker-compose-postgres.yml \
--f ./docker/docker-compose-tomcat.yml \
-down
-```
-
+If you don't give any flags, or you add both then the script is going to build both front and back-end part of the web application.
 
 ## Troubleshooting
 
+### <a name="known-build-issue"></a>Known Build Issue
+
+This current version of our developer env has a bug when we build and execute the application
+with the `build-and-deploy-webapp.sh` script.
+We have a ticket to fix this in our backlog: [Update bulk with the latest webpack and its dependencies](https://github.com/ebi-gene-expression-group/atlas-web-bulk/issues/176)
+
+You can build a working WAR with the following steps:
+1. Manually build the UI:
+```bash
+./compile-front-end-packages.sh -iu
+```
+
+2. Manually build the backend:
+```bash
+./gradlew :app:war
+```
+
+3. Use this script to start up the web app on your local environment:
+```bash
+./build-and-deploy-webapp.sh -n
+```
+
 ### SolrCloud nodes shut down on macOS
 Docker for macOS sets fairly strict resource limits for all Docker containers. If your containers require e.g. more
-memory you need to increase the available amount in the Docker Dashboard. For bulk Expression Atlas, plase set Memory
+memory you need to increase the available amount in the Docker Dashboard. For bulk Expression Atlas, please set Memory
 to between 8-12 GB and disk image to 100 GB or more. Please see the screenshot below for reference:
 
 ![Screenshot-2021-02-18-at-18-27-40](https://user-images.githubusercontent.com/4425744/109644570-8ccee680-7b4d-11eb-9db0-7a29fb4d9e2b.png)

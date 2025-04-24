@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.sample.Contrast;
 import uk.ac.ebi.atlas.model.experiment.differential.DifferentialExperiment;
 import uk.ac.ebi.atlas.model.experiment.summary.ContrastSummary;
@@ -21,7 +22,7 @@ import static uk.ac.ebi.atlas.utils.GsonProvider.GSON;
 @Scope("request")
 public class ContrastSummaryController {
 
-    private ExperimentTrader experimentTrader;
+    private final ExperimentTrader experimentTrader;
 
     @Inject
     public ContrastSummaryController(ExperimentTrader experimentTrader) {
@@ -43,8 +44,10 @@ public class ContrastSummaryController {
             throw new IllegalArgumentException("No contrast with ID " + contrastId + " found.");
         }
 
+        ExperimentDesign experimentDesign = experimentTrader.getExperimentDesign(experimentAccession);
+
         ContrastSummary contrastSummary = new ContrastSummaryBuilder()
-                .withExperiment(differentialExperiment)
+                .withExperimentDesign(experimentDesign)
                 .forContrast(contrast)
                 .withExperimentDescription(differentialExperiment.getDescription())
                 .build();

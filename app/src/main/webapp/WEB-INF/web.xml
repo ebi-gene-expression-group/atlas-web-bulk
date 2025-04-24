@@ -53,6 +53,10 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+    
+    <listener>
+        <listener-class>uk.ac.ebi.atlas.configuration.HttpOnlyCookieConfigurator</listener-class>
+    </listener>
 
     <filter>
         <filter-name>UrlRewriteFilter</filter-name>
@@ -95,6 +99,28 @@
         <url-pattern>/sc/json/*</url-pattern>
     </filter-mapping>
 
+    <filter>
+        <filter-name>httpHeaderSecurity</filter-name>
+        <filter-class>org.apache.catalina.filters.HttpHeaderSecurityFilter</filter-class>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>hstsEnabled</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>antiClickJackingOption</param-name>
+            <param-value>ALLOW-FROM</param-value> <!-- Options: DENY or SAMEORIGIN -->
+        </init-param>
+        <init-param>
+            <param-name>antiClickJackingUri</param-name>
+            <param-value>https://www.ebi.ac.uk/</param-value> <!-- Customize to your desired URL -->
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>httpHeaderSecurity</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <security-role>
         <role-name>admin</role-name>
     </security-role>
@@ -123,16 +149,10 @@
         <auth-constraint />
     </security-constraint>
 
-    <!-- Disable JSessionID -->
     <session-config>
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
-
-    <welcome-file-list>
-        <welcome-file>/WEB-INF/jsp/index.jsp</welcome-file>
-    </welcome-file-list>
-
-    <error-page>
-        <location>/WEB-INF/jsp/error.jsp</location>
-    </error-page>
 </web-app>

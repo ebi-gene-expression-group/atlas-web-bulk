@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'uk.ac.ebi.ge'
-version = '1.0.0'
+version = '37.0.4'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -16,7 +16,7 @@ repositories {
   // unless we’re on the VPN, in which case the build fails
   mavenLocal()
   maven {
-    url "http://45.88.81.166/artifactory/maven-local/"
+    url "http://45.88.81.151/artifactory/maven-local/"
     allowInsecureProtocol true
   }
 }
@@ -61,7 +61,7 @@ dependencies {
     exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
   }
 
-  testImplementation 'org.springframework:spring-test:5.1.5.RELEASE'
+  testImplementation 'org.springframework:spring-test:5.1.6.RELEASE'
   testImplementation 'com.h2database:h2:1.4.199'
   testImplementation 'org.junit.jupiter:junit-jupiter-params:5.4.1'
   testImplementation 'org.mockito:mockito-core:5.2.0'

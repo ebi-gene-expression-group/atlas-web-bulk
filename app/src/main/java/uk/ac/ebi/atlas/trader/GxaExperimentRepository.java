@@ -9,6 +9,7 @@ import uk.ac.ebi.atlas.controllers.ResourceNotFoundException;
 import uk.ac.ebi.atlas.experimentimport.ExperimentCrudDao;
 import uk.ac.ebi.atlas.experimentimport.idf.IdfParser;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.trader.factory.BaselineExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.MicroarrayExperimentFactory;
 import uk.ac.ebi.atlas.trader.factory.ProteomicsDifferentialExperimentFactory;
@@ -54,7 +55,7 @@ public class GxaExperimentRepository implements ExperimentRepository {
 
         LOGGER.info("Building experiment {}...", experimentAccession);
 
-        var experimentDesign = experimentDesignParser.parse(experimentDto.getExperimentAccession());
+        var experimentDesign = getExperimentDesign(experimentAccession);
         var idfParserOutput = idfParser.parse(experimentDto.getExperimentAccession());
         switch (experimentDto.getExperimentType()) {
             case PROTEOMICS_BASELINE:
@@ -105,5 +106,15 @@ public class GxaExperimentRepository implements ExperimentRepository {
                         "Unable to build experiment " + experimentDto.getExperimentAccession()
                         + ": experiment type " + experimentDto.getExperimentType() + " is not supported");
         }
+    }
+
+    @Override
+    public String getExperimentType(String experimentAccession) {
+        return experimentCrudDao.getExperimentType(experimentAccession);
+    }
+
+    @Override
+    public ExperimentDesign getExperimentDesign(String experimentAccession) {
+        return experimentDesignParser.parse(experimentAccession);
     }
 }

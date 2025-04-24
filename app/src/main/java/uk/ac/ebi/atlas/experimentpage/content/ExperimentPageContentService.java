@@ -10,15 +10,19 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.commons.readers.TsvStreamer;
+import uk.ac.ebi.atlas.experimentpage.ExperimentDesignFile;
+import uk.ac.ebi.atlas.experimentpage.ExpressionAtlasContentService;
 import uk.ac.ebi.atlas.experimentpage.ExternallyAvailableContentService;
 import uk.ac.ebi.atlas.experimentpage.json.JsonBaselineExperimentController;
 import uk.ac.ebi.atlas.experimentpage.qc.MicroarrayQcFiles;
 import uk.ac.ebi.atlas.experimentpage.qc.QcReportController;
 import uk.ac.ebi.atlas.model.download.ExternallyAvailableContent;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesignTable;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.model.experiment.sample.ReportsGeneExpression;
 import uk.ac.ebi.atlas.resource.DataFileHub;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 import uk.ac.ebi.atlas.utils.GsonProvider;
 
 import java.util.List;
@@ -35,9 +39,15 @@ public class ExperimentPageContentService {
             .create();
 
     private final DataFileHub dataFileHub;
+    private final ExpressionAtlasContentService expressionAtlasContentService;
+    private final ExperimentTrader experimentTrader;
 
-    public ExperimentPageContentService(DataFileHub dataFileHub) {
+    public ExperimentPageContentService(DataFileHub dataFileHub,
+                                        ExpressionAtlasContentService expressionAtlasContentService,
+                                        ExperimentTrader experimentTrader) {
         this.dataFileHub = dataFileHub;
+        this.expressionAtlasContentService = expressionAtlasContentService;
+        this.experimentTrader = experimentTrader;
     }
 
     @Cacheable(cacheNames = "experimentContent", key = "#experiment.getAccession()")
@@ -61,7 +71,8 @@ public class ExperimentPageContentService {
         // everything wants to have a heatmap
         availableTabs.add(
                 heatmapTab(
-                        GSON.toJsonTree(getExperimentVariablesAsHeatmapFilterGroups(experiment)).getAsJsonArray(),
+                        GSON.toJsonTree(getExperimentVariablesAsHeatmapFilterGroups(experiment,
+                                experimentTrader.getExperimentDesign(experiment.getAccession()))).getAsJsonArray(),
                         JsonBaselineExperimentController.geneDistributionUrl(
                                 experiment.getAccession(),
                                 accessKey,
@@ -81,6 +92,12 @@ public class ExperimentPageContentService {
                                             experiment.getAccession(),
                                             accessKey,
                                             ExternallyAvailableContent.ContentType.PLOTS))));
+        }
+
+        if (dataFileHub.getExperimentFiles(experiment.getAccession()).experimentDesign.exists()) {
+            availableTabs.add(
+                    experimentDesignTab(new ExperimentDesignTable(experimentTrader, experiment).asJson(),
+                            ExperimentDesignFile.makeUrl(experiment.getAccession(), accessKey)));
         }
 
         availableTabs.add(
@@ -126,17 +143,22 @@ public class ExperimentPageContentService {
             }
         }
 
-        supplementaryInformationTabs.add(
-                customContentTab(
-                        "resources",
-                        "Resources",
-                        "url",
-                        new JsonPrimitive(
-                                ExternallyAvailableContentService.listResourcesUrl(
-                                        experiment.getAccession(),
-                                        accessKey,
-                                        ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION)))
-        );
+        if(!expressionAtlasContentService.list(
+                experiment.getAccession(),
+                accessKey,
+                ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION).isEmpty()) {
+            supplementaryInformationTabs.add(
+                    customContentTab(
+                            "resources",
+                            "Resources",
+                            "url",
+                            new JsonPrimitive(
+                                    ExternallyAvailableContentService.listResourcesUrl(
+                                            experiment.getAccession(),
+                                            accessKey,
+                                            ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION)))
+            );
+        }
 
         if (experiment.getType().isMicroarray() &&
                 dataFileHub.getExperimentFiles(experiment.getAccession()).qcFolder.existsAndIsNonEmpty()) {
@@ -146,8 +168,6 @@ public class ExperimentPageContentService {
                             "QC Report",
                             "reports",
                             pairsToArrayOfObjects(
-                                    "name",
-                                    "url",
                                     new MicroarrayQcFiles(
                                             dataFileHub.getExperimentFiles(experiment.getAccession()).qcFolder)
                                             .getArrayDesignsThatHaveQcReports().stream()
@@ -176,12 +196,12 @@ public class ExperimentPageContentService {
         return result;
     }
 
-    private JsonArray pairsToArrayOfObjects(String leftName, String rightName, List<Pair<String, String>> pairs) {
+    private JsonArray pairsToArrayOfObjects(List<Pair<String, String>> pairs) {
         JsonArray result = new JsonArray();
         for (Pair<String, String> p : pairs) {
             JsonObject o = new JsonObject();
-            o.addProperty(leftName, p.getLeft());
-            o.addProperty(rightName, p.getRight());
+            o.addProperty("name", p.getLeft());
+            o.addProperty("url", p.getRight());
             result.add(o);
         }
         return result;

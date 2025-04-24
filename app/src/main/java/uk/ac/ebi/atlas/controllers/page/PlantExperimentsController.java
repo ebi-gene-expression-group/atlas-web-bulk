@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.controllers.page;
 
 import com.google.common.collect.TreeMultimap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,11 +22,8 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
         this.experimentTrader = experimentTrader;
     }
 
-    // Dear Future Expression Atlas Developer,
-    // Have a look at the comment in BaselineExperimentsController.
     @GetMapping(value = "/plant/experiments", produces = "text/html;charset=UTF-8")
     public String getPlantExperimentsPage(Model model) {
-        var experimentLinks = new HashMap<String, String>();
         var experimentDisplayNames = new HashMap<String, String>();
 
         var publicPlantExperiments =
@@ -33,35 +31,37 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
                         .filter(experiment -> experiment.getSpecies().isPlant())
                         .collect(toImmutableSet());
 
-        // Sort experiments by their display name
-        Comparator<String> valueComparator = Comparator.comparing(experimentDisplayNames::get);
-        var baselineExperimentAccessionsBySpecies = TreeMultimap.create(String::compareTo, valueComparator);
+        Comparator<String> displayNameComparator = Comparator.comparing(experimentDisplayNames::get);
+        var experimentAccessionsBySpecies = TreeMultimap.create(String::compareTo, displayNameComparator);
         var numDifferentialExperimentsBySpecies = new TreeMap<String, Integer>();
 
         for (var experiment : publicPlantExperiments) {
-            experimentLinks.put(experiment.getAccession() + experiment.getSpecies().getName(), "");
+            var accession = experiment.getAccession();
             experimentDisplayNames.put(
-                    experiment.getAccession(),
-                    experiment.getDisplayName() + " (" + experiment.getAnalysedAssays().size() + " assays)");
+                accession,
+                experiment.getDisplayName() + " (" + experiment.getAnalysedAssays().size() + " assays)"
+            );
 
             if (experiment.getType().isBaseline()) {
-                baselineExperimentAccessionsBySpecies.put(experiment.getSpecies().getName(), experiment.getAccession());
+                experimentAccessionsBySpecies.put(experiment.getSpecies().getName(), accession);
             }
             else if (experiment.getType().isDifferential()) {
-                var speciesReferenceName = experiment.getSpecies().getReferenceName();
+                var speciesReferenceName = StringUtils.capitalize(experiment.getSpecies().getReferenceName());
                 numDifferentialExperimentsBySpecies.put(
-                        speciesReferenceName,
-                        numDifferentialExperimentsBySpecies.getOrDefault(speciesReferenceName, 0) + 1);
+                    speciesReferenceName,
+                    numDifferentialExperimentsBySpecies.getOrDefault(speciesReferenceName, 0) + 1
+                );
             }
         }
 
-        model.addAttribute("baselineExperimentAccessionsBySpecies", baselineExperimentAccessionsBySpecies);
-        model.addAttribute("numDifferentialExperimentsBySpecies", numDifferentialExperimentsBySpecies);
-        model.addAttribute("experimentLinks", experimentLinks);
-        model.addAttribute("experimentDisplayNames", experimentDisplayNames);
-        model.addAttribute("numberOfPlantExperiments", publicPlantExperiments.size());
+        var baselineExperimentsData =
+            ExperimentsUtil.getBaselineExperiments(experimentAccessionsBySpecies, experimentDisplayNames);
 
-        model.addAttribute("mainTitle", "Plant experiments ");
+        model.addAttribute("baselineExperimentsData", baselineExperimentsData);
+        model.addAttribute("numDifferentialExperimentsBySpecies", numDifferentialExperimentsBySpecies);
+        model.addAttribute("numberOfPlantExperiments", publicPlantExperiments.size());
+        model.addAttribute("speciesIconSelector", SpeciesIconSelector.getEnumMap());
+        model.addAttribute("title", "Plant experiments ");
 
         return "plants-landing-page";
     }

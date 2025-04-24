@@ -1,0 +1,26 @@
+<div th:fragment="home-experiments-summary-panel">
+    <div id="experiments-summary-panel"></div>
+
+    <script defer th:src="@{/resources/js-bundles/homepageExperimentsSummaryPanel.bundle.js}"></script>
+
+    <script th:with="contextPath=@{/}">
+        document.addEventListener("DOMContentLoaded", function(event) {
+            homepageExperimentsSummaryPanel.render(
+                {
+                    host: '$contextPath',
+                    resource: 'json/experiments-summary',
+                    responsiveCardsRowProps: {
+                        className: 'row expanded small-up-2 medium-up-3 large-up-6',
+                        cardContainerClassName: 'column',
+                        imageIconHeight: '3rem'
+                    },
+                    onComponentDidMount: function() {
+                        $('#experiments-summary-panel').foundation();
+                        $('#experiments-summary-panel').foundationExtendEBI();
+                    }
+                },
+                'experiments-summary-panel');
+        });
+    </script>
+
+</div>

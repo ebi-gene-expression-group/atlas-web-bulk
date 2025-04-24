@@ -53,7 +53,8 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
         String resourcesVersion = "prod.30";
 
         bulkDifferentialEvidenceService =
-                new EvidenceService<>(bulkDifferentialProfileStreamFactory, dataFileHub, resourcesVersion);
+                new EvidenceService<>(
+                        bulkDifferentialProfileStreamFactory, dataFileHub, resourcesVersion);
         diffMicroarrayEvidenceService =
                 new EvidenceService<>(microarrayProfileStreamFactory, dataFileHub, resourcesVersion);
     }
@@ -77,6 +78,7 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
         PrintWriter responseWriter = response.getWriter();
         diffMicroarrayEvidenceService.evidenceForExperiment(
                 experiment,
+                experimentTrader.getExperimentDesign(experimentAccession),
                 contrast -> {
                     MicroarrayRequestPreferences requestPreferences = new MicroarrayRequestPreferences();
                     requestPreferences.setFoldChangeCutoff(logFoldChangeCutoff);
@@ -158,6 +160,7 @@ public class OpenTargetsEvidenceController extends JsonExperimentController {
         PrintWriter printWriter = response.getWriter();
         bulkDifferentialEvidenceService.evidenceForExperiment(
                 experiment,
+                experimentTrader.getExperimentDesign(experimentAccession),
                 contrast -> {
                     DifferentialRequestPreferences requestPreferences = new DifferentialRequestPreferences();
                     requestPreferences.setFoldChangeCutoff(logFoldChangeCutoff);

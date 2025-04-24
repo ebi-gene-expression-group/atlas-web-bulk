@@ -6,20 +6,30 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.model.experiment.sample.BiologicalReplicate;
 import uk.ac.ebi.atlas.model.OntologyTerm;
-import uk.ac.ebi.atlas.model.experiment.sdrf.Factor;
-import uk.ac.ebi.atlas.model.experiment.sdrf.FactorSet;
 import uk.ac.ebi.atlas.model.experiment.sdrf.SampleCharacteristic;
+import uk.ac.ebi.atlas.model.experiment.ExperimentDesign;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExperiment;
+import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.wrap;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaselineExperimentAssayGroupsLinesTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaselineExperimentAssayGroupsLinesTest.class);
+
     private static final String EXPERIMENT_ACCESSION = "EXPERIMENT_ACCESSION";
     private static final String ASSAY1 = "ASSAY1";
     private static final String ASSAY2 = "ASSAY2";
@@ -63,34 +73,35 @@ public class BaselineExperimentAssayGroupsLinesTest {
 
     @Test
     public void lines() {
-        when(baselineExperiment.getAccession())
-                .thenReturn(EXPERIMENT_ACCESSION);
-        when(baselineExperiment.getDataColumnDescriptors())
-                .thenReturn(ImmutableList.of(ASSAY_GROUP1, ASSAY_GROUP2, ASSAY_GROUP3));
+        ExperimentDesign experimentDesign = new ExperimentDesign();
 
-        var sampleCharacteristic1 = SampleCharacteristic.create(SAMPLE_HEADER, SAMPLE_VALUE1, SAMPLE_ONTOLOGY_TERM1);
-        when(baselineExperiment.getSampleCharacteristics(ASSAY1)).thenReturn(ImmutableList.of(sampleCharacteristic1));
+        SampleCharacteristic sampleCharacteristic1 =
+                SampleCharacteristic.create(SAMPLE_HEADER, SAMPLE_VALUE1, SAMPLE_ONTOLOGY_TERM1);
+        SampleCharacteristic sampleCharacteristic2 =
+                SampleCharacteristic.create(SAMPLE_HEADER, SAMPLE_VALUE2, SAMPLE_ONTOLOGY_TERM2);
 
-        var sampleCharacteristic2 = SampleCharacteristic.create(SAMPLE_HEADER, SAMPLE_VALUE2, SAMPLE_ONTOLOGY_TERM2);
-        when(baselineExperiment.getSampleCharacteristics(ASSAY2)).thenReturn(ImmutableList.of(sampleCharacteristic2));
+        experimentDesign.putSampleCharacteristic(ASSAY1, SAMPLE_HEADER, sampleCharacteristic1);
+        experimentDesign.putSampleCharacteristic(ASSAY2, SAMPLE_HEADER, sampleCharacteristic2);
+        experimentDesign.putSampleCharacteristic(ASSAY3, SAMPLE_HEADER, SAMPLE_VALUE3);
+        experimentDesign.putFactor(ASSAY1, FACTOR_HEADER, FACTOR_VALUE1, FACTOR_ONTOLOGY_TERM1);
+        experimentDesign.putFactor(ASSAY2, FACTOR_HEADER, FACTOR_VALUE2, FACTOR_ONTOLOGY_TERM2);
+        experimentDesign.putFactor(ASSAY3, FACTOR_HEADER, FACTOR_VALUE3);
 
-        var sampleCharacteristic3 = SampleCharacteristic.create(SAMPLE_HEADER, SAMPLE_VALUE3);
-        when(baselineExperiment.getSampleCharacteristics(ASSAY3)).thenReturn(ImmutableList.of(sampleCharacteristic3));
+        when(baselineExperiment.getAccession()).thenReturn(EXPERIMENT_ACCESSION);
+        when(baselineExperiment.getDataColumnDescriptors()).thenReturn(ImmutableList.of(ASSAY_GROUP1, ASSAY_GROUP2,
+                ASSAY_GROUP3));
 
-        var factorSet1 = new FactorSet();
-        factorSet1.add(new Factor(FACTOR_HEADER, FACTOR_VALUE1, FACTOR_ONTOLOGY_TERM1));
-        when(baselineExperiment.getFactors(ASSAY1)).thenReturn(factorSet1);
+        BaselineExperimentAssayGroupsLines subject =
+                new BaselineExperimentAssayGroupsLines(baselineExperiment, experimentDesign);
 
-        var factorSet2 = new FactorSet();
-        factorSet2.add(new Factor(FACTOR_HEADER, FACTOR_VALUE2, FACTOR_ONTOLOGY_TERM2));
-        when(baselineExperiment.getFactors(ASSAY2)).thenReturn(factorSet2);
+        Iterator<String[]> lines = subject.iterator();
 
-        var factorSet3 = new FactorSet();
-        factorSet3.add(new Factor(FACTOR_HEADER, FACTOR_VALUE3));
-        when(baselineExperiment.getFactors(ASSAY3)).thenReturn(factorSet3);
-
-        var subject = new BaselineExperimentAssayGroupsLines(baselineExperiment);
-        var lines = subject.iterator();
+        subject.forEach(line ->
+                LOGGER.info(
+                        Arrays.stream(line)
+                                .map(field -> wrap(field, "\""))
+                                .map(field -> isBlank(field) ? "\"\"" : field)
+                                .collect(joining(","))));
 
         assertThat(
                 lines.next(),

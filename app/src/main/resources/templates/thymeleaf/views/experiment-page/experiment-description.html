@@ -1,0 +1,122 @@
+<div id="experimentDescription" class="row expanded">
+    <div class="small-12 columns">
+        <h3 id="goto-experiment" th:text="${experimentDescription}"></h3>
+        <h5 th:text="${type}"></h5>
+
+        <div id="experimentOrganisms">Organism:
+            <span style="font-style:italic" th:text="${species}">${species}</span>
+        </div>
+
+        <div th:if="${arrayDesignAccessions != null and not #sets.isEmpty(arrayDesignAccessions) and arrayDesignNames != null and not #sets.isEmpty(arrayDesignNames)}"
+             id="experimentArrayDesigns">
+            Array Design(s):
+            <div th:each="arrayDesignAccession, iterStat : ${arrayDesignAccessions}">
+                <a class="array-design"
+                   th:id="${arrayDesignAccession}"
+                   title="'View array design in ArrayExpress'"
+                   th:href="'https://www.ebi.ac.uk/arrayexpress/arrays/' + ${arrayDesignAccession}"
+                   target="_blank"
+                   th:text="${arrayDesignNames[iterStat.index]}">
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${publications != null and not #lists.isEmpty(publications)}"
+             id="experimentReferences">
+            <span th:with="pluralityPostFix=${#lists.size(publications) > 1 ? 's': ''}"
+                    th:text="'Publication' + ${pluralityPostFix}"></span>
+            <ul>
+                <li th:each="publication : ${publications}">
+                    <span th:if="${publication.authors != null}"
+                          th:text="${publication.authors} + ' (' + publication.publicationYear + ')'">
+                    </span>
+                    <i>
+                        <a th:if="${publication.pubmedId != null}"
+                           class="pubmed-id"
+                           th:href="'https://europepmc.org/abstract/MED/' + ${publication.pubmedId}"
+                           title="Read publication"
+                           target="_blank"
+                           th:text="${publication.title}" >
+                        </a>
+                        <a th:unless="${publication.pubmedId != null}"
+                           class="pubmed-id"
+                           th:href="'https://doi.org/' + ${publication.doi}"
+                           title="Read publication"
+                           target="_blank"
+                           th:text="${publication.title}" >
+                        </a>
+                    </i>
+                </li>
+            </ul>
+        </div>
+
+        <div th:if="${dataProviderURL != null and not #lists.isEmpty(dataProviderURL) and dataProviderDescription != null and not #lists.isEmpty(dataProviderDescription)}"
+             id="dataProvider">
+            Raw Data Provider:
+            <div th:each="dataProvider, iterStat : ${dataProviderURL}">
+                <a class="thick-link"
+                   title="'Experiment Data Provider'"
+                   th:href="${dataProvider}"
+                   th:text="${dataProviderDescription[iterStat.index]}">
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${alternativeViews != null and not #lists.isEmpty(alternativeViews) and alternativeViewDescriptions != null and not #lists.isEmpty(alternativeViewDescriptions)}"
+        id="alternativeViews">
+            See also:
+            <div th:each="alternativeViewAccession, iterStat : ${alternativeViews}">
+                <a class="thick-link"
+                   title="Alternative view"
+                   th:href="@{'/experiments/' + ${alternativeViewAccession}}"
+                    th:text="${alternativeViewDescriptions[iterStat.index]}">
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script defer th:src="@{/resources/js/pubmedMinedBioentitiesModule.js}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var $pubmedGeneQueries = $('.pubmed-genequery');
+
+      $pubmedGeneQueries.click(function (event) {
+        var pubmedId = $(event.target).attr("data-pubmed-id");
+
+        pubmedMinedBioentitiesModule.fetchPubmedMinedBioentities(pubmedId, function (err, bioentities) {
+
+          if (err) {
+            throw new Error("Error fetching pubmed mined bioentities for id " + pubmedId + ": " + err.message);
+          }
+
+          if (!bioentities || bioentities.length === 0) {
+            alert("No text-mined genes/proteins available in Europe PubMed Central for PMID " + pubmedId);
+            console.warn("No pubmed mined bioentities for id " + pubmedId);
+            return;
+          }
+
+          function replaceGeneQueryWithBioentities(url, bioentities) {
+            var newGeneQuery = bioentities.map(function(e){
+              return ({
+                value: e
+              });
+            });
+
+            if (url.indexOf("geneQuery") > -1) {
+              return url.replace(/geneQuery=[^&]*/, "geneQuery=" + JSON.stringify(newGeneQuery));
+            }
+
+            return url + (url.indexOf("?") > -1 ? "&" : "?") + "geneQuery=" + JSON.stringify(newGeneQuery);
+
+          }
+
+          var experimentUrlForPubMedBioentities = replaceGeneQueryWithBioentities(document.URL, bioentities);
+          window.open(encodeURI(experimentUrlForPubMedBioentities), '_blank');
+        });
+
+      });
+
+  });
+</script>

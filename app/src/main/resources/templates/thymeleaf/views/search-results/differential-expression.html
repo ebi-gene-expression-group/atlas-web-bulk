@@ -1,0 +1,20 @@
+<div id="gxaDifferentialTab"></div>
+
+<script defer th:src="@{/resources/js-bundles/expressionAtlasDifferentialExpression.bundle.js}"></script>
+
+<th:block th:if="${hasDifferentialResults}">
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            $(function() {
+                expressionAtlasDifferentialExpression.render({
+                    atlasUrl: '[(@{/})]',
+                    geneQuery: /*[[${geneQuery}]]*/ {},
+                    conditionQuery: /*[[${conditionQuery}]]*/ {},
+                    species: /*[[${species}]]*/ ''
+                }, "gxaDifferentialTab");
+            });
+        })
+    </script>
+</th:block>
+
+

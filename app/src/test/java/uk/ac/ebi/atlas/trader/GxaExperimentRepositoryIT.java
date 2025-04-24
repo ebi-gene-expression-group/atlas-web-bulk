@@ -100,4 +100,22 @@ class GxaExperimentRepositoryIT {
                 .isInstanceOf(BaselineExperiment.class)
                 .hasNoNullFieldsOrProperties();
     }
+
+    @Test
+    void whenExperimentDoesNotExists_ThrowsException() {
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(
+                        () -> subject.getExperimentType(
+                                jdbcUtils.fetchRandomExperimentAccession() + "_NOT_EXIST")
+                );
+    }
+
+    @Test
+    void whenExperimentExists_thenReturnsExperimentType() {
+        var experimentAccession = jdbcUtils.fetchRandomExperimentAccession();
+        var originalExperimentType = jdbcUtils.fetchExperimentTypeByAccession(experimentAccession);
+        var experimentType = subject.getExperimentType(experimentAccession);
+
+        assertThat(experimentType).isEqualTo(originalExperimentType);
+    }
 }

@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.3/css/ebi-global.css" type="text/css" media="all" />
+<link rel="stylesheet" href="https://ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.3/fonts.css" type="text/css" media="all" />
+
+<!-- JavaScript -->
+<script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/cookiebanner.js"></script>
+<script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foot.js"></script>
+<script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/script.js"></script>
+
+<!-- The Foundation theme JavaScript -->
+<script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/libraries/foundation-6/js/foundation.js"></script>
+<script src="https://www.ebi.ac.uk/web_guidelines/EBI-Framework/v1.1/js/foundationExtendEBI.js"></script>
+<script>$(document).foundation();</script>
+<script>$(document).foundationExtendEBI();</script>
+
+<style>
+    h1 {
+        color:cadetblue;
+    }
+</style>
+
+<div id="qc-content" class="row expanded">
+    <div class="small-12 columns">
+        <div th:utext="${qcReportContent}"></div>
+    </div>
+</div>
+

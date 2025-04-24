@@ -64,9 +64,10 @@ class GxaExperimentCrudIT {
         var lastUpdateBeforeUpdate = experimentBeforeUpdate.getLastUpdate();
 
         subject.createExperiment(experimentAccession, RNG.nextBoolean());
-        assertThat(subject.readExperiment(experimentAccession)).get()
+        var updatedExperiment = subject.readExperiment(experimentAccession).orElseThrow();
+        assertThat(updatedExperiment)
                 .isEqualToIgnoringGivenFields(experimentBeforeUpdate, "lastUpdate", "isPrivate");
-        assertThat(subject.readExperiment(experimentAccession).orElseThrow().getLastUpdate())
+        assertThat(updatedExperiment.getLastUpdate())
                 .isAfter(lastUpdateBeforeUpdate);
     }
 

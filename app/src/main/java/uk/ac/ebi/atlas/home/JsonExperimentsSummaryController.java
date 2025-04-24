@@ -125,9 +125,9 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
                 CardModel.create(
                         IMAGE,
                         getExperimentsSummaryImageUrl("gtex"),
-                        getExperimentLink("E-MTAB-5214"),
+                        getExperimentLink("E-GTEX-8"),
                         ImmutableList.of(
-                                getExperimentLink("Human tissues", "E-MTAB-5214"))),
+                                getExperimentLink("Human tissues", "E-GTEX-8"))),
                 CardModel.create(
                         IMAGE,
                         getExperimentsSummaryImageUrl("pcawg"),

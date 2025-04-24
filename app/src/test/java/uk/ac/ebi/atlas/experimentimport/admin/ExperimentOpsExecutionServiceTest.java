@@ -9,7 +9,8 @@ import uk.ac.ebi.atlas.experimentimport.ExperimentCrud;
 import uk.ac.ebi.atlas.experimentimport.analyticsindex.AnalyticsIndexerManager;
 import uk.ac.ebi.atlas.experimentimport.coexpression.BaselineCoexpressionProfileLoader;
 
-import static org.mockito.Mockito.doNothing;
+
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExperimentOpsExecutionServiceTest {
@@ -35,26 +36,21 @@ public class ExperimentOpsExecutionServiceTest {
                         analyticsIndexerManager);
     }
 
-
-    // No need to verify interactions: if any stub isn’t used Mockito will throw an exception
-
     @Test
     public void updateExperimentDesignShouldRemoveExperimentFromCache() throws Exception {
-        doNothing().when(experimentCrudMock).updateExperimentDesign(ACCESSION);
         subject.attemptExecuteStatefulOp(ACCESSION, Op.UPDATE_DESIGN);
+        verify(experimentCrudMock).updateExperimentDesign(ACCESSION);
     }
 
     @Test
     public void updateExperimentToPrivateShouldRemoveExperimentFromAnalyticsIndex() throws Exception {
-        doNothing().when(analyticsIndexerManager).deleteFromAnalyticsIndex(ACCESSION);
-        doNothing().when(experimentCrudMock).updateExperimentPrivate(ACCESSION, true);
         subject.attemptExecuteStatefulOp(ACCESSION, Op.UPDATE_PRIVATE);
+        verify(analyticsIndexerManager).deleteFromAnalyticsIndex(ACCESSION);
     }
 
     @Test
     public void deleteExperimentShouldRemoveExperimentFromAnalyticsIndex() throws Exception {
-        doNothing().when(analyticsIndexerManager).deleteFromAnalyticsIndex(ACCESSION);
-        doNothing().when(experimentCrudMock).deleteExperiment(ACCESSION);
         subject.attemptExecuteStatefulOp(ACCESSION, Op.DELETE);
+        verify(analyticsIndexerManager).deleteFromAnalyticsIndex(ACCESSION);
     }
 }

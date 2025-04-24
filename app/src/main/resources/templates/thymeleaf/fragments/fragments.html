@@ -1,0 +1,104 @@
+<header th:fragment="global-masthead" id="masthead-black-bar" class="clearfix masthead-black-bar expanded">
+    <script>
+        // Hack that solves https://github.com/ebiwd/EBI-Framework/pull/139 (I got tired of waiting)
+        window.addEventListener('load', function() {
+            $('#masthead-black-bar nav')[2].className='row expanded';
+        });
+    </script>
+</header>
+
+<div th:fragment="local-masthead">
+    <div id="information-banner" style="background: #C5C5C5; font-size: large"></div>
+    <div data-sticky-container>
+        <header id="masthead" class="masthead" data-sticky data-sticky-on="large" data-top-anchor="content:top" data-btm-anchor="content:bottom">
+            <div class="masthead-inner row expanded">
+                <div class="small-12 large-8 columns">
+                    <a href="home" title="Back to Expression Atlas homepage">
+                        <div class="media-object" id="local-title">
+                            <div class="media-object-section hide-for-small-only">
+                                <img th:src="@{/resources/images/expression-atlas.png}" alt="Expression Atlas logo" style="height: 7em">
+                            </div>
+                            <div class="media-object-section">
+                                <h1>Expression&nbsp;Atlas</h1>
+                                <h4 class="show-for-large">Gene expression across species and biological conditions</h4>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="small-12 large-4 columns">
+                    <div class="media-object" style="display: flex; justify-content: flex-end; align-items: center;">
+                        <div class="media-object-section">
+                            <h4 class="show-for-large">Query single cell expression</h4>
+                            <a href="/gxa/sc" title="To Single Cell Expression Atlas" class="button" style="box-shadow: 2px 2px 2px 2px rgba(0,0,0,0.5)">To Single Cell Expression Atlas <i class="icon icon-functional" data-icon=">"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <nav>
+                    <ul id="local-nav" class="dropdown menu float-left" data-description="navigational">
+                        <li id="local-nav-home"><a th:href="@{/home}"><i class="icon icon-generic padding-right-medium" data-icon="H"></i>Home</a></li>
+                        <li id="local-nav-experiments"><a th:href="@{/experiments}"><i class="icon icon-functional padding-right-medium" data-icon="C"></i>Browse experiments</a></li>
+                        <li id="local-nav-download"><a th:href="@{/download}"><i class="icon icon-functional padding-right-medium" data-icon="="></i>Download</a></li>
+                        <li id="local-nav-release-notes"><a th:href="@{/release-notes.html}"><i class="icon icon-generic padding-right-medium" data-icon=";"></i>Release notes</a></li>
+                        <li id="local-nav-faq"><a th:href="@{/FAQ.html}"><i class="icon icon-generic padding-right-medium" data-icon="G"></i>FAQ</a></li>
+                        <li id="local-nav-help"><a th:href="@{/help/index.html}"><i class="icon icon-generic padding-right-medium" data-icon="?"></i>Help</a></li>
+                        <li id="local-nav-licence"><a th:href="@{/licence.html}"><i class="icon icon-common padding-right-medium" data-icon="&#xf573;"></i>Licence</a></li>
+                        <li id="local-nav-about"><a th:href="@{/about.html}"><i class="icon icon-generic padding-right-medium" data-icon="i"></i>About</a></li>
+                        <li id="local-nav-feedback"><a href="https://www.ebi.ac.uk/support/gxa" target="_blank" data-icon="X"><i class="icon icon-generic padding-right-medium" data-icon="s"></i>Support</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+    </div>
+</div>
+
+<footer th:fragment="global-footer">
+    <div id="global-footer" class="global-footer">
+        <nav id="global-nav-expanded" class="global-nav row">
+        </nav>
+        <section id="ebi-footer-meta" class="ebi-footer-meta row">
+        </section>
+    </div>
+</footer>
+
+<footer th:fragment="local-footer" id="local-footer" class="local-footer" role="local-footer">
+    <div id="local-footer-nav-menu" class="row expanded">
+        <div class="small-12 small-centered medium-8 large-6 columns">
+            <div class="row small-up-1 medium-up-3">
+                <div class="column column-block margin-top-large margin-bottom-large text-center">
+                    <h4 style="color:white">Experiments</h4>
+                    <a href="experiments?experimentType=baseline" target="_blank">Baseline experiments</a><br/>
+                    <a href="experiments?experimentType=differential" target="_blank">Differential experiments</a>
+                </div>
+
+                <div class="column column-block margin-top-large margin-bottom-large text-center">
+                    <h4 style="color:white">Atlas</h4>
+                    <a href="release-notes.html" target="_blank">Release notes</a><br/>
+                    <a href="download.html" target="_blank">Download</a><br/>
+                    <a href="help/index.html" target="_blank">Help</a><br/>
+                    <a href="FAQ.html" target="_blank">FAQ</a><br/>
+                    <a href="about.html" target="_blank">About Atlas</a>
+                </div>
+
+                <div class="column column-block margin-top-large margin-bottom-large text-center">
+                    <h4 style="color:white">Follow us</h4>
+                    <a href="https://twitter.com/ExpressionAtlas" target="_blank">Twitter</a><br/>
+                    <a href="https://www.ebi.ac.uk/support/gxa" target="_blank">Support</a><br/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="relationships" class="row">
+        <div id="elixir-banner"
+             data-color="none"
+             data-use-cdr-logo="false"
+             data-name="This service"
+             data-description="Expression Atlas is an ELIXIR database service"
+             data-more-information-link="https://www.elixir-europe.org/about-us/who-we-are/nodes/embl-ebi"
+             data-use-basic-styles="false">
+        </div>
+    </div>
+
+    <script defer="defer" src="https://ebi.emblstatic.net/web_guidelines/EBI-Framework/v1.3/js/elixirBanner.js"></script>
+</footer>
