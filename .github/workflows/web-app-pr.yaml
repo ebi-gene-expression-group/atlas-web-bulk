@@ -20,5 +20,11 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.jdk }}
-      - name: Compile cli
+      - name: Bulid WAR
         run: ./gradlew --no-daemon :app:war
+      - name: Upload WAR artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gxa-war
+          path: webapps/*.war
+          retention-days: 7  # Set how many days to retain the artifact (1–90)
