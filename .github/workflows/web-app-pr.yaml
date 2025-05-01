@@ -9,7 +9,7 @@ jobs:
       fail-fast: false #  if one of the jobs in the matrix expansion fails, the rest of the jobs will be cancelled
       matrix:
         os: ["ubuntu-latest"]
-        jdk: [11]
+        jdk: [17]
     runs-on: ${{ matrix.os }}
     env:
       JDK_VERSION: ${{ matrix.jdk }}

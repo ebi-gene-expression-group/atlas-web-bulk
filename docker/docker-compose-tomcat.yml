@@ -2,7 +2,7 @@ version: "3.6"
 
 services:
   gxa-tomcat:
-    image: tomcat:9-jdk11
+    image: tomcat:9-jdk17
     container_name: gxa-tomcat
     networks:
       - atlas-test-net
