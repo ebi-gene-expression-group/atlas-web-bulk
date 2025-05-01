@@ -23,7 +23,7 @@ jobs:
       - name: Bulid WAR
         run: ./gradlew --no-daemon :app:war
       - name: Upload WAR artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gxa-war
           path: webapps/*.war
