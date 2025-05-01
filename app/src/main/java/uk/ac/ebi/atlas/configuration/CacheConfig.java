@@ -20,7 +20,7 @@ public class CacheConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheConfig.class);
     private static final long DEFAULT_CACHE_CAPACITY =
             Cache2kConfiguration.of(Object.class, Object.class).getEntryCapacity();
-    private Path experimentsDirPath;
+    private final Path experimentsDirPath;
 
     public CacheConfig(Path experimentsDirPath) {
         this.experimentsDirPath = experimentsDirPath;
@@ -50,7 +50,11 @@ public class CacheConfig {
 
                 // Used for sitemap.xml files
                 builder -> builder.name("publicBioentityIdentifiers").eternal(true),
-                builder -> builder.name("publicSpecies").eternal(true));
+                builder -> builder.name("publicSpecies").eternal(true),
+
+                // used for long-running controller result caching see https://github.com/ebi-gene-expression-group/atlas-web-bulk/issues/266
+                builder -> builder.name("baselineExperimentData").eternal(true)
+        );
     }
 
     private Optional<Long> countExperimentDirectories() {

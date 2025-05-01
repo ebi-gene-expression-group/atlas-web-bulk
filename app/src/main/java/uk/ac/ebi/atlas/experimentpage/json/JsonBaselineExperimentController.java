@@ -1,5 +1,6 @@
 package uk.ac.ebi.atlas.experimentpage.json;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,6 +74,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
                         preferences));
     }
 
+    @Cacheable(cacheNames = "baselineExperimentData", key = "#experimentAccession")
     @RequestMapping(value = "/json/experiments/{experimentAccession}",
                     produces = "application/json;charset=UTF-8",
                     params = "type=RNASEQ_MRNA_BASELINE")
@@ -121,7 +123,7 @@ public class JsonBaselineExperimentController extends JsonExperimentController {
             throw new ResourceNotFoundException("No reference baseline experiment for species " + speciesString);
         }
 
-        return baselineRnaSeqExperimentData(preferences, experimentAccession, "");
+        return baselineExperimentData(preferences, experimentAccession, "");
     }
 
     static final String GENE_DISTRIBUTION_URL = "json/experiments/{experimentAccession}/genedistribution";
