@@ -63,9 +63,9 @@ pipeline {
             timeout (time: 2, unit: "HOURS")
           }
           steps {
-//             sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
-//             sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
-//             sh './gradlew --no-watch-fs :atlas-web-core:jacocoTestReport'
+    //             sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
+    //             sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
+    //             sh './gradlew --no-watch-fs :atlas-web-core:jacocoTestReport'
           }
         }
       }
@@ -115,7 +115,7 @@ pipeline {
 
         stage('–– Build ––') {
           when { anyOf {
-            branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/add_ci_env'
+            branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'
           } }
           stages {
             stage('Provision Node.js build environment') {
@@ -173,10 +173,10 @@ pipeline {
 
   post {
     always {
-      junit 'atlas-web-core/build/ut/**/*.xml'
+//       junit 'atlas-web-core/build/ut/**/*.xml'
 //       junit 'atlas-web-core/build/it/**/*.xml'
 
-      junit 'app/build/ut/**/*.xml'
+//       junit 'app/build/ut/**/*.xml'
 //       junit 'app/build/it/**/*.xml'
 //       junit 'app/build/e2e/**/*.xml'
 
