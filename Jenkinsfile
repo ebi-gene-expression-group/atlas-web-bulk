@@ -58,16 +58,16 @@ pipeline {
           }
         }
 
-//         stage('Test') {
-//           options {
-//             timeout (time: 2, unit: "HOURS")
-//           }
-//           steps {
+        stage('Test') {
+          options {
+            timeout (time: 2, unit: "HOURS")
+          }
+          steps {
 //                 sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
 //                 sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
-//                 sh './gradlew --no-watch-fs :atlas-web-core:jacocoTestReport'
-//           }
-//         }
+                sh './gradlew --no-watch-fs :atlas-web-core:jacocoTestReport'
+          }
+        }
       }
     }
 
@@ -101,17 +101,17 @@ pipeline {
           }
         }
 
-//         stage('Test') {
-//           options {
-//             timeout (time: 2, unit: "HOURS")
-//           }
-//           steps {
+        stage('Test') {
+          options {
+            timeout (time: 2, unit: "HOURS")
+          }
+          steps {
 //             sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
 //             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
 //             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
-//             sh './gradlew --no-watch-fs :app:jacocoTestReport'
-//           }
-//         }
+            sh './gradlew --no-watch-fs :app:jacocoTestReport'
+          }
+        }
 
         stage('–– Build ––') {
           when { anyOf {
