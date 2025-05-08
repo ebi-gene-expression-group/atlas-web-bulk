@@ -12,7 +12,8 @@ function print_usage() {
   printf '%b\n\n' "-h\tShow usage instructions"
 }
 
-PROJECT_NAME=app
+SUBPROJECT_NAME=app
+DOCKER_COMPOSE_PROJECT_NAME=gxa
 mandatory_name=false
 
 while getopts "n:p:h" opt
@@ -22,8 +23,8 @@ do
       mandatory_name=true; TEST_CASE_NAME=${OPTARG}
       ;;
     p )
-      PROJECT_NAME=${OPTARG}
-      if ! [[ "$PROJECT_NAME" =~ ^(app|atlas-web-core)$ ]]; then
+      SUBPROJECT_NAME=${OPTARG}
+      if ! [[ "$SUBPROJECT_NAME" =~ ^(app|atlas-web-core)$ ]]; then
         echo "Project name is not valid -$OPTARG" >&2
         exit 1
       fi
@@ -66,9 +67,9 @@ gradle \
 -PjdbcUrl=jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DB} \
 -PjdbcUsername=${POSTGRES_USER} \
 -PjdbcPassword=${POSTGRES_PASSWORD} \
--PzkHosts=${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181 \
--PsolrHosts=http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_1_NAME}:8983/solr,http://${PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr \
-${PROJECT_NAME}:testClasses
+-PzkHosts=${DOCKER_COMPOSE_PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_1_NAME}:2181,${DOCKER_COMPOSE_PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_2_NAME}:2181,${DOCKER_COMPOSE_PROJECT_NAME}-${SOLR_CLOUD_ZK_CONTAINER_3_NAME}:2181 \
+-PsolrHosts=http://${DOCKER_COMPOSE_PROJECT_NAME}-${DOCKER_COMPOSE_PROJECT_NAME}:8983/solr,http://${DOCKER_COMPOSE_PROJECT_NAME}-${SOLR_CLOUD_CONTAINER_2_NAME}:8983/solr \
+${SUBPROJECT_NAME}:testClasses
 
-gradle --continuous :${PROJECT_NAME}:test --tests $TEST_CASE_NAME
+gradle --continuous :${SUBPROJECT_NAME}:test --tests $TEST_CASE_NAME
 "
