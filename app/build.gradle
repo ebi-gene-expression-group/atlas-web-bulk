@@ -29,7 +29,6 @@ war {
     destinationDirectory = file "${destinationPath}"
 }
 
-def cache2kVersion = '1.2.4.Final'
 dependencies {
     implementation project(':atlas-web-core')
 
@@ -45,8 +44,8 @@ dependencies {
     implementation 'commons-net:commons-net:3.8.0'
 
     implementation 'org.springframework:spring-context-support'
-    implementation 'org.springframework.data:spring-data-redis:2.1.6.RELEASE'
-    implementation 'redis.clients:jedis:3.0.1'
+    implementation 'org.springframework.data:spring-data-redis'
+    implementation 'redis.clients:jedis'
 
     implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
     implementation 'org.thymeleaf:thymeleaf-spring5:3.1.2.RELEASE'
