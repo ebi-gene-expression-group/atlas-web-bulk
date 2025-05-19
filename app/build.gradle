@@ -44,9 +44,9 @@ dependencies {
     implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation 'commons-net:commons-net:3.8.0'
 
-    implementation "org.cache2k:cache2k-api:${cache2kVersion}"
-    runtimeOnly "org.cache2k:cache2k-core:${cache2kVersion}"
-    implementation "org.cache2k:cache2k-spring:${cache2kVersion}"
+    implementation 'org.springframework:spring-context-support'
+    implementation 'org.springframework.data:spring-data-redis:2.1.6.RELEASE'
+    implementation 'redis.clients:jedis:3.0.1'
 
     implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
     implementation 'org.thymeleaf:thymeleaf-spring5:3.1.2.RELEASE'

@@ -1,74 +1,93 @@
 package uk.ac.ebi.atlas.configuration;
 
-import org.cache2k.configuration.Cache2kConfiguration;
-import org.cache2k.extra.spring.SpringCache2kCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @EnableCaching
 @Configuration
 public class CacheConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheConfig.class);
-    private static final long DEFAULT_CACHE_CAPACITY =
-            Cache2kConfiguration.of(Object.class, Object.class).getEntryCapacity();
     private final Path experimentsDirPath;
 
     public CacheConfig(Path experimentsDirPath) {
         this.experimentsDirPath = experimentsDirPath;
     }
 
+
+    @Value("${redis.host}")
+    private String redisHost;
+
+    @Value("${redis.port}")
+    private int redisPort;
+
+    @Value("${redis.password:}")
+    private String redisPassword;
+
     @Bean
-    public CacheManager cacheManager() {
-        return new SpringCache2kCacheManager().addCaches(
-                builder -> builder.name("designElementsByGeneId"),
-                builder -> builder.name("arrayDesignByAccession"),
-                builder -> builder.name("bioentityProperties"),
-
-                builder ->
-                        builder.name("experiment")
-                                .eternal(true)
-                                .entryCapacity(
-                                        countExperimentDirectories().map(count ->
-                                                Double.valueOf(Math.ceil(1.25 * count)).longValue())
-                                                .orElse(DEFAULT_CACHE_CAPACITY)),
-                builder -> builder.name("experimentAttributes").eternal(true),
-                builder -> builder.name("speciesSummary").eternal(true),
-                // Spring unwraps Optional types
-                builder -> builder.name("experimentCollection").permitNullValues(true),
-                builder -> builder.name("experiment2Collections"),
-
-                builder -> builder.name("experimentContent").eternal(true),
-
-                // Used for sitemap.xml files
-                builder -> builder.name("publicBioentityIdentifiers").eternal(true),
-                builder -> builder.name("publicSpecies").eternal(true),
-
-                // used for long-running controller result caching see https://github.com/ebi-gene-expression-group/atlas-web-bulk/issues/266
-                builder -> builder.name("baselineExperimentData").eternal(true)
-        );
-    }
-
-    private Optional<Long> countExperimentDirectories() {
-        try {
-            long experimentDirCount = Arrays.stream(experimentsDirPath.resolve("magetab").toFile().listFiles())
-                    .filter(File::isDirectory)
-                    .map(File::getName)
-                    .filter(filename -> filename.startsWith("E-"))
-                    .count();
-            LOGGER.info("Found {} experiment directories", experimentDirCount);
-            return Optional.of(experimentDirCount);
-        } catch (Exception e) {
-            LOGGER.error("There was an error reading {}", experimentsDirPath.resolve("magetab").toString());
-            return Optional.empty();
+    public JedisConnectionFactory jedisConnectionFactory() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
+        if (redisPassword != null && !redisPassword.isEmpty()) {
+            config.setPassword(redisPassword);
         }
+        return new JedisConnectionFactory(config);
     }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(JedisConnectionFactory factory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        return template;
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager(JedisConnectionFactory connectionFactory) {
+        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                .entryTtl(Duration.ofMinutes(60)); // Default TTL (can be overridden per cache)
+
+        Map<String, RedisCacheConfiguration> cacheConfigs = new LinkedHashMap<>();
+
+        cacheConfigs.put("designElementsByGeneId", defaultConfig);
+        cacheConfigs.put("arrayDesignByAccession", defaultConfig);
+        cacheConfigs.put("bioentityProperties", defaultConfig);
+        cacheConfigs.put("experiment", defaultConfig.entryTtl(Duration.ZERO));
+        cacheConfigs.put("experimentAttributes", defaultConfig.entryTtl(Duration.ZERO));
+        cacheConfigs.put("speciesSummary", defaultConfig.entryTtl(Duration.ZERO));
+        cacheConfigs.put("experimentCollection", defaultConfig);
+        cacheConfigs.put("experiment2Collections", defaultConfig);
+        cacheConfigs.put("experimentContent", defaultConfig.entryTtl(Duration.ZERO));
+        cacheConfigs.put("publicBioentityIdentifiers", defaultConfig.entryTtl(Duration.ZERO));
+        cacheConfigs.put("publicSpecies", defaultConfig.entryTtl(Duration.ZERO));
+        cacheConfigs.put("baselineExperimentData", defaultConfig.entryTtl(Duration.ZERO));
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(cacheConfigs)
+                .build();
+    }
+
 }
