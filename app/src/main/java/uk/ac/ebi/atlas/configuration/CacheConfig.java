@@ -25,12 +25,6 @@ import java.util.Map;
 @Configuration
 public class CacheConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheConfig.class);
-    private final Path experimentsDirPath;
-
-    public CacheConfig(Path experimentsDirPath) {
-        this.experimentsDirPath = experimentsDirPath;
-    }
-
 
     @Value("${redis.host}")
     private String redisHost;
