@@ -3,7 +3,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '10'))
     disableConcurrentBuilds()
   }
-  
+
   agent {
     kubernetes {
       cloud 'gke-autopilot'
@@ -115,7 +115,7 @@ pipeline {
 
         stage('–– Build ––') {
           when { anyOf {
-            branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'
+            branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'; branch 'feature/*'
           } }
           stages {
             stage('Provision Node.js build environment') {
