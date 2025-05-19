@@ -22,7 +22,9 @@ module.exports = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: `../webapp/resources/js-bundles/**`
     }),
-    new BundleAnalyzerPlugin()
+    new BundleAnalyzerPlugin({
+      analyzerMode: `static`
+    })
   ],
 
   output: {
