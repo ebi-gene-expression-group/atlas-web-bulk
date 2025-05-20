@@ -7,6 +7,7 @@ variables:
       the username and password with which the jenkins artifact is
       downloaded in basic auth format.
   JENKINS_JOB:
+    value: "Bulk%20Expression%20Atlas%20-%20Develop"
     options:
       - "Bulk%20Expression%20Atlas%20-%20Develop"
       - "Bulk%20Expression%20Atlas%20-%20Pull%20Requests"
