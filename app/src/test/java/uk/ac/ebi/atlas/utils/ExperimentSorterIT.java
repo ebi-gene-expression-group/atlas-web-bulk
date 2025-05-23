@@ -4,7 +4,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +19,11 @@ import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
@@ -67,36 +64,24 @@ class ExperimentSorterIT {
     }
 
     @Test
-    void testReverseSortExperimentsPerSize() {
-        Collection<String> experimentAccessionsPerSizeDescending = subject.reverseSortAllExperimentsPerSize().values();
-        Iterator<String> iterator = experimentAccessionsPerSizeDescending.iterator();
+    void when_all_experiments_sorted_reverse_by_size_then_sorting_correct_by_size() {
+        var sortedExperiments = subject.reverseSortAllExperimentsPerSize();
 
-        String firstExperiment = iterator.next();
+        // Check that sizes are in descending order
+        var sizes = new ArrayList<>(sortedExperiments.keySet());
 
-
-        String lastExperiment = firstExperiment;
-        while (iterator.hasNext()) {
-            lastExperiment = iterator.next();
+        // Skip the check if there's only one size
+        if (sizes.size() > 1) {
+            IntStream.range(0, sizes.size() - 1)
+                .forEach(i -> assertTrue(sizes.get(i) >= sizes.get(i + 1),
+                    "Experiments should be sorted in descending order by size"));
         }
-
-        Long firstSize = -1L;
-        Long lastSize = -1L;
-
-        for (Map.Entry<Long, Collection<String>> e: subject.reverseSortAllExperimentsPerSize().asMap().entrySet()) {
-            if (e.getValue().contains(lastExperiment)) {
-                lastSize = e.getKey();
-            }
-            if (e.getValue().contains(firstExperiment)) {
-                firstSize = e.getKey();
-            }
-        }
-        assertTrue(firstSize > 0 && lastSize > 0 && firstSize >= lastSize);
     }
 
-    // TODO https://www.pivotaltracker.com/story/show/101118548
-    @Disabled
-    public void reverseSortExperimentsPerSizeContainsAllExperiments() {
-        Collection<String> experimentAccessionsPerSizeDescending = subject.reverseSortAllExperimentsPerSize().values();
-        assertThat(experimentAccessionsPerSizeDescending.size(), Matchers.greaterThan(50));
+    @Test
+    public void when_all_experiments_sorted_reverse_by_size_then_sorted_experiments_contains_all_public_experiments() {
+        var sizeOfPublicExperiments = experimentTrader.getPublicExperiments().size();
+        var sortedExperiments = subject.reverseSortAllExperimentsPerSize().values();
+        assertThat(sortedExperiments.size(), Matchers.equalTo(sizeOfPublicExperiments));
     }
 }
