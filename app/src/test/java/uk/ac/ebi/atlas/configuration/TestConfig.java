@@ -6,6 +6,7 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.web.client.RestTemplate;
+import uk.ac.ebi.atlas.experiments.ExperimentCellCountDao;
 
 @Configuration
 // Enabling component scanning will also load BasePathsConfig, JdbcConfig and SolrConfig, so just using this class as
@@ -21,5 +22,10 @@ public class TestConfig {
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+    @Bean
+    public ExperimentCellCountDao experimentCellCountDao() {
+        return __ -> 0;
     }
 }
