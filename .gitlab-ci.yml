@@ -2,10 +2,6 @@ variables:
   JENKINS_BUILD_NUMBER:
     value: '140'
     description: build number in jenkins
-  JENKINS_CREDENTIALS:
-    description: >
-      the username and password with which the jenkins artifact is
-      downloaded in basic auth format.
   JENKINS_JOB:
     value: "Bulk%20Expression%20Atlas%20-%20Develop"
     description: Jenkins job to use
@@ -16,11 +12,6 @@ variables:
     description: >
       the branch from which to copy the built war
     value: develop
-
-  TOMCAT_CREDENTIALS:
-    description: >
-      the username and password with which the war is deployed to tomcat is
-      downloaded in basic auth format. (should be a env specific variable)
   TOMCAT_CONTEXT: /gxa
 
 
@@ -41,6 +32,7 @@ copy-war-from-jenkins:
     - >
       curl -u "${JENKINS_CREDENTIALS}" 
       --fail
+      --location
       "${JENKINS_URL}/job/${JENKINS_JOB}/job/${JENKINS_BRANCH}/${JENKINS_BUILD_NUMBER}/artifact/webapps/gxa.war" 
       --output "./gxa.war"
   artifacts:
