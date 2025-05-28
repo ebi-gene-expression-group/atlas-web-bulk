@@ -8,6 +8,7 @@ variables:
       downloaded in basic auth format.
   JENKINS_JOB:
     value: "Bulk%20Expression%20Atlas%20-%20Develop"
+    description: Jenkins job to use
     options:
       - "Bulk%20Expression%20Atlas%20-%20Develop"
       - "Bulk%20Expression%20Atlas%20-%20Pull%20Requests"
@@ -75,7 +76,8 @@ deploy-staging:
   script:
     - >
       curl -u "${TOMCAT_CREDENTIALS}" 
-      -i --fail -X PUT 
+      -i --fail 
+      -X PUT 
       "${TOMCAT_URL}/manager/text/deploy?path=${TOMCAT_CONTEXT}&update=true"
       --upload-file "./gxa.war"
     - >
