@@ -58,31 +58,16 @@ function update_npm_package {
     npm audit fix
 }
 
+export -f update_npm_package
+
 cd app/src/main/javascript
 
-pushd .
-cd modules
-for MODULE_DIR in `ls`
-do
-  pushd .
-  cd $MODULE_DIR
-  update_npm_package
-  echo ">> $PWD$ npm run prepare"
-  npm run prepare
-  popd
-done
-popd
-
-pushd .
-cd bundles
-for BUNDLE_DIR in `ls`
-do
-  pushd .
-  cd $BUNDLE_DIR
-  update_npm_package
-  popd
-done
-popd
+find modules -type d -mindepth 1 -maxdepth 1 | \
+  xargs -n1 -t -P 4 -I {} bash -c \
+    "cd {}; echo pwd; update_npm_package; npm run prepare"
+find bundles -type d -mindepth 1 -maxdepth 1 | \
+  xargs -n1 -t -P 4 -I {} bash -c \
+    "cd {}; echo pwd; update_npm_package"
 
 update_npm_package
 echo ">> $PWD$ npx webpack $WEBPACK_OPTS"
