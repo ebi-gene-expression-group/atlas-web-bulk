@@ -106,10 +106,10 @@ pipeline {
             timeout (time: 2, unit: "HOURS")
           }
           steps {
-//             sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
-//             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
-//             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
-            sh './gradlew --no-watch-fs :app:jacocoTestReport'
+             sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
+             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
+             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
+             sh './gradlew --no-watch-fs :app:jacocoTestReport'
           }
         }
 
@@ -176,9 +176,9 @@ pipeline {
 //       junit 'atlas-web-core/build/ut/**/*.xml'
 //       junit 'atlas-web-core/build/it/**/*.xml'
 
-//       junit 'app/build/ut/**/*.xml'
-//       junit 'app/build/it/**/*.xml'
-//       junit 'app/build/e2e/**/*.xml'
+      junit 'app/build/ut/**/*.xml'
+      junit 'app/build/it/**/*.xml'
+      junit 'app/build/e2e/**/*.xml'
 
       archiveArtifacts artifacts: 'atlas-web-core/build/reports/**', fingerprint: true, allowEmptyArchive: true
       archiveArtifacts artifacts: 'app/build/reports/**', fingerprint: true, allowEmptyArchive: true
