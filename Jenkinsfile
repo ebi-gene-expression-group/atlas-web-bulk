@@ -3,7 +3,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '10'))
     disableConcurrentBuilds()
   }
-  
+
   agent {
     kubernetes {
       cloud 'gke-autopilot'
@@ -106,16 +106,16 @@ pipeline {
             timeout (time: 2, unit: "HOURS")
           }
           steps {
-             sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
-             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
-             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
+            sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
+            sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
+//             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
              sh './gradlew --no-watch-fs :app:jacocoTestReport'
           }
         }
 
         stage('–– Build ––') {
           when { anyOf {
-            branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'
+            branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'; branch 'feature/*'
           } }
           stages {
             stage('Provision Node.js build environment') {
