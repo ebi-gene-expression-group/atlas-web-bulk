@@ -30,6 +30,7 @@ copy-war-from-jenkins:
     JENKINS_BRANCH: develop
   when: manual
   script:
+    - set -vx
     - >
       curl --basic --user "${JENKINS_CREDENTIALS}" 
       --insecure
