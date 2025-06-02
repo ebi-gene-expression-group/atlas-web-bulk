@@ -33,6 +33,7 @@ copy-war-from-jenkins:
     - set -vx
     - >
       curl --basic --user "${JENKINS_CREDENTIALS}" 
+      --verbose
       --insecure
       --fail --location 
       "${JENKINS_URL}/job/${JENKINS_JOB}/job/${JENKINS_BRANCH}/${JENKINS_BUILD_NUMBER}/artifact/webapps/gxa.war"
