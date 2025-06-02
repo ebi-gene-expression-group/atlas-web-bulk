@@ -30,10 +30,10 @@ copy-war-from-jenkins:
   when: manual
   script:
     - >
-      curl -u "${JENKINS_CREDENTIALS}" 
-      --fail
-      --location
-      "${JENKINS_URL}/job/${JENKINS_JOB}/job/${JENKINS_BRANCH}/${JENKINS_BUILD_NUMBER}/artifact/webapps/gxa.war" 
+      curl --basic "${JENKINS_CREDENTIALS}" 
+      --insecure
+      --fail --location 
+      "${JENKINS_URL}/job/${JENKINS_JOB}/job/${JENKINS_BRANCH}/${JENKINS_BUILD_NUMBER}/artifact/webapps/gxa.war"
       --output "./gxa.war"
   artifacts:
     paths:
