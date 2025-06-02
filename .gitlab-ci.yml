@@ -9,6 +9,7 @@ variables:
       - "Bulk%20Expression%20Atlas%20-%20Develop"
       - "Bulk%20Expression%20Atlas%20-%20Pull%20Requests"
   JENKINS_BRANCH:
+    value: ${CI_COMMIT_BRANCH}
     description: >
       the branch from which to copy the built war
     value: develop
@@ -30,7 +31,7 @@ copy-war-from-jenkins:
   when: manual
   script:
     - >
-      curl --basic "${JENKINS_CREDENTIALS}" 
+      curl --basic --user "${JENKINS_CREDENTIALS}" 
       --insecure
       --fail --location 
       "${JENKINS_URL}/job/${JENKINS_JOB}/job/${JENKINS_BRANCH}/${JENKINS_BUILD_NUMBER}/artifact/webapps/gxa.war"
@@ -67,13 +68,13 @@ deploy-staging:
   image: alpine/curl:8.12.1
   script:
     - >
-      curl -u "${TOMCAT_CREDENTIALS}" 
+      curl --basic --user "${TOMCAT_CREDENTIALS}" 
       -i --fail 
       -X PUT 
       "${TOMCAT_URL}/manager/text/deploy?path=${TOMCAT_CONTEXT}&update=true"
       --upload-file "./gxa.war"
     - >
-      curl -u "${TOMCAT_CREDENTIALS}" 
+      curl --basic --user "${TOMCAT_CREDENTIALS}" 
       -i --fail 
       "${TOMCAT_URL}/manager/text/list"
       | grep "${TOMCAT_CONTEXT}" | grep running
