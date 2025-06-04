@@ -3,7 +3,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '10'))
     disableConcurrentBuilds()
   }
-  
+
   agent {
     kubernetes {
       cloud 'gke-autopilot'
@@ -106,8 +106,8 @@ pipeline {
             timeout (time: 2, unit: "HOURS")
           }
           steps {
-//             sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
-//             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
+            sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
+            sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
 //             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
             sh './gradlew --no-watch-fs :app:jacocoTestReport'
           }
@@ -115,7 +115,7 @@ pipeline {
 
         stage('–– Build ––') {
           when { anyOf {
-            branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'
+            branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'; branch 'feature/*'
           } }
           stages {
             stage('Provision Node.js build environment') {
@@ -173,13 +173,6 @@ pipeline {
 
   post {
     always {
-//       junit 'atlas-web-core/build/ut/**/*.xml'
-//       junit 'atlas-web-core/build/it/**/*.xml'
-
-//       junit 'app/build/ut/**/*.xml'
-//       junit 'app/build/it/**/*.xml'
-//       junit 'app/build/e2e/**/*.xml'
-
       archiveArtifacts artifacts: 'atlas-web-core/build/reports/**', fingerprint: true, allowEmptyArchive: true
       archiveArtifacts artifacts: 'app/build/reports/**', fingerprint: true, allowEmptyArchive: true
       archiveArtifacts artifacts: 'app/src/main/webapp/resources/js-bundles/report.html', fingerprint: true, allowEmptyArchive: true

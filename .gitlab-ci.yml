@@ -1,0 +1,83 @@
+variables:
+  JENKINS_BUILD_NUMBER:
+    value: '140'
+    description: build number in jenkins
+  JENKINS_JOB:
+    value: "Bulk%20Expression%20Atlas%20-%20Develop"
+    description: Jenkins job to use
+    options:
+      - "Bulk%20Expression%20Atlas%20-%20Develop"
+      - "Bulk%20Expression%20Atlas%20-%20Pull%20Requests"
+  JENKINS_BRANCH:
+    value: ${CI_COMMIT_BRANCH}
+    description: >
+      the branch from which to copy the built war
+    value: develop
+  TOMCAT_CONTEXT: /gxa
+
+
+stages:
+  - build
+  - deploy
+
+copy-war-from-jenkins:
+  stage: build
+  tags: ["dind"]
+  image: alpine/curl:8.12.1
+
+  variables:
+    JENKINS_URL: "http://gene-expression.ebi.ac.uk/jenkins"
+    JENKINS_BRANCH: develop
+  when: manual
+  script:
+    - set -vx
+    - >
+      curl --basic --user "${JENKINS_CREDENTIALS}" 
+      --verbose
+      --insecure
+      --fail --location 
+      "${JENKINS_URL}/job/${JENKINS_JOB}/job/${JENKINS_BRANCH}/${JENKINS_BUILD_NUMBER}/artifact/webapps/gxa.war"
+      --output "./gxa.war"
+  artifacts:
+    paths:
+      - "./gxa.war"
+
+deploy-test:
+  variables:
+    ENVIRONMENT_NAME: test
+    TOMCAT_URL: "http://ves-hx-77:8080"
+  environment:
+    name: test
+    url: https://www-test.ebi.ac.uk${TOMCAT_CONTEXT}/
+  when: manual
+  extends: .deploy-template
+
+deploy-staging:
+  variables:
+    ENVIRONMENT_NAME: staging
+    TOMCAT_URL: "http://wp-p1m2-98:8080"
+  environment:
+    name: staging
+    url: https://wwwdev.ebi.ac.uk${TOMCAT_CONTEXT}/
+  only:
+    - develop
+  when: manual
+  extends: .deploy-template
+
+.deploy-template:
+  stage: deploy
+  tags: ["dind"]
+  image: alpine/curl:8.12.1
+  script:
+    - >
+      curl --basic --user "${TOMCAT_CREDENTIALS}" 
+      -i --fail 
+      -X PUT 
+      "${TOMCAT_URL}/manager/text/deploy?path=${TOMCAT_CONTEXT}&update=true"
+      --upload-file "./gxa.war"
+    - >
+      curl --basic --user "${TOMCAT_CREDENTIALS}" 
+      -i --fail 
+      "${TOMCAT_URL}/manager/text/list"
+      | grep "${TOMCAT_CONTEXT}" | grep running
+      || { echo "App ${TOMCAT_CONTEXT} not found or not running"; exit 1; }
