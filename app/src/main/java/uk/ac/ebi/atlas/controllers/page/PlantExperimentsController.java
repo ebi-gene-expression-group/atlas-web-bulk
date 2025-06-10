@@ -44,11 +44,11 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
 
             if (experiment.getType().isBaseline()) {
                 experimentAccessionsBySpecies.put(
-                    StringUtils.capitalize(experiment.getSpecies().getName().toLowerCase().replace(".", "")), accession);
+                    getSpeciesName(experiment.getSpecies().getName()), accession);
             }
             else if (experiment.getType().isDifferential()) {
                 var speciesReferenceName =
-                    StringUtils.capitalize(experiment.getSpecies().getReferenceName().toLowerCase().replace(".", ""));
+                    getSpeciesName(experiment.getSpecies().getReferenceName());
                 numDifferentialExperimentsBySpecies.put(
                     speciesReferenceName,
                     numDifferentialExperimentsBySpecies.getOrDefault(speciesReferenceName, 0) + 1
@@ -66,5 +66,9 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
         model.addAttribute("title", "Plant experiments ");
 
         return "plants-landing-page";
+    }
+
+    private static String getSpeciesName(String speciesName) {
+        return StringUtils.capitalize(speciesName.toLowerCase().replace(".", ""));
     }
 }

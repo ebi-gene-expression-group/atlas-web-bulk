@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
+import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
@@ -47,7 +48,7 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
             var displayName = experiment.getDisplayName() + " (" + experiment.getAnalysedAssays().size() + " assays)";
             experimentDisplayNames.put(accession, displayName);
             experimentAccessionsBySpecies.put(
-                StringUtils.capitalize(experiment.getSpecies().getName().toLowerCase().replace(".", "")), accession);
+                getSpeciesName(experiment), accession);
         }
 
         var baselineExperimentsData =
@@ -58,5 +59,9 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
         model.addAttribute("title", "Baseline experiments ");
 
         return "baseline-landing-page";
+    }
+
+    private static String getSpeciesName(Experiment<?> experiment) {
+        return StringUtils.capitalize(experiment.getSpecies().getName().toLowerCase().replace(".", ""));
     }
 }
