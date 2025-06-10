@@ -45,7 +45,7 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
             var accession = experiment.getAccession();
             var displayName = experiment.getDisplayName() + " (" + experiment.getAnalysedAssays().size() + " assays)";
             experimentDisplayNames.put(accession, displayName);
-            experimentAccessionsBySpecies.put(experiment.getSpecies().getName(), accession);
+            experimentAccessionsBySpecies.put(experiment.getNormalisedSpeciesName(), accession);
         }
 
         var baselineExperimentsData =
