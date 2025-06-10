@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.controllers.page;
 
 import com.google.common.collect.TreeMultimap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,7 +46,8 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
             var accession = experiment.getAccession();
             var displayName = experiment.getDisplayName() + " (" + experiment.getAnalysedAssays().size() + " assays)";
             experimentDisplayNames.put(accession, displayName);
-            experimentAccessionsBySpecies.put(experiment.getSpecies().getName(), accession);
+            experimentAccessionsBySpecies.put(
+                StringUtils.capitalize(experiment.getSpecies().getName().toLowerCase().replace(".", "")), accession);
         }
 
         var baselineExperimentsData =
