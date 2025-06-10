@@ -1,12 +1,10 @@
 package uk.ac.ebi.atlas.controllers.page;
 
 import com.google.common.collect.TreeMultimap;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uk.ac.ebi.atlas.controllers.HtmlExceptionHandlingController;
-import uk.ac.ebi.atlas.model.experiment.Experiment;
 import uk.ac.ebi.atlas.model.experiment.ExperimentType;
 import uk.ac.ebi.atlas.trader.ExperimentTrader;
 
@@ -47,8 +45,7 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
             var accession = experiment.getAccession();
             var displayName = experiment.getDisplayName() + " (" + experiment.getAnalysedAssays().size() + " assays)";
             experimentDisplayNames.put(accession, displayName);
-            experimentAccessionsBySpecies.put(
-                getSpeciesName(experiment), accession);
+            experimentAccessionsBySpecies.put(experiment.getNormalisedSpeciesName(), accession);
         }
 
         var baselineExperimentsData =
@@ -59,9 +56,5 @@ public class BaselineExperimentsController extends HtmlExceptionHandlingControll
         model.addAttribute("title", "Baseline experiments ");
 
         return "baseline-landing-page";
-    }
-
-    private static String getSpeciesName(Experiment<?> experiment) {
-        return StringUtils.capitalize(experiment.getSpecies().getName().toLowerCase().replace(".", ""));
     }
 }

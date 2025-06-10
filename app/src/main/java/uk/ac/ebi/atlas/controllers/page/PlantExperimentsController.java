@@ -1,7 +1,6 @@
 package uk.ac.ebi.atlas.controllers.page;
 
 import com.google.common.collect.TreeMultimap;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,12 +42,10 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
             );
 
             if (experiment.getType().isBaseline()) {
-                experimentAccessionsBySpecies.put(
-                    getSpeciesName(experiment.getSpecies().getName()), accession);
+                experimentAccessionsBySpecies.put(experiment.getNormalisedSpeciesName(), accession);
             }
             else if (experiment.getType().isDifferential()) {
-                var speciesReferenceName =
-                    getSpeciesName(experiment.getSpecies().getReferenceName());
+                var speciesReferenceName = experiment.getNormalisedSpeciesReferenceName();
                 numDifferentialExperimentsBySpecies.put(
                     speciesReferenceName,
                     numDifferentialExperimentsBySpecies.getOrDefault(speciesReferenceName, 0) + 1
@@ -66,9 +63,5 @@ public class PlantExperimentsController extends HtmlExceptionHandlingController 
         model.addAttribute("title", "Plant experiments ");
 
         return "plants-landing-page";
-    }
-
-    private static String getSpeciesName(String speciesName) {
-        return StringUtils.capitalize(speciesName.toLowerCase().replace(".", ""));
     }
 }
