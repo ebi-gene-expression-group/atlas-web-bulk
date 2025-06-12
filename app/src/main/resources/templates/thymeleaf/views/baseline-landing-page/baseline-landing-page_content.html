@@ -17,8 +17,9 @@
                             nameByAccessions=${experimentsBySpecies.getValue()},
                             total=${#maps.size(nameByAccessions)}">
                 <h4 th:text="${species}">Species</h4>
-                <span th:class="'icon icon-species ' + ${speciesIconSelector.get(species).get('speciesColorCode')}"
-                      th:data-icon="${speciesIconSelector.get(species).get('speciesIconCode')}"></span>
+                <span th:class="'icon icon-species ' + ${(speciesIconSelector.get(species) ?: speciesIconSelector.get('Default')).get('speciesColorCode')}"
+                      th:data-icon="${(speciesIconSelector.get(species) ?: speciesIconSelector.get('Default')).get('speciesIconCode')}">
+                </span>
                 <ul class="show_more" style="list-style:none;padding-left:0; margin-left:0;">
                     <li th:each="nameByAccession : ${nameByAccessions}"
                         th:with="accession=${nameByAccession.getKey()},displayName=${nameByAccession.getValue()}">
@@ -38,7 +39,7 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function(event) {
+    document.addEventListener("DOMContentLoaded", function() {
         //hide/show when there is more than 5 items in the list
         $(function() {
             var $ul = $(".species_item ul");
