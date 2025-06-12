@@ -23,7 +23,7 @@
                 <ul class="show_more" style="list-style:none;padding-left:0; margin-left:0;">
                     <li th:each="nameByAccession : ${nameByAccessions}"
                         th:with="accession=${nameByAccession.getKey()},displayName=${nameByAccession.getValue()}">
-                        <a th:href="@{/experiments/${accession}}"
+                        <a th:href="@{'/experiments/'+ ${accession}}"
                            th:text="${displayName}"
                            style="color:#337ab7; border-bottom: none;">
                         </a>
