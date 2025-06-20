@@ -1,6 +1,5 @@
 package uk.ac.ebi.atlas.experimentpage.qc;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.ac.ebi.atlas.model.resource.AtlasResource;
@@ -15,6 +14,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toSet;
 
 public class MicroarrayQcFiles {
+    private static final String QUALITY_MEASURE = "QM";
     private final Set<Path> qcDirectory;
 
     public MicroarrayQcFiles(AtlasResource<Set<Path>> directoryResource) {
@@ -41,15 +41,18 @@ public class MicroarrayQcFiles {
 
     public Collection<String> getArrayDesignsThatHaveQcReports() {
         return qcDirectory.stream()
-                .map(path -> experimentAndArrayDesign(path.getFileName().toString()).getRight())
+                .map(path -> experimentAndArrayDesign(path.getFileName().toString()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(Pair::getRight)
                 .collect(toSet());
-    }
+}
 
-    private static Pair<String, String> experimentAndArrayDesign(String folderName) {
-        String[] xs = folderName.split("_");
-        Preconditions.checkState(
-                xs.length == 3,
-                "Folder name of QC reports expected as {experiment}_{arrayDesign}_QM, got: " + folderName);
-        return Pair.of(xs[0], xs[1]);
+private static Optional<Pair<String, String>> experimentAndArrayDesign(String folderName) {
+    String[] xs = folderName.split("_");
+    if (xs.length == 3 && xs[2].equals(QUALITY_MEASURE)) {
+        return Optional.of(Pair.of(xs[0], xs[1]));
     }
+    return Optional.empty();
+}
 }

@@ -22,9 +22,9 @@ import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
-import static org.junit.Assert.assertThat;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL;
 import static uk.ac.ebi.atlas.model.experiment.ExperimentType.MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL;
@@ -69,8 +69,7 @@ class MicroarrayQCFilesIT {
                 new MicroarrayQcFiles(dataFileHub.getExperimentFiles(accession).qcFolder);
 
         for (String arrayDesignReadOffFromFolderName : microarrayQCFiles.getArrayDesignsThatHaveQcReports()) {
-            assertThat(arrayDesignReadOffFromFolderName,
-                    is(oneOf(new ArrayList<>(experiment.getArrayDesignAccessions()).toArray())));
+            assertThat(arrayDesignReadOffFromFolderName, is(oneOf(new ArrayList<>(experiment.getArrayDesignAccessions()).toArray())));
         }
     }
 
@@ -79,6 +78,7 @@ class MicroarrayQCFilesIT {
                 jdbcUtils.fetchRandomExperimentAccession(
                         MICROARRAY_1COLOUR_MRNA_DIFFERENTIAL,
                         MICROARRAY_2COLOUR_MRNA_DIFFERENTIAL,
-                        MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL));
+                        MICROARRAY_1COLOUR_MICRORNA_DIFFERENTIAL)
+        );
     }
 }
