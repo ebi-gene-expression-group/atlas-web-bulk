@@ -103,7 +103,7 @@ class TracksControllerWIT {
     void getTrackPrivateExperimentWithGoodAcessKey() throws Exception {
         this.mockMvc.perform(
                 get(DIFFERENTIAL_URL_TEMPLATE.format(
-                        new Object[] {"E-MTAB-5555", "g4_g2"}) + "?accessKey=ef1db551-15ef-4074-b56c-ed9a1b1157d2"))
+                        new Object[] {"E-MTAB-5555", "g4_g2"}) + "?accessKey=fa5b8c3c-81fd-42fb-b0ce-129989c8f033"))
                 .andExpect(status().isOk());
     }
 }
