@@ -49,6 +49,7 @@ public class GxaExperimentRepository implements ExperimentRepository {
         var experimentDto = experimentCrudDao.readExperiment(experimentAccession);
 
         if (experimentDto == null) {
+            LOGGER.info("Experiment with accession {} could not be found.", experimentAccession);
             throw new ResourceNotFoundException(
                     "Experiment with accession " + experimentAccession + " could not be found");
         }
