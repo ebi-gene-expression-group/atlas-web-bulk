@@ -48,7 +48,7 @@ deploy-test:
     TOMCAT_URL: "http://ves-hx-77:8080"
   environment:
     name: test
-    url: https://www-test.ebi.ac.uk${TOMCAT_CONTEXT}/
+    url: https://wwwtest.ebi.ac.uk${TOMCAT_CONTEXT}/
   when: manual
   extends: .deploy-template
 
