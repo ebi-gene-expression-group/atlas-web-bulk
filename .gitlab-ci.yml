@@ -81,3 +81,17 @@ deploy-staging:
       "${TOMCAT_URL}/manager/text/list"
       | grep "${TOMCAT_CONTEXT}" | grep running
       || { echo "App ${TOMCAT_CONTEXT} not found or not running"; exit 1; }
+
+build_container_image:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master" 
+  image: docker:24.0.5
+  stage: build
+  services:
+    - docker:24.0.5-dind
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
