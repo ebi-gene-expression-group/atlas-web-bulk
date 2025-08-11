@@ -37,6 +37,20 @@ services:
         -PjdbcPassword=${POSTGRES_PASSWORD} \
         :cli:bootRun --args="update-baseline-coexpression -e $(echo ${EXP_IDS} | sed -e "s/ /,/g")"
         
+        cd /root/wf-bulk-indexing
+          git checkout feature/gxa_marker_gene
+        
+        cd /root/wf-bulk-indexing/bin
+        export PATH=.:$${PATH}
+        export dbConnection=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
+        
+        for EXP_ID in ${EXP_IDS}
+        do
+          EXP_ID=$${EXP_ID} \
+          ATLAS_EXPS=/atlas-data/exp/magetab/ \
+          ./load_marker_gene.sh
+        done
+        
         # I read in a Postgres forum that you can use the following line to stop Postgres remotely; on occasions it 
         # hangs indefinitely, so I leave as an exercise to the reader to find a better way to do it :(
         PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -c "COPY (SELECT 1) TO PROGRAM 'pg_ctl stop -m smart --no-wait';"
