@@ -17,37 +17,57 @@ import java.util.List;
 public class BaselineExperimentProfilesService {
     private final BaselineExperimentTopGenesService baselineExperimentTopGenesService;
     private final BaselineExperimentProfilesDao baselineExperimentProfilesDao;
+    private final MarkerGeneDao markerGeneDao;
 
 
     public BaselineExperimentProfilesService(BaselineExperimentTopGenesService baselineExperimentTopGenesService,
-                                             BaselineExperimentProfilesDao baselineExperimentProfilesDao) {
+                                             BaselineExperimentProfilesDao baselineExperimentProfilesDao,
+                                             MarkerGeneDao markerGeneDao) {
         this.baselineExperimentTopGenesService = baselineExperimentTopGenesService;
         this.baselineExperimentProfilesDao = baselineExperimentProfilesDao;
+        this.markerGeneDao = markerGeneDao;
     }
 
     public GeneProfilesList<BaselineProfile> getTopGeneProfiles(String experimentAccession,
                                                                 List<AssayGroup> assayGroups,
                                                                 BaselineRequestPreferences<?> preferences) {
 
-        List<String> topGeneIds = preferences.isSpecific() ?
-                baselineExperimentTopGenesService.searchSpecificGenesInBaselineExperiment(
-                        experimentAccession, preferences) :
-                baselineExperimentTopGenesService.searchMostExpressedGenesInBaselineExperiment(
-                        experimentAccession, preferences);
+        if (preferences.isSpecific()) {
+            // Fetch marker genes from PostgreSQL
+            return markerGeneDao.fetchMarkerGeneProfiles(experimentAccession, assayGroups, preferences);
+        } else {
+            // Use the existing Solr-based implementation
+            List<String> topGeneIds = 
+                    baselineExperimentTopGenesService.searchMostExpressedGenesInBaselineExperiment(
+                            experimentAccession, preferences);
 
-        return baselineExperimentProfilesDao.fetchProfiles(topGeneIds, assayGroups, preferences, experimentAccession);
+            return baselineExperimentProfilesDao.fetchProfiles(topGeneIds, assayGroups, preferences, experimentAccession);
+        }
     }
 
     public GeneProfilesList<BaselineProfile> getGeneProfiles(String experimentAccession,
                                                             List<AssayGroup> assayGroups,
                                                             BaselineRequestPreferences<?> preferences,
                                                             String... geneIds) {
-        return baselineExperimentProfilesDao.fetchProfiles(
-                ImmutableList.copyOf(geneIds), assayGroups, preferences, experimentAccession);
+        if (preferences.isSpecific()) {
+            // Fetch specific genes from PostgreSQL
+            return markerGeneDao.fetchSpecificGeneProfiles(
+                    ImmutableList.copyOf(geneIds), experimentAccession, assayGroups, preferences);
+        } else {
+            // Use the existing Solr-based implementation
+            return baselineExperimentProfilesDao.fetchProfiles(
+                    ImmutableList.copyOf(geneIds), assayGroups, preferences, experimentAccession);
+        }
     }
 
 
     public long fetchCount(String experimentAccession, BaselineRequestPreferences<?> preferences) {
-        return baselineExperimentProfilesDao.fetchCount(experimentAccession, preferences);
+        if (preferences.isSpecific()) {
+            // Get count from PostgreSQL
+            return markerGeneDao.fetchCount(experimentAccession, preferences);
+        } else {
+            // Use the existing Solr-based implementation
+            return baselineExperimentProfilesDao.fetchCount(experimentAccession, preferences);
+        }
     }
 }
