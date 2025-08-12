@@ -1,5 +1,6 @@
 package uk.ac.ebi.atlas.experimentpage.baseline.profiles;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
@@ -8,6 +9,7 @@ import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExpression;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,27 +23,27 @@ import java.util.stream.Collectors;
 public class MarkerGeneDao {
     private final JdbcTemplate jdbcTemplate;
 
-    private static final String FETCH_MARKER_GENES_SQL =
-            "SELECT gene_id, gene_name, assay, expression_level " +
+    // SQL query constants
+    private static final String BASE_QUERY =
+        "SELECT gene_id, gene_name, assay, expression_level " +
             "FROM gxa_marker_gene " +
-            "WHERE experiment_accession = ? " +
-            "AND expression_unit = ? " +
-            "AND expression_level >= ? " +
-            "ORDER BY marker_gene_rank " +
-            "LIMIT ?";
+            "WHERE experiment_accession = ? ";
 
-    private static final String COUNT_MARKER_GENES_SQL =
-            "SELECT COUNT(DISTINCT gene_id) " +
-            "FROM gxa_marker_gene " +
-            "WHERE experiment_accession = ? " +
-            "AND expression_unit = ? " +
-            "AND expression_level >= ?";
+    private static final String FETCH_MARKER_GENES = BASE_QUERY +
+        "AND expression_unit = ? " +
+        "AND expression_level >= ? " +
+        "ORDER BY marker_gene_rank " +
+        "LIMIT ?";
 
-    private static final String FETCH_SPECIFIC_GENES_SQL =
-            "SELECT gene_id, gene_name, assay, expression_level " +
+    private static final String FETCH_SPECIFIC_GENES = BASE_QUERY +
+        "AND gene_id IN (%s) " +
+        "AND expression_unit = ? " +
+        "AND expression_level >= ?";
+
+    private static final String COUNT_MARKER_GENES =
+        "SELECT COUNT(DISTINCT gene_id) " +
             "FROM gxa_marker_gene " +
             "WHERE experiment_accession = ? " +
-            "AND gene_id IN (%s) " +
             "AND expression_unit = ? " +
             "AND expression_level >= ?";
 
@@ -51,148 +53,174 @@ public class MarkerGeneDao {
 
     /**
      * Fetches marker gene profiles from the database.
+     * These are the most highly expressed genes for the experiment.
      *
      * @param experimentAccession The experiment accession
      * @param assayGroups The list of assay groups
-     * @param preferences The request preferences
-     * @return A list of baseline profiles
+     * @param preferences The request preferences containing filtering criteria
+     * @return A list of baseline profiles for marker genes
      */
-    public GeneProfilesList<BaselineProfile> fetchMarkerGeneProfiles(String experimentAccession,
-                                                                    List<AssayGroup> assayGroups,
-                                                                    BaselineRequestPreferences<?> preferences) {
-        // Map of assay IDs to assay groups
-        Map<String, AssayGroup> assayGroupMap = createAssayGroupMap(assayGroups);
+    public GeneProfilesList<BaselineProfile> fetchMarkerGeneProfiles(
+        @NotNull String experimentAccession,
+        @NotNull List<AssayGroup> assayGroups,
+        @NotNull BaselineRequestPreferences<?> preferences) {
 
-        // Fetch data from database
-        List<Map<String, Object>> results = jdbcTemplate.queryForList(
-                FETCH_MARKER_GENES_SQL,
-                experimentAccession,
-                preferences.getUnit().getDatabaseValue(),
-                preferences.getCutoff(),
-                preferences.getHeatmapMatrixSize());
+        var queryParams = new Object[] {
+            experimentAccession,
+            preferences.getUnit().getDatabaseValue(),
+            preferences.getCutoff(),
+            preferences.getHeatmapMatrixSize()
+        };
 
-        // Process results into a map of gene ID to BaselineProfile
-        Map<String, BaselineProfile> profilesMap = new HashMap<>();
+        var results = executeQuery(FETCH_MARKER_GENES, queryParams);
 
-        for (Map<String, Object> row : results) {
-            String geneId = (String) row.get("gene_id");
-            String geneName = (String) row.get("gene_name");
-            String assayId = (String) row.get("assay");
-            double expressionLevel = ((Number) row.get("expression_level")).doubleValue();
-
-            // Get or create profile
-            BaselineProfile profile = profilesMap.computeIfAbsent(
-                    geneId, id -> new BaselineProfile(id, geneName));
-
-            // Find the assay group for this assay
-            AssayGroup assayGroup = assayGroupMap.get(assayId);
-            if (assayGroup != null) {
-                // Add expression to profile
-                profile.add(assayGroup, new BaselineExpression(expressionLevel));
-            }
-        }
-
-        // Create and return the gene profiles list
-        GeneProfilesList<BaselineProfile> geneProfilesList = new GeneProfilesList<>(profilesMap.values());
+        var geneProfilesList = createGeneProfilesList(results, assayGroups);
         geneProfilesList.setTotalResultCount(fetchCount(experimentAccession, preferences));
 
         return geneProfilesList;
     }
 
     /**
-     * Fetches specific gene profiles from the database.
+     * Fetches profiles for specific genes from the database.
+     * This method is used when querying for a predefined list of gene IDs.
      *
      * @param geneIds The list of gene IDs to fetch
      * @param experimentAccession The experiment accession
      * @param assayGroups The list of assay groups
-     * @param preferences The request preferences
-     * @return A list of baseline profiles
+     * @param preferences The request preferences containing filtering criteria
+     * @return A list of baseline profiles for the specified genes
      */
-    public GeneProfilesList<BaselineProfile> fetchSpecificGeneProfiles(List<String> geneIds,
-                                                                      String experimentAccession,
-                                                                      List<AssayGroup> assayGroups,
-                                                                      BaselineRequestPreferences<?> preferences) {
+    public GeneProfilesList<BaselineProfile> fetchSpecificGeneProfiles(
+        @NotNull List<String> geneIds,
+        @NotNull String experimentAccession,
+        @NotNull List<AssayGroup> assayGroups,
+        @NotNull BaselineRequestPreferences<?> preferences) {
+
         if (geneIds.isEmpty()) {
             return new GeneProfilesList<>();
         }
 
-        // Map of assay IDs to assay groups
-        Map<String, AssayGroup> assayGroupMap = createAssayGroupMap(assayGroups);
+        var sql = buildSpecificGenesQuery(geneIds);
+        var params = buildSpecificGenesParams(geneIds, experimentAccession, preferences);
 
-        // Create placeholders for the IN clause
-        String placeholders = geneIds.stream()
-                .map(id -> "?")
-                .collect(Collectors.joining(","));
-
-        // Create the SQL query with the IN clause
-        String sql = String.format(FETCH_SPECIFIC_GENES_SQL, placeholders);
-
-        // Create the parameters array
-        Object[] params = new Object[geneIds.size() + 3];
-        params[0] = experimentAccession;
-        for (int i = 0; i < geneIds.size(); i++) {
-            params[i + 1] = geneIds.get(i);
-        }
-        params[geneIds.size() + 1] = preferences.getUnit().getDatabaseValue();
-        params[geneIds.size() + 2] = preferences.getCutoff();
-
-        // Fetch data from database
-        List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, params);
-
-        // Process results into a map of gene ID to BaselineProfile
-        Map<String, BaselineProfile> profilesMap = new HashMap<>();
-
-        for (Map<String, Object> row : results) {
-            String geneId = (String) row.get("gene_id");
-            String geneName = (String) row.get("gene_name");
-            String assayId = (String) row.get("assay");
-            double expressionLevel = ((Number) row.get("expression_level")).doubleValue();
-
-            // Get or create profile
-            BaselineProfile profile = profilesMap.computeIfAbsent(
-                    geneId, id -> new BaselineProfile(id, geneName));
-
-            // Find the assay group for this assay
-            AssayGroup assayGroup = assayGroupMap.get(assayId);
-            if (assayGroup != null) {
-                // Add expression to profile
-                profile.add(assayGroup, new BaselineExpression(expressionLevel));
-            }
-        }
-
-        // Create and return the gene profiles list
-        return new GeneProfilesList<>(profilesMap.values());
+        var results = executeQuery(sql, params.toArray());
+        return createGeneProfilesList(results, assayGroups);
     }
 
     /**
-     * Fetches the count of marker genes for an experiment.
+     * Fetches the count of distinct marker genes for an experiment.
+     * This is used to determine the total number of results available.
      *
      * @param experimentAccession The experiment accession
-     * @param preferences The request preferences
-     * @return The count of marker genes
+     * @param preferences The request preferences containing filtering criteria
+     * @return The count of distinct marker genes matching the criteria
      */
-    public long fetchCount(String experimentAccession, BaselineRequestPreferences<?> preferences) {
-        return jdbcTemplate.queryForObject(
-                COUNT_MARKER_GENES_SQL,
-                Long.class,
-                experimentAccession,
-                preferences.getUnit().getDatabaseValue(),
-                preferences.getCutoff());
+    public long fetchCount(
+        @NotNull String experimentAccession,
+        @NotNull BaselineRequestPreferences<?> preferences) {
+
+        var queryParams = new Object[] {
+            experimentAccession,
+            preferences.getUnit().getDatabaseValue(),
+            preferences.getCutoff()
+        };
+
+        return jdbcTemplate.queryForObject(COUNT_MARKER_GENES, Long.class, queryParams);
     }
 
     /**
-     * Creates a map of assay IDs to assay groups.
+     * Executes a SQL query and returns the results.
+     *
+     * @param sql The SQL query to execute
+     * @param params The parameters for the SQL query
+     * @return The query results as a list of maps
+     */
+    private List<Map<String, Object>> executeQuery(String sql, Object[] params) {
+        return jdbcTemplate.queryForList(sql, params);
+    }
+
+    /**
+     * Builds SQL query for specific genes with the appropriate placeholders.
+     *
+     * @param geneIds List of gene IDs to query for
+     * @return SQL query string with placeholders for the gene IDs
+     */
+    private String buildSpecificGenesQuery(List<String> geneIds) {
+        var placeholders = geneIds.stream()
+            .map(id -> "?")
+            .collect(Collectors.joining(","));
+        return String.format(FETCH_SPECIFIC_GENES, placeholders);
+    }
+
+    /**
+     * Builds parameters for the specific genes query.
+     *
+     * @param geneIds List of gene IDs to query for
+     * @param experimentAccession The experiment accession
+     * @param preferences The request preferences
+     * @return List of parameters for the query
+     */
+    private List<Object> buildSpecificGenesParams(
+        List<String> geneIds,
+        String experimentAccession,
+        BaselineRequestPreferences<?> preferences) {
+
+        var params = new ArrayList<>(geneIds.size() + 3);
+        params.add(experimentAccession);
+        params.addAll(geneIds);
+        params.add(preferences.getUnit().getDatabaseValue());
+        params.add(preferences.getCutoff());
+
+        return params;
+    }
+
+    /**
+     * Creates a lookup map of assay IDs to their parent assay groups.
+     * This is used to efficiently find the assay group for a given assay ID.
      *
      * @param assayGroups The list of assay groups
-     * @return A map of assay IDs to assay groups
+     * @return A map where keys are assay IDs and values are their parent assay groups
      */
     private Map<String, AssayGroup> createAssayGroupMap(List<AssayGroup> assayGroups) {
-        Map<String, AssayGroup> assayGroupMap = new HashMap<>();
-        for (AssayGroup assayGroup : assayGroups) {
-            for (String assayId : assayGroup.getAssayIds()) {
+        var assayGroupMap = new HashMap<String, AssayGroup>();
+        for (var assayGroup : assayGroups) {
+            for (var assayId : assayGroup.getAssayIds()) {
                 assayGroupMap.put(assayId, assayGroup);
             }
         }
         return assayGroupMap;
+    }
+
+    /**
+     * Processes database query results into a GeneProfilesList.
+     * This method transforms raw database rows into structured gene profiles with expression data.
+     *
+     * @param results Database query results containing gene expression data
+     * @param assayGroups The list of assay groups for the experiment
+     * @return A GeneProfilesList containing the processed gene profiles
+     */
+    private GeneProfilesList<BaselineProfile> createGeneProfilesList(
+        List<Map<String, Object>> results,
+        List<AssayGroup> assayGroups) {
+
+        var assayGroupMap = createAssayGroupMap(assayGroups);
+        var profilesMap = new HashMap<String, BaselineProfile>();
+
+        for (var row : results) {
+            var geneId = (String) row.get("gene_id");
+            var geneName = (String) row.get("gene_name");
+            var assayId = (String) row.get("assay");
+            var expressionLevel = ((Number) row.get("expression_level")).doubleValue();
+
+            var profile = profilesMap.computeIfAbsent(
+                geneId, id -> new BaselineProfile(id, geneName));
+
+            var assayGroup = assayGroupMap.get(assayId);
+            if (assayGroup != null) {
+                profile.add(assayGroup, new BaselineExpression(expressionLevel));
+            }
+        }
+
+        return new GeneProfilesList<>(profilesMap.values());
     }
 }
