@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.ac.ebi.atlas.configuration.TestConfig;
-import uk.ac.ebi.atlas.testutils.JdbcUtils;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -37,9 +36,6 @@ class JsonBaselineExperimentControllerWIT {
     @Inject
     private DataSource dataSource;
 
-    @Inject
-    private JdbcUtils jdbcUtils;
-
     @Autowired
     private WebApplicationContext wac;
 
@@ -48,14 +44,20 @@ class JsonBaselineExperimentControllerWIT {
     @BeforeAll
     void populateDatabaseTables() {
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-        populator.addScripts(new ClassPathResource("fixtures/experiment-fixture.sql"));
+        populator.addScripts(
+            new ClassPathResource("fixtures/experiment-fixture.sql"),
+            new ClassPathResource("fixtures/gxa-marker-gene-fixture.sql")
+        );
         populator.execute(dataSource);
     }
 
     @AfterAll
     void cleanDatabaseTables() {
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
-        populator.addScripts(new ClassPathResource("fixtures/experiment-delete.sql"));
+        populator.addScripts(
+            new ClassPathResource("fixtures/gxa-marker-gene-delete.sql"),
+            new ClassPathResource("fixtures/experiment-delete.sql")
+        );
         populator.execute(dataSource);
     }
 
