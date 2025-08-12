@@ -67,23 +67,23 @@ public class MarkerGeneDao {
         List<Map<String, Object>> results = jdbcTemplate.queryForList(
                 FETCH_MARKER_GENES_SQL,
                 experimentAccession,
-                preferences.getUnit().toString(),
+                preferences.getUnit().getDatabaseValue(),
                 preferences.getCutoff(),
                 preferences.getHeatmapMatrixSize());
 
         // Process results into a map of gene ID to BaselineProfile
         Map<String, BaselineProfile> profilesMap = new HashMap<>();
-        
+
         for (Map<String, Object> row : results) {
             String geneId = (String) row.get("gene_id");
             String geneName = (String) row.get("gene_name");
             String assayId = (String) row.get("assay");
             double expressionLevel = ((Number) row.get("expression_level")).doubleValue();
-            
+
             // Get or create profile
             BaselineProfile profile = profilesMap.computeIfAbsent(
                     geneId, id -> new BaselineProfile(id, geneName));
-            
+
             // Find the assay group for this assay
             AssayGroup assayGroup = assayGroupMap.get(assayId);
             if (assayGroup != null) {
@@ -91,11 +91,11 @@ public class MarkerGeneDao {
                 profile.add(assayGroup, new BaselineExpression(expressionLevel));
             }
         }
-        
+
         // Create and return the gene profiles list
         GeneProfilesList<BaselineProfile> geneProfilesList = new GeneProfilesList<>(profilesMap.values());
         geneProfilesList.setTotalResultCount(fetchCount(experimentAccession, preferences));
-        
+
         return geneProfilesList;
     }
 
@@ -123,35 +123,35 @@ public class MarkerGeneDao {
         String placeholders = geneIds.stream()
                 .map(id -> "?")
                 .collect(Collectors.joining(","));
-        
+
         // Create the SQL query with the IN clause
         String sql = String.format(FETCH_SPECIFIC_GENES_SQL, placeholders);
-        
+
         // Create the parameters array
         Object[] params = new Object[geneIds.size() + 3];
         params[0] = experimentAccession;
         for (int i = 0; i < geneIds.size(); i++) {
             params[i + 1] = geneIds.get(i);
         }
-        params[geneIds.size() + 1] = preferences.getUnit().toString();
+        params[geneIds.size() + 1] = preferences.getUnit().getDatabaseValue();
         params[geneIds.size() + 2] = preferences.getCutoff();
-        
+
         // Fetch data from database
         List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, params);
-        
+
         // Process results into a map of gene ID to BaselineProfile
         Map<String, BaselineProfile> profilesMap = new HashMap<>();
-        
+
         for (Map<String, Object> row : results) {
             String geneId = (String) row.get("gene_id");
             String geneName = (String) row.get("gene_name");
             String assayId = (String) row.get("assay");
             double expressionLevel = ((Number) row.get("expression_level")).doubleValue();
-            
+
             // Get or create profile
             BaselineProfile profile = profilesMap.computeIfAbsent(
                     geneId, id -> new BaselineProfile(id, geneName));
-            
+
             // Find the assay group for this assay
             AssayGroup assayGroup = assayGroupMap.get(assayId);
             if (assayGroup != null) {
@@ -159,7 +159,7 @@ public class MarkerGeneDao {
                 profile.add(assayGroup, new BaselineExpression(expressionLevel));
             }
         }
-        
+
         // Create and return the gene profiles list
         return new GeneProfilesList<>(profilesMap.values());
     }
@@ -176,7 +176,7 @@ public class MarkerGeneDao {
                 COUNT_MARKER_GENES_SQL,
                 Long.class,
                 experimentAccession,
-                preferences.getUnit().toString(),
+                preferences.getUnit().getDatabaseValue(),
                 preferences.getCutoff());
     }
 

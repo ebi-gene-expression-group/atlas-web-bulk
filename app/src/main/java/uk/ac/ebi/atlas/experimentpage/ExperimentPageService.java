@@ -116,7 +116,7 @@ public class ExperimentPageService {
             URIBuilder builder = new URIBuilder(urlBase);
 
             builder.addParameter("geneQuery", requestPreferences.getGeneQuery().toJson());
-            builder.addParameter("unit", requestPreferences.getUnit().toString());
+            builder.addParameter("unit", requestPreferences.getUnit().getDatabaseValue());
             builder.addParameter("cutoff", Double.toString(requestPreferences.getCutoff()));
             builder.addParameter("heatmapMatrixSize", Integer.toString(requestPreferences.getHeatmapMatrixSize()));
             builder.addParameter("selectedColumnIds", Joiner.on(",").join(requestPreferences.getSelectedColumnIds()));
