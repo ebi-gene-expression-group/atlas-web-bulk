@@ -30,6 +30,10 @@ import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProx
 import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.EXPERIMENT_ACCESSION;
 import static uk.ac.ebi.atlas.solr.cloud.collections.BulkAnalyticsCollectionProxy.asAnalyticsSchemaField;
 
+/**
+ * DAO for fetching baseline expression profiles from the Solr analytics collection.
+ * This is used when the 'specific' field in BaselineRequestPreferences is false.
+ */
 @Component
 public class BaselineExperimentProfilesDao {
     private final BulkAnalyticsCollectionProxy bulkAnalyticsCollectionProxy;
@@ -38,6 +42,13 @@ public class BaselineExperimentProfilesDao {
         bulkAnalyticsCollectionProxy = collectionProxyFactory.create(BulkAnalyticsCollectionProxy.class);
     }
 
+    /**
+     * Fetches the count of distinct genes matching the criteria in a baseline experiment.
+     *
+     * @param experimentAccession The experiment accession
+     * @param preferences The request preferences containing filtering criteria
+     * @return The count of distinct genes matching the criteria
+     */
     public long fetchCount(String experimentAccession, BaselineRequestPreferences<?> preferences) {
         SolrQuery solrQuery =
                 ExperimentRequestPreferencesSolrQueryFactory.createSolrQuery(experimentAccession, preferences);
@@ -45,11 +56,19 @@ public class BaselineExperimentProfilesDao {
         return bulkAnalyticsCollectionProxy.fieldStats(BIOENTITY_IDENTIFIER, solrQuery).getCountDistinct();
     }
 
+    /**
+     * Fetches profiles for specific genes from the Solr analytics collection.
+     *
+     * @param geneIds The list of gene IDs to fetch
+     * @param assayGroups The list of assay groups
+     * @param preferences The request preferences containing filtering criteria
+     * @param experimentAccession The experiment accession
+     * @return A list of baseline profiles for the specified genes
+     */
     public GeneProfilesList<BaselineProfile> fetchProfiles(List<String> geneIds,
                                                            List<AssayGroup> assayGroups,
                                                            BaselineRequestPreferences<?> preferences,
                                                            String experimentAccession) {
-        // Number of rows multiplied by all or a subset of columns
         int maximumNumberOfDocs = geneIds.size() *
                 (preferences.getSelectedColumnIds().isEmpty() ?
                         assayGroups.size() :
@@ -114,6 +133,13 @@ public class BaselineExperimentProfilesDao {
         return baselineProfiles;
     }
 
+    /**
+     * Parses a collection of Solr field values into a BaselineExpression with quartiles.
+     * This is used when the expression data includes quartile information.
+     *
+     * @param values The collection of values representing quartiles
+     * @return A BaselineExpression containing the quartile data
+     */
     private BaselineExpression parseSolrFieldValue(Collection<Object> values) {
         List<Double> quartiles =
                 values.stream()
@@ -129,6 +155,13 @@ public class BaselineExperimentProfilesDao {
                 quartiles.get(4));
     }
 
+    /**
+     * Parses a single Solr field value into a BaselineExpression.
+     * This is used when the expression data is a single value without quartiles.
+     *
+     * @param value The expression value
+     * @return A BaselineExpression containing the single value
+     */
     private BaselineExpression parseSolrFieldValue(Object value) {
         return new BaselineExpression((double) value);
     }

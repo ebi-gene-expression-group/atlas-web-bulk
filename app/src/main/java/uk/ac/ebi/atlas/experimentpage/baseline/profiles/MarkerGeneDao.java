@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class MarkerGeneDao {
     private final JdbcTemplate jdbcTemplate;
 
-    // SQL query constants
     private static final String BASE_QUERY =
         "SELECT gene_id, gene_name, assay, expression_level " +
             "FROM gxa_marker_gene " +
