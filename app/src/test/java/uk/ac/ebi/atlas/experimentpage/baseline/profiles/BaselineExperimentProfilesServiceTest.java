@@ -29,25 +29,25 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class BaselineExperimentProfilesServiceTest {
     @Mock
-    private BaselineExperimentTopGenesService baselineExperimentTopGenesService;
+    private BaselineExperimentTopGenesService topGenesService;
 
     @Mock
-    private BaselineExperimentProfilesDao baselineExperimentProfilesDao;
+    private BaselineExperimentProfilesDao solrDao;
 
     @Mock
-    private MarkerGeneDao markerGeneDao;
+    private MarkerGeneDao postgresDao;
 
     @Mock
-    private BaselineProfile baselineProfile1;
+    private BaselineProfile mockProfile1;
 
     @Mock
-    private BaselineProfile baselineProfile2;
+    private BaselineProfile mockProfile2;
 
     private BaselineExperimentProfilesService subject;
-    private RnaSeqBaselineRequestPreferences preferences;
+    private RnaSeqBaselineRequestPreferences requestPrefs;
     private List<AssayGroup> assayGroups;
     private GeneProfilesList<BaselineProfile> expectedProfiles;
-    private List<String> geneIds;
+    private List<String> testGeneIds;
 
     private static final String EXPERIMENT_ACCESSION = "E-MTAB-1234";
     private static final String GENE_ID_1 = "ENSG00000001";
@@ -56,189 +56,151 @@ public class BaselineExperimentProfilesServiceTest {
     private static final String ASSAY_ID_2 = "assay2";
     private static final double CUTOFF = 0.5;
     private static final int HEATMAP_SIZE = 50;
+    private static final long EXPECTED_COUNT = 42L;
 
     @Before
     public void setUp() {
+        initializeService();
+        initializeRequestPreferences();
+        initializeAssayGroups();
+        initializeTestGeneIds();
+        initializeSampleProfiles();
+    }
+
+    private void initializeService() {
         subject = new BaselineExperimentProfilesService(
-                baselineExperimentTopGenesService, baselineExperimentProfilesDao, markerGeneDao);
+                topGenesService, solrDao, postgresDao);
+    }
 
-        // Create preferences
-        preferences = new RnaSeqBaselineRequestPreferences();
-        preferences.setUnit(ExpressionUnit.Absolute.Rna.TPM);
-        preferences.setCutoff(CUTOFF);
-        preferences.setHeatmapMatrixSize(HEATMAP_SIZE);
+    private void initializeRequestPreferences() {
+        requestPrefs = new RnaSeqBaselineRequestPreferences();
+        requestPrefs.setUnit(ExpressionUnit.Absolute.Rna.TPM);
+        requestPrefs.setCutoff(CUTOFF);
+        requestPrefs.setHeatmapMatrixSize(HEATMAP_SIZE);
+    }
 
-        // Create assay groups
+    private void initializeAssayGroups() {
         BiologicalReplicate replicate1 = BiologicalReplicate.create(ASSAY_ID_1);
         BiologicalReplicate replicate2 = BiologicalReplicate.create(ASSAY_ID_2);
         var assayGroup1 = new AssayGroup("g1", Collections.singleton(replicate1));
         var assayGroup2 = new AssayGroup("g2", Collections.singleton(replicate2));
         assayGroups = Arrays.asList(assayGroup1, assayGroup2);
+    }
 
-        // Create gene IDs
-        geneIds = Arrays.asList(GENE_ID_1, GENE_ID_2);
+    private void initializeTestGeneIds() {
+        testGeneIds = Arrays.asList(GENE_ID_1, GENE_ID_2);
+    }
 
-        // Create expected profiles
+    private void initializeSampleProfiles() {
         expectedProfiles = new GeneProfilesList<>();
-        expectedProfiles.add(baselineProfile1);
-        expectedProfiles.add(baselineProfile2);
+        expectedProfiles.add(mockProfile1);
+        expectedProfiles.add(mockProfile2);
         expectedProfiles.setTotalResultCount(2);
     }
 
     @Test
-    public void getTopGeneProfilesUsesMarkerGeneDaoWhenSpecificIsTrue() {
-        // Set specific to true
-        preferences.setSpecific(true);
-
-        // Mock marker gene DAO
-        when(markerGeneDao.fetchMarkerGeneProfiles(
-                EXPERIMENT_ACCESSION, assayGroups, preferences))
+    public void topGeneProfilesUsesPostgresWhenSpecificIsTrue() {
+        requestPrefs.setSpecific(true);
+        when(postgresDao.fetchMarkerGeneProfiles(
+                EXPERIMENT_ACCESSION, assayGroups, requestPrefs))
                 .thenReturn(expectedProfiles);
 
-        // Call the method under test
         GeneProfilesList<BaselineProfile> result = subject.getTopGeneProfiles(
-                EXPERIMENT_ACCESSION, assayGroups, preferences);
+                EXPERIMENT_ACCESSION, assayGroups, requestPrefs);
 
-        // Verify the result
         assertThat(result).isEqualTo(expectedProfiles);
-
-        // Verify that the marker gene DAO was used
-        verify(markerGeneDao).fetchMarkerGeneProfiles(
-                EXPERIMENT_ACCESSION, assayGroups, preferences);
-
-        // Verify that the Solr-based implementation was not used
-        verify(baselineExperimentTopGenesService, never())
+        verify(postgresDao).fetchMarkerGeneProfiles(
+                EXPERIMENT_ACCESSION, assayGroups, requestPrefs);
+        verify(topGenesService, never())
                 .searchMostExpressedGenesInBaselineExperiment(anyString(), any());
-        verify(baselineExperimentProfilesDao, never())
+        verify(solrDao, never())
                 .fetchProfiles(anyList(), anyList(), any(), anyString());
     }
 
     @Test
-    public void getTopGeneProfilesUsesSolrWhenSpecificIsFalse() {
-        // Set specific to false
-        preferences.setSpecific(false);
-
-        // Mock Solr-based implementation
-        when(baselineExperimentTopGenesService.searchMostExpressedGenesInBaselineExperiment(
-                EXPERIMENT_ACCESSION, preferences))
-                .thenReturn(geneIds);
-        when(baselineExperimentProfilesDao.fetchProfiles(
-                geneIds, assayGroups, preferences, EXPERIMENT_ACCESSION))
+    public void topGeneProfilesUsesSolrWhenSpecificIsFalse() {
+        requestPrefs.setSpecific(false);
+        when(topGenesService.searchMostExpressedGenesInBaselineExperiment(
+                EXPERIMENT_ACCESSION, requestPrefs))
+                .thenReturn(testGeneIds);
+        when(solrDao.fetchProfiles(
+                testGeneIds, assayGroups, requestPrefs, EXPERIMENT_ACCESSION))
                 .thenReturn(expectedProfiles);
 
-        // Call the method under test
         GeneProfilesList<BaselineProfile> result = subject.getTopGeneProfiles(
-                EXPERIMENT_ACCESSION, assayGroups, preferences);
+                EXPERIMENT_ACCESSION, assayGroups, requestPrefs);
 
-        // Verify the result
         assertThat(result).isEqualTo(expectedProfiles);
-
-        // Verify that the Solr-based implementation was used
-        verify(baselineExperimentTopGenesService)
-                .searchMostExpressedGenesInBaselineExperiment(EXPERIMENT_ACCESSION, preferences);
-        verify(baselineExperimentProfilesDao)
-                .fetchProfiles(geneIds, assayGroups, preferences, EXPERIMENT_ACCESSION);
-
-        // Verify that the marker gene DAO was not used
-        verify(markerGeneDao, never())
+        verify(topGenesService)
+                .searchMostExpressedGenesInBaselineExperiment(EXPERIMENT_ACCESSION, requestPrefs);
+        verify(solrDao)
+                .fetchProfiles(testGeneIds, assayGroups, requestPrefs, EXPERIMENT_ACCESSION);
+        verify(postgresDao, never())
                 .fetchMarkerGeneProfiles(anyString(), anyList(), any());
     }
 
     @Test
-    public void getGeneProfilesUsesMarkerGeneDaoWhenSpecificIsTrue() {
-        // Set specific to true
-        preferences.setSpecific(true);
-
-        // Mock marker gene DAO
-        when(markerGeneDao.fetchSpecificGeneProfiles(
-                eq(Arrays.asList(GENE_ID_1, GENE_ID_2)), eq(EXPERIMENT_ACCESSION), eq(assayGroups), eq(preferences)))
+    public void specificGeneProfilesUsesPostgresWhenSpecificIsTrue() {
+        requestPrefs.setSpecific(true);
+        when(postgresDao.fetchSpecificGeneProfiles(
+                eq(testGeneIds), eq(EXPERIMENT_ACCESSION), eq(assayGroups), eq(requestPrefs)))
                 .thenReturn(expectedProfiles);
 
-        // Call the method under test
         GeneProfilesList<BaselineProfile> result = subject.getGeneProfiles(
-                EXPERIMENT_ACCESSION, assayGroups, preferences, GENE_ID_1, GENE_ID_2);
+                EXPERIMENT_ACCESSION, assayGroups, requestPrefs, GENE_ID_1, GENE_ID_2);
 
-        // Verify the result
         assertThat(result).isEqualTo(expectedProfiles);
-
-        // Verify that the marker gene DAO was used
-        verify(markerGeneDao).fetchSpecificGeneProfiles(
-                eq(Arrays.asList(GENE_ID_1, GENE_ID_2)), eq(EXPERIMENT_ACCESSION), eq(assayGroups), eq(preferences));
-
-        // Verify that the Solr-based implementation was not used
-        verify(baselineExperimentProfilesDao, never())
+        verify(postgresDao).fetchSpecificGeneProfiles(
+                eq(testGeneIds), eq(EXPERIMENT_ACCESSION), eq(assayGroups), eq(requestPrefs));
+        verify(solrDao, never())
                 .fetchProfiles(anyList(), anyList(), any(), anyString());
     }
 
     @Test
-    public void getGeneProfilesUsesSolrWhenSpecificIsFalse() {
-        // Set specific to false
-        preferences.setSpecific(false);
-
-        // Mock Solr-based implementation
-        when(baselineExperimentProfilesDao.fetchProfiles(
-                eq(Arrays.asList(GENE_ID_1, GENE_ID_2)), eq(assayGroups), eq(preferences), eq(EXPERIMENT_ACCESSION)))
+    public void specificGeneProfilesUsesSolrWhenSpecificIsFalse() {
+        requestPrefs.setSpecific(false);
+        when(solrDao.fetchProfiles(
+                eq(testGeneIds), eq(assayGroups), eq(requestPrefs), eq(EXPERIMENT_ACCESSION)))
                 .thenReturn(expectedProfiles);
 
-        // Call the method under test
         GeneProfilesList<BaselineProfile> result = subject.getGeneProfiles(
-                EXPERIMENT_ACCESSION, assayGroups, preferences, GENE_ID_1, GENE_ID_2);
+                EXPERIMENT_ACCESSION, assayGroups, requestPrefs, GENE_ID_1, GENE_ID_2);
 
-        // Verify the result
         assertThat(result).isEqualTo(expectedProfiles);
-
-        // Verify that the Solr-based implementation was used
-        verify(baselineExperimentProfilesDao)
-                .fetchProfiles(eq(Arrays.asList(GENE_ID_1, GENE_ID_2)), eq(assayGroups), eq(preferences), eq(EXPERIMENT_ACCESSION));
-
-        // Verify that the marker gene DAO was not used
-        verify(markerGeneDao, never())
+        verify(solrDao)
+                .fetchProfiles(eq(testGeneIds), eq(assayGroups), eq(requestPrefs), eq(EXPERIMENT_ACCESSION));
+        verify(postgresDao, never())
                 .fetchSpecificGeneProfiles(anyList(), anyString(), anyList(), any());
     }
 
     @Test
-    public void fetchCountUsesMarkerGeneDaoWhenSpecificIsTrue() {
-        // Set specific to true
-        preferences.setSpecific(true);
+    public void countUsesPostgresWhenSpecificIsTrue() {
+        requestPrefs.setSpecific(true);
+        when(postgresDao.fetchCount(EXPERIMENT_ACCESSION, requestPrefs))
+                .thenReturn(EXPECTED_COUNT);
 
-        // Mock marker gene DAO
-        when(markerGeneDao.fetchCount(EXPERIMENT_ACCESSION, preferences))
-                .thenReturn(42L);
+        long result = subject.fetchCount(EXPERIMENT_ACCESSION, requestPrefs);
 
-        // Call the method under test
-        long result = subject.fetchCount(EXPERIMENT_ACCESSION, preferences);
-
-        // Verify the result
-        assertThat(result).isEqualTo(42L);
-
-        // Verify that the marker gene DAO was used
-        verify(markerGeneDao).fetchCount(EXPERIMENT_ACCESSION, preferences);
-
-        // Verify that the Solr-based implementation was not used
-        verify(baselineExperimentProfilesDao, never())
+        assertThat(result).isEqualTo(EXPECTED_COUNT);
+        verify(postgresDao).fetchCount(EXPERIMENT_ACCESSION, requestPrefs);
+        verify(solrDao, never())
                 .fetchCount(anyString(), any());
     }
 
     @Test
-    public void fetchCountUsesSolrWhenSpecificIsFalse() {
-        // Set specific to false
-        preferences.setSpecific(false);
+    public void countUsesSolrWhenSpecificIsFalse() {
+        requestPrefs.setSpecific(false);
+        when(solrDao.fetchCount(EXPERIMENT_ACCESSION, requestPrefs))
+                .thenReturn(EXPECTED_COUNT);
 
-        // Mock Solr-based implementation
-        when(baselineExperimentProfilesDao.fetchCount(EXPERIMENT_ACCESSION, preferences))
-                .thenReturn(42L);
+        long result = subject.fetchCount(EXPERIMENT_ACCESSION, requestPrefs);
 
-        // Call the method under test
-        long result = subject.fetchCount(EXPERIMENT_ACCESSION, preferences);
-
-        // Verify the result
-        assertThat(result).isEqualTo(42L);
-
-        // Verify that the Solr-based implementation was used
-        verify(baselineExperimentProfilesDao).fetchCount(EXPERIMENT_ACCESSION, preferences);
-
-        // Verify that the marker gene DAO was not used
-        verify(markerGeneDao, never())
+        assertThat(result).isEqualTo(EXPECTED_COUNT);
+        verify(solrDao).fetchCount(EXPERIMENT_ACCESSION, requestPrefs);
+        verify(postgresDao, never())
                 .fetchCount(anyString(), any());
     }
+
+
+
 }
