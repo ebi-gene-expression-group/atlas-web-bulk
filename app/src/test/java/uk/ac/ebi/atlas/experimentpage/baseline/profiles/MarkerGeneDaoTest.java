@@ -1,5 +1,7 @@
 package uk.ac.ebi.atlas.experimentpage.baseline.profiles;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +35,8 @@ public class MarkerGeneDaoTest {
     private RnaSeqBaselineRequestPreferences preferences;
     private AssayGroup assayGroup1;
     private AssayGroup assayGroup2;
+    private JsonArray mockColumnHeaders;
+
 
     private MarkerGeneDao subject;
     private static final String EXPERIMENT_ACCESSION = "E-MTAB-1234";
@@ -64,7 +68,26 @@ public class MarkerGeneDaoTest {
 
         assayGroup1 = new AssayGroup("g1", Collections.singleton(replicate1));
         assayGroup2 = new AssayGroup("g2", Collections.singleton(replicate2));
+
+        initializeMockColumnHeaders();
     }
+
+    private void initializeMockColumnHeaders() {
+        mockColumnHeaders = new JsonArray();
+
+        // Add header for assayGroup1
+        JsonObject header1 = new JsonObject();
+        header1.addProperty("assayGroupId", assayGroup1.getId());
+        header1.addProperty("factorValue", ASSAY_ID_1);
+        mockColumnHeaders.add(header1);
+
+        // Add header for assayGroup2
+        JsonObject header2 = new JsonObject();
+        header2.addProperty("assayGroupId", assayGroup2.getId());
+        header2.addProperty("factorValue", ASSAY_ID_2);
+        mockColumnHeaders.add(header2);
+    }
+
 
     @Test
     public void fetchMarkerGeneProfilesReturnsCorrectProfiles() {
@@ -84,9 +107,10 @@ public class MarkerGeneDaoTest {
 
         // Call the method under test
         GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
-                EXPERIMENT_ACCESSION,
-                Arrays.asList(assayGroup1, assayGroup2),
-                preferences);
+            EXPERIMENT_ACCESSION,
+            Arrays.asList(assayGroup1, assayGroup2),
+            preferences,
+            mockColumnHeaders);
 
         // Verify the results
         assertThat(result).hasSize(2);
@@ -125,10 +149,11 @@ public class MarkerGeneDaoTest {
 
         // Call the method under test
         GeneProfilesList<BaselineProfile> result = subject.fetchSpecificGeneProfiles(
-                Arrays.asList(GENE_ID_1, GENE_ID_2),
-                EXPERIMENT_ACCESSION,
-                Arrays.asList(assayGroup1, assayGroup2),
-                preferences);
+            Arrays.asList(GENE_ID_1, GENE_ID_2),
+            EXPERIMENT_ACCESSION,
+            Arrays.asList(assayGroup1, assayGroup2),
+            preferences,
+            mockColumnHeaders);
 
         // Verify the results
         assertThat(result).hasSize(2);
@@ -165,10 +190,11 @@ public class MarkerGeneDaoTest {
     @Test
     public void fetchSpecificGeneProfilesReturnsEmptyListForEmptyInput() {
         GeneProfilesList<BaselineProfile> result = subject.fetchSpecificGeneProfiles(
-                Collections.emptyList(),
-                EXPERIMENT_ACCESSION,
-                Arrays.asList(assayGroup1, assayGroup2),
-                preferences);
+            Collections.emptyList(),
+            EXPERIMENT_ACCESSION,
+            Arrays.asList(assayGroup1, assayGroup2),
+            preferences,
+            mockColumnHeaders);
 
         assertThat(result).isEmpty();
     }
