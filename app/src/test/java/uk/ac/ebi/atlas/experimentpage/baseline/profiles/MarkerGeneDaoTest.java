@@ -98,11 +98,13 @@ public class MarkerGeneDaoTest {
         );
 
         when(jdbcTemplate.queryForList(
-                anyString(), eq(EXPERIMENT_ACCESSION), eq("TPM"), eq(CUTOFF), eq(HEATMAP_SIZE)))
+            anyString(), eq(EXPERIMENT_ACCESSION), eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()),
+            eq(CUTOFF), eq(HEATMAP_SIZE)))
                 .thenReturn(mockResults);
 
         when(jdbcTemplate.queryForObject(
-                anyString(), eq(Long.class), eq(EXPERIMENT_ACCESSION), eq("TPM"), eq(CUTOFF)))
+            anyString(), eq(Long.class), eq(EXPERIMENT_ACCESSION),
+            eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()), eq(CUTOFF)))
                 .thenReturn(2L);
 
         // Call the method under test
@@ -180,7 +182,8 @@ public class MarkerGeneDaoTest {
     @Test
     public void fetchCountReturnsCorrectCount() {
         when(jdbcTemplate.queryForObject(
-                anyString(), eq(Long.class), eq(EXPERIMENT_ACCESSION), eq("TPM"), eq(CUTOFF)))
+            anyString(), eq(Long.class), eq(EXPERIMENT_ACCESSION),
+            eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()), eq(CUTOFF)))
                 .thenReturn(42L);
 
         long count = subject.fetchCount(EXPERIMENT_ACCESSION, preferences);
