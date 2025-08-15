@@ -56,11 +56,12 @@ public class JsonBaselineGeneInExperimentController extends JsonExperimentContro
 
         BaselineRequestContext<ExpressionUnit.Absolute.Rna> requestContext =
                 new BaselineRequestContext<>(preferences, experiment);
-        result.add("columnHeaders", columnHeaders(requestContext));
+        var columnHeaders = columnHeaders(requestContext);
+        result.add("columnHeaders", columnHeaders);
 
         GeneProfilesList<BaselineProfile> geneExpression =
                 baselineExperimentProfilesService.getGeneProfiles(
-                        experimentAccession, requestContext.getDataColumnsToReturn(), preferences, geneId);
+                        experimentAccession, requestContext.getDataColumnsToReturn(), preferences, columnHeaders, geneId);
 
         // Do we need to set cutoff to 0? TODO Test the endpoint...
         preferences.setCutoff(0.0);

@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.experimentpage.baseline.profiles;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonArray;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.experimentpage.baseline.topgenes.BaselineExperimentTopGenesService;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
@@ -45,9 +46,10 @@ public class BaselineExperimentProfilesService {
      */
     public GeneProfilesList<BaselineProfile> getTopGeneProfiles(String experimentAccession,
                                                                 List<AssayGroup> assayGroups,
-                                                                BaselineRequestPreferences<?> preferences) {
+                                                                BaselineRequestPreferences<?> preferences,
+                                                                JsonArray columnHeaders) {
         if (preferences.isSpecific()) {
-            return markerGeneDao.fetchMarkerGeneProfiles(experimentAccession, assayGroups, preferences);
+            return markerGeneDao.fetchMarkerGeneProfiles(experimentAccession, assayGroups, preferences, columnHeaders);
         }
 
         List<String> topGeneIds = 
@@ -70,14 +72,15 @@ public class BaselineExperimentProfilesService {
      * @return A list of baseline profiles for the specified genes
      */
     public GeneProfilesList<BaselineProfile> getGeneProfiles(String experimentAccession,
-                                                            List<AssayGroup> assayGroups,
-                                                            BaselineRequestPreferences<?> preferences,
-                                                            String... geneIds) {
+                                                             List<AssayGroup> assayGroups,
+                                                             BaselineRequestPreferences<?> preferences,
+                                                             JsonArray columnHeaders,
+                                                             String... geneIds) {
         ImmutableList<String> geneIdsList = ImmutableList.copyOf(geneIds);
 
         if (preferences.isSpecific()) {
             return markerGeneDao.fetchSpecificGeneProfiles(
-                    geneIdsList, experimentAccession, assayGroups, preferences);
+                    geneIdsList, experimentAccession, assayGroups, preferences, columnHeaders);
         }
 
         return baselineExperimentProfilesDao.fetchProfiles(
