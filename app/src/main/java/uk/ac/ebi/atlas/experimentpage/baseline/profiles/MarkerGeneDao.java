@@ -14,10 +14,12 @@ import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * DAO for fetching marker gene data from the gxa_marker_gene table in PostgreSQL.
@@ -27,23 +29,45 @@ import java.util.stream.Collectors;
 public class MarkerGeneDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarkerGeneDao.class);
+    private static final int MAX_NUMBER_OF_MARKER_GENES = 50;
     private final JdbcTemplate jdbcTemplate;
 
-    private static final String BASE_QUERY =
-        "SELECT gene_id, gene_name, assay, expression_level " +
+    private static final String FETCH_MARKER_GENES =
+        "WITH filtered_data AS ( " +
+            "SELECT gene_id, gene_name, assay, expression_level, marker_gene_rank " +
             "FROM gxa_marker_gene " +
-            "WHERE experiment_accession = ? ";
+            "WHERE experiment_accession = ?" +
+            "  AND assay IN (?)" +
+            "  AND expression_unit = ?" +
+            "  AND expression_level >= ?" +
+            "), " +
+            "ranked_genes AS (" +
+            "  SELECT DISTINCT gene_id" +
+            "  FROM filtered_data" +
+            "  WHERE marker_gene_rank <= ? " +
+            ") " +
+        "SELECT gene_id, gene_name, assay, expression_level " +
+        "FROM filtered_data " +
+        "WHERE gene_id IN (SELECT gene_id FROM ranked_genes)";
 
-    private static final String FETCH_MARKER_GENES = BASE_QUERY +
-        "AND expression_unit = ? " +
-        "AND expression_level >= ? " +
-        "ORDER BY marker_gene_rank " +
-        "LIMIT ?";
-
-    private static final String FETCH_SPECIFIC_GENES = BASE_QUERY +
-        "AND gene_id IN (%s) " +
-        "AND expression_unit = ? " +
-        "AND expression_level >= ?";
+    private static final String FETCH_SPECIFIC_GENES =
+        "WITH filtered_data AS ( " +
+            "SELECT gene_id, gene_name, assay, expression_level, marker_gene_rank " +
+            "FROM gxa_marker_gene " +
+            "WHERE experiment_accession = ?" +
+            "  AND assay IN (?)" +
+            "  AND expression_unit = ?" +
+            "  AND expression_level >= ?" +
+            "  AND gene_id IN (?) " +
+            "), " +
+            "ranked_genes AS (" +
+            "  SELECT DISTINCT gene_id" +
+            "  FROM filtered_data" +
+            "  WHERE marker_gene_rank <= ? " +
+            ") " +
+            "SELECT gene_id, gene_name, assay, expression_level " +
+            "FROM filtered_data " +
+            "WHERE gene_id IN (SELECT gene_id FROM ranked_genes)";
 
     private static final String COUNT_MARKER_GENES =
         "SELECT COUNT(DISTINCT gene_id) " +
@@ -71,14 +95,26 @@ public class MarkerGeneDao {
         @NotNull BaselineRequestPreferences<?> preferences,
         @NotNull JsonArray columnHeaders) {
 
-        var queryParams = new Object[] {
-            experimentAccession,
-            preferences.getUnit().getDatabaseValue(),
-            preferences.getCutoff(),
-            preferences.getHeatmapMatrixSize()
-        };
+        var markerGeneRankLimit = (double) (MAX_NUMBER_OF_MARKER_GENES / columnHeaders.size());
 
-        var results = executeQuery(FETCH_MARKER_GENES, queryParams);
+        List<String> assayNames = IntStream.range(0, columnHeaders.size())
+            .mapToObj(i -> columnHeaders.get(i).getAsJsonObject())
+            .filter(header -> header.has("factorValue") && !header.get("factorValue").isJsonNull())
+            .map(header -> header.get("factorValue").getAsString())
+            .filter(name -> !name.isEmpty())
+            .collect(Collectors.toList());
+
+        var inClause = String.join(",", Collections.nCopies(assayNames.size(), "?"));
+        var query = FETCH_MARKER_GENES.replace("assay IN (?)", "assay IN (" + inClause + ")");
+
+        List<Object> queryParams = new ArrayList<>();
+        queryParams.add(experimentAccession);
+        queryParams.addAll(assayNames);
+        queryParams.add(preferences.getUnit().getDatabaseValue());
+        queryParams.add(preferences.getCutoff());
+        queryParams.add(markerGeneRankLimit);
+
+        var results = executeQuery(query, queryParams);
 
         var geneProfilesList = createGeneProfilesList(results, assayGroups, columnHeaders);
         geneProfilesList.setTotalResultCount(fetchCount(experimentAccession, preferences));
@@ -107,10 +143,30 @@ public class MarkerGeneDao {
             return new GeneProfilesList<>();
         }
 
-        var sql = buildSpecificGenesQuery(geneIds);
-        var params = buildSpecificGenesParams(geneIds, experimentAccession, preferences);
+        var markerGeneRankLimit = (double) (MAX_NUMBER_OF_MARKER_GENES / columnHeaders.size());
 
-        var results = executeQuery(sql, params.toArray());
+        List<String> assayNames = IntStream.range(0, columnHeaders.size())
+            .mapToObj(i -> columnHeaders.get(i).getAsJsonObject())
+            .filter(header -> header.has("factorValue") && !header.get("factorValue").isJsonNull())
+            .map(header -> header.get("factorValue").getAsString())
+            .filter(name -> !name.isEmpty())
+            .collect(Collectors.toList());
+
+        var assayInClause = String.join(",", Collections.nCopies(assayNames.size(), "?"));
+        var geneIdInClause = String.join(",", Collections.nCopies(geneIds.size(), "?"));
+        var query = FETCH_SPECIFIC_GENES
+            .replace("assay IN (?)", "assay IN (" + assayInClause + ")")
+            .replace("geneId IN (?)", "geneId IN (" + geneIdInClause + ")");
+
+        List<Object> queryParams = new ArrayList<>();
+        queryParams.add(experimentAccession);
+        queryParams.addAll(assayNames);
+        queryParams.add(preferences.getUnit().getDatabaseValue());
+        queryParams.add(preferences.getCutoff());
+        queryParams.addAll(geneIds);
+        queryParams.add(markerGeneRankLimit);
+
+        var results = executeQuery(query, queryParams);
         return createGeneProfilesList(results, assayGroups, columnHeaders);
     }
 
@@ -142,43 +198,8 @@ public class MarkerGeneDao {
      * @param params The parameters for the SQL query
      * @return The query results as a list of maps
      */
-    private List<Map<String, Object>> executeQuery(String sql, Object[] params) {
-        return jdbcTemplate.queryForList(sql, params);
-    }
-
-    /**
-     * Builds SQL query for specific genes with the appropriate placeholders.
-     *
-     * @param geneIds List of gene IDs to query for
-     * @return SQL query string with placeholders for the gene IDs
-     */
-    private String buildSpecificGenesQuery(List<String> geneIds) {
-        var placeholders = geneIds.stream()
-            .map(id -> "?")
-            .collect(Collectors.joining(","));
-        return String.format(FETCH_SPECIFIC_GENES, placeholders);
-    }
-
-    /**
-     * Builds parameters for the specific genes query.
-     *
-     * @param geneIds List of gene IDs to query for
-     * @param experimentAccession The experiment accession
-     * @param preferences The request preferences
-     * @return List of parameters for the query
-     */
-    private List<Object> buildSpecificGenesParams(
-        List<String> geneIds,
-        String experimentAccession,
-        BaselineRequestPreferences<?> preferences) {
-
-        var params = new ArrayList<>(geneIds.size() + 3);
-        params.add(experimentAccession);
-        params.addAll(geneIds);
-        params.add(preferences.getUnit().getDatabaseValue());
-        params.add(preferences.getCutoff());
-
-        return params;
+    private List<Map<String, Object>> executeQuery(String sql, List<?> params) {
+        return jdbcTemplate.queryForList(sql, params.toArray(new Object[0]));
     }
 
     /**
