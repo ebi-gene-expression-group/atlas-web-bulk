@@ -11,6 +11,7 @@ import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExpression;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
+import uk.ac.ebi.atlas.search.SemanticQueryTerm;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class MarkerGeneDao {
             "  AND assay IN (?)" +
             "  AND expression_unit = ?" +
             "  AND expression_level >= ?" +
-            "  AND gene_id IN (?) " +
+            "  AND (gene_id IN (?) OR gene_name IN (?))" +
             "), " +
             "ranked_genes AS (" +
             "  SELECT DISTINCT gene_id" +
@@ -103,18 +104,35 @@ public class MarkerGeneDao {
             .map(header -> header.get("factorValue").getAsString())
             .filter(name -> !name.isEmpty())
             .collect(Collectors.toList());
-
-        var inClause = String.join(",", Collections.nCopies(assayNames.size(), "?"));
-        var query = FETCH_MARKER_GENES.replace("assay IN (?)", "assay IN (" + inClause + ")");
-
+        List<String> genes = preferences.getGeneQuery().terms().stream()
+            .map(SemanticQueryTerm::value)  // Replace with actual method to get value
+            .collect(Collectors.toList());
+        var sql = "";
         List<Object> queryParams = new ArrayList<>();
-        queryParams.add(experimentAccession);
-        queryParams.addAll(assayNames);
-        queryParams.add(preferences.getUnit().getDatabaseValue());
-        queryParams.add(preferences.getCutoff());
-        queryParams.add(markerGeneRankLimit);
+        var assayInClause = String.join(",", Collections.nCopies(assayNames.size(), "?"));
+        if (genes.isEmpty()) {
+            sql = FETCH_MARKER_GENES;
+            queryParams.add(experimentAccession);
+            queryParams.addAll(assayNames);
+            queryParams.add(preferences.getUnit().getDatabaseValue());
+            queryParams.add(preferences.getCutoff());
+            queryParams.add(markerGeneRankLimit);
+        } else {
+            sql = FETCH_SPECIFIC_GENES;
+            var geneIdInClause = String.join(",", Collections.nCopies(genes.size(), "?"));
+            sql = sql.replace("gene_id IN (?) OR gene_name IN (?)",
+                "gene_id IN (" + geneIdInClause + ") OR gene_name IN (" + geneIdInClause + ")");
+            queryParams.add(experimentAccession);
+            queryParams.addAll(assayNames);
+            queryParams.add(preferences.getUnit().getDatabaseValue());
+            queryParams.add(preferences.getCutoff());
+            queryParams.addAll(genes);
+            queryParams.addAll(genes);
+            queryParams.add(markerGeneRankLimit);
+        }
+        sql = sql.replace("assay IN (?)", "assay IN (" + assayInClause + ")");
 
-        var results = executeQuery(query, queryParams);
+        var results = executeQuery(sql, queryParams);
 
         var geneProfilesList = createGeneProfilesList(results, assayGroups, columnHeaders);
         geneProfilesList.setTotalResultCount(fetchCount(experimentAccession, preferences));
@@ -147,8 +165,8 @@ public class MarkerGeneDao {
 
         List<String> assayNames = IntStream.range(0, columnHeaders.size())
             .mapToObj(i -> columnHeaders.get(i).getAsJsonObject())
-            .filter(header -> header.has("factorValue") && !header.get("factorValue").isJsonNull())
-            .map(header -> header.get("factorValue").getAsString())
+            .filter(header -> header.has("name") && !header.get("name").isJsonNull())
+            .map(header -> header.get("name").getAsString())
             .filter(name -> !name.isEmpty())
             .collect(Collectors.toList());
 
@@ -156,13 +174,15 @@ public class MarkerGeneDao {
         var geneIdInClause = String.join(",", Collections.nCopies(geneIds.size(), "?"));
         var query = FETCH_SPECIFIC_GENES
             .replace("assay IN (?)", "assay IN (" + assayInClause + ")")
-            .replace("geneId IN (?)", "geneId IN (" + geneIdInClause + ")");
+            .replace("gene_id IN (?) OR gene_name IN (?)",
+                "gene_id IN (" + geneIdInClause + ") OR gene_name IN (" + geneIdInClause + ")");
 
         List<Object> queryParams = new ArrayList<>();
         queryParams.add(experimentAccession);
         queryParams.addAll(assayNames);
         queryParams.add(preferences.getUnit().getDatabaseValue());
         queryParams.add(preferences.getCutoff());
+        queryParams.addAll(geneIds);
         queryParams.addAll(geneIds);
         queryParams.add(markerGeneRankLimit);
 
@@ -258,7 +278,7 @@ public class MarkerGeneDao {
 
             // Check if the factor assayNameFromHeader matches the assay name
             if (assayNameFromHeader.equals(assayName)) {
-                assayGroupId = header.get("assayGroupId").getAsString();
+                assayGroupId = getFirstNonEmptyValue(header, "assayGroupId", "id");
                 LOGGER.debug("Found assay group ID '{}' for assay name '{}'", assayGroupId, assayName);
                 break;
             }
