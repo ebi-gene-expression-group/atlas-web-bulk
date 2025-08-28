@@ -46,6 +46,7 @@ public class MarkerGeneDaoTest {
     private static final String GENE_NAME_2 = "Gene2";
     private static final String ASSAY_ID_1 = "assay1";
     private static final String ASSAY_ID_2 = "assay2";
+    private static final String ASSAY_PARAM_NAME = "name";
     private static final double EXPRESSION_LEVEL_1 = 10.5;
     private static final double EXPRESSION_LEVEL_2 = 20.3;
     private static final double CUTOFF = 0.5;
@@ -112,7 +113,8 @@ public class MarkerGeneDaoTest {
             EXPERIMENT_ACCESSION,
             Arrays.asList(assayGroup1, assayGroup2),
             preferences,
-            mockColumnHeaders);
+            mockColumnHeaders,
+            "factorValue");
 
         // Verify the results
         assertThat(result).hasSize(2);
@@ -150,12 +152,12 @@ public class MarkerGeneDaoTest {
                 .thenReturn(mockResults);
 
         // Call the method under test
-        GeneProfilesList<BaselineProfile> result = subject.fetchSpecificGeneProfiles(
-            Arrays.asList(GENE_ID_1, GENE_ID_2),
+        GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
             EXPERIMENT_ACCESSION,
             Arrays.asList(assayGroup1, assayGroup2),
             preferences,
-            mockColumnHeaders);
+            mockColumnHeaders,
+            ASSAY_PARAM_NAME);
 
         // Verify the results
         assertThat(result).hasSize(2);
@@ -192,12 +194,12 @@ public class MarkerGeneDaoTest {
 
     @Test
     public void fetchSpecificGeneProfilesReturnsEmptyListForEmptyInput() {
-        GeneProfilesList<BaselineProfile> result = subject.fetchSpecificGeneProfiles(
-            Collections.emptyList(),
+        GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
             EXPERIMENT_ACCESSION,
             Arrays.asList(assayGroup1, assayGroup2),
             preferences,
-            mockColumnHeaders);
+            mockColumnHeaders,
+            ASSAY_PARAM_NAME);
 
         assertThat(result).isEmpty();
     }

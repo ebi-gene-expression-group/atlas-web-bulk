@@ -48,8 +48,18 @@ public class BaselineExperimentProfilesService {
                                                                 List<AssayGroup> assayGroups,
                                                                 BaselineRequestPreferences<?> preferences,
                                                                 JsonArray columnHeaders) {
-        if (preferences.isSpecific()) {
-            return markerGeneDao.fetchMarkerGeneProfiles(experimentAccession, assayGroups, preferences, columnHeaders);
+        var isGeneSearch = !preferences.getGeneQuery().terms().isEmpty();
+        if (isGeneSearch) {
+            List<String> topGeneIds =  baselineExperimentTopGenesService.searchSpecificGenesInBaselineExperiment(
+                experimentAccession, preferences);
+            return baselineExperimentProfilesDao.fetchProfiles(
+                topGeneIds, assayGroups, preferences, experimentAccession);
+        } else if (preferences.isSpecific()) {
+            var geneProfilesList = markerGeneDao.fetchMarkerGeneProfiles(
+                experimentAccession, assayGroups, preferences, columnHeaders, "factorValue");
+            geneProfilesList.setTotalResultCount(fetchCount(experimentAccession, preferences));
+
+            return geneProfilesList;
         }
 
         List<String> topGeneIds = 
@@ -78,9 +88,13 @@ public class BaselineExperimentProfilesService {
                                                              String... geneIds) {
         ImmutableList<String> geneIdsList = ImmutableList.copyOf(geneIds);
 
+        if (geneIdsList.isEmpty() && preferences.isSpecific()) {
+            return new GeneProfilesList<>();
+        }
+
         if (preferences.isSpecific()) {
-            return markerGeneDao.fetchSpecificGeneProfiles(
-                    geneIdsList, experimentAccession, assayGroups, preferences, columnHeaders);
+            return markerGeneDao.fetchMarkerGeneProfiles(
+                experimentAccession, assayGroups, preferences, columnHeaders, "name");
         }
 
         return baselineExperimentProfilesDao.fetchProfiles(
