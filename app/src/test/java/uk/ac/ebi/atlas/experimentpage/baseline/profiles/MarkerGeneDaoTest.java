@@ -2,6 +2,7 @@ package uk.ac.ebi.atlas.experimentpage.baseline.profiles;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -46,24 +46,22 @@ public class MarkerGeneDaoTest {
     private static final String GENE_NAME_2 = "Gene2";
     private static final String ASSAY_ID_1 = "assay1";
     private static final String ASSAY_ID_2 = "assay2";
-    private static final String ASSAY_PARAM_NAME = "name";
+    private static final String ASSAY_PARAM_NAME = "factorValue";
     private static final double EXPRESSION_LEVEL_1 = 10.5;
     private static final double EXPRESSION_LEVEL_2 = 20.3;
     private static final double CUTOFF = 0.5;
-    private static final int HEATMAP_SIZE = 50;
+    private static final int MAX_NUMBER_OF_MARKER_GENES = 50;
 
     @Before
     public void setUp() {
         subject = new MarkerGeneDao(jdbcTemplate);
 
-        // Create real preferences
         preferences = new RnaSeqBaselineRequestPreferences();
         preferences.setUnit(ExpressionUnit.Absolute.Rna.TPM);
         preferences.setCutoff(CUTOFF);
-        preferences.setHeatmapMatrixSize(HEATMAP_SIZE);
+        preferences.setHeatmapMatrixSize(MAX_NUMBER_OF_MARKER_GENES);
         preferences.setSpecific(true);
 
-        // Create real AssayGroup instances
         BiologicalReplicate replicate1 = BiologicalReplicate.create(ASSAY_ID_1);
         BiologicalReplicate replicate2 = BiologicalReplicate.create(ASSAY_ID_2);
 
@@ -75,83 +73,19 @@ public class MarkerGeneDaoTest {
 
     private void initializeMockColumnHeaders() {
         mockColumnHeaders = new JsonArray();
+        mockColumnHeaders.add(getHeader(assayGroup1, ASSAY_ID_1));
+        mockColumnHeaders.add(getHeader(assayGroup2, ASSAY_ID_2));
+    }
 
-        // Add header for assayGroup1
+    private @NotNull JsonObject getHeader(AssayGroup assayGroup1, String assayId1) {
         JsonObject header1 = new JsonObject();
         header1.addProperty("assayGroupId", assayGroup1.getId());
-        header1.addProperty("factorValue", ASSAY_ID_1);
-        mockColumnHeaders.add(header1);
-
-        // Add header for assayGroup2
-        JsonObject header2 = new JsonObject();
-        header2.addProperty("assayGroupId", assayGroup2.getId());
-        header2.addProperty("factorValue", ASSAY_ID_2);
-        mockColumnHeaders.add(header2);
-    }
-
-
-    @Test
-    public void fetchMarkerGeneProfilesReturnsCorrectProfiles() {
-        // Mock database results
-        List<Map<String, Object>> mockResults = Arrays.asList(
-                createResultRow(GENE_ID_1, GENE_NAME_1, ASSAY_ID_1, EXPRESSION_LEVEL_1),
-                createResultRow(GENE_ID_2, GENE_NAME_2, ASSAY_ID_2, EXPRESSION_LEVEL_2)
-        );
-
-        when(jdbcTemplate.queryForList(
-            anyString(), eq(EXPERIMENT_ACCESSION), eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()),
-            eq(CUTOFF), eq(HEATMAP_SIZE)))
-                .thenReturn(mockResults);
-
-        when(jdbcTemplate.queryForObject(
-            anyString(), eq(Long.class), eq(EXPERIMENT_ACCESSION),
-            eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()), eq(CUTOFF)))
-                .thenReturn(2L);
-
-        // Call the method under test
-        GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
-            EXPERIMENT_ACCESSION,
-            Arrays.asList(assayGroup1, assayGroup2),
-            preferences,
-            mockColumnHeaders,
-            "factorValue");
-
-        // Verify the results
-        assertThat(result).hasSize(2);
-        assertThat(result.properties().get("searchResultTotal")).isEqualTo("2");
-
-        // Verify the first profile
-        BaselineProfile profile1 = result.stream()
-                .filter(p -> p.getId().equals(GENE_ID_1))
-                .findFirst()
-                .orElse(null);
-        assertThat(profile1).isNotNull();
-        assertThat(profile1.getName()).isEqualTo(GENE_NAME_1);
-        assertThat(profile1.getExpression(assayGroup1).getLevel()).isEqualTo(EXPRESSION_LEVEL_1);
-
-        // Verify the second profile
-        BaselineProfile profile2 = result.stream()
-                .filter(p -> p.getId().equals(GENE_ID_2))
-                .findFirst()
-                .orElse(null);
-        assertThat(profile2).isNotNull();
-        assertThat(profile2.getName()).isEqualTo(GENE_NAME_2);
-        assertThat(profile2.getExpression(assayGroup2).getLevel()).isEqualTo(EXPRESSION_LEVEL_2);
+        header1.addProperty("factorValue", assayId1);
+        return header1;
     }
 
     @Test
-    public void fetchSpecificGeneProfilesReturnsCorrectProfiles() {
-        // Mock database results
-        List<Map<String, Object>> mockResults = Arrays.asList(
-                createResultRow(GENE_ID_1, GENE_NAME_1, ASSAY_ID_1, EXPRESSION_LEVEL_1),
-                createResultRow(GENE_ID_2, GENE_NAME_2, ASSAY_ID_2, EXPRESSION_LEVEL_2)
-        );
-
-        when(jdbcTemplate.queryForList(
-                anyString(), any(Object[].class)))
-                .thenReturn(mockResults);
-
-        // Call the method under test
+    public void fetchGeneProfilesReturnsEmptyListForEmptyInput() {
         GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
             EXPERIMENT_ACCESSION,
             Arrays.asList(assayGroup1, assayGroup2),
@@ -159,10 +93,32 @@ public class MarkerGeneDaoTest {
             mockColumnHeaders,
             ASSAY_PARAM_NAME);
 
-        // Verify the results
-        assertThat(result).hasSize(2);
+        assertThat(result).isEmpty();
+    }
 
-        // Verify the first profile
+    @Test
+    public void fetchMarkerGeneProfilesReturnsCorrectProfiles() {
+        List<Map<String, Object>> mockResults = Arrays.asList(
+                createResultRow(GENE_ID_1, GENE_NAME_1, ASSAY_ID_1, EXPRESSION_LEVEL_1),
+                createResultRow(GENE_ID_2, GENE_NAME_2, ASSAY_ID_2, EXPRESSION_LEVEL_2)
+        );
+
+        when(jdbcTemplate.queryForList(
+            anyString(), eq(EXPERIMENT_ACCESSION), eq(ASSAY_ID_1), eq(ASSAY_ID_2),
+                eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()),
+                eq(CUTOFF),
+                eq((double) (MAX_NUMBER_OF_MARKER_GENES / mockColumnHeaders.size()))))
+                .thenReturn(mockResults);
+
+        GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
+            EXPERIMENT_ACCESSION,
+            Arrays.asList(assayGroup1, assayGroup2),
+            preferences,
+            mockColumnHeaders,
+            ASSAY_PARAM_NAME);
+
+        assertThat(result).hasSize(mockResults.size());
+
         BaselineProfile profile1 = result.stream()
                 .filter(p -> p.getId().equals(GENE_ID_1))
                 .findFirst()
@@ -171,7 +127,6 @@ public class MarkerGeneDaoTest {
         assertThat(profile1.getName()).isEqualTo(GENE_NAME_1);
         assertThat(profile1.getExpression(assayGroup1).getLevel()).isEqualTo(EXPRESSION_LEVEL_1);
 
-        // Verify the second profile
         BaselineProfile profile2 = result.stream()
                 .filter(p -> p.getId().equals(GENE_ID_2))
                 .findFirst()
@@ -183,25 +138,14 @@ public class MarkerGeneDaoTest {
 
     @Test
     public void fetchCountReturnsCorrectCount() {
+        final long expectedCount = 42L;
         when(jdbcTemplate.queryForObject(
             anyString(), eq(Long.class), eq(EXPERIMENT_ACCESSION),
             eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()), eq(CUTOFF)))
-                .thenReturn(42L);
+                .thenReturn(expectedCount);
 
         long count = subject.fetchCount(EXPERIMENT_ACCESSION, preferences);
-        assertThat(count).isEqualTo(42L);
-    }
-
-    @Test
-    public void fetchSpecificGeneProfilesReturnsEmptyListForEmptyInput() {
-        GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
-            EXPERIMENT_ACCESSION,
-            Arrays.asList(assayGroup1, assayGroup2),
-            preferences,
-            mockColumnHeaders,
-            ASSAY_PARAM_NAME);
-
-        assertThat(result).isEmpty();
+        assertThat(count).isEqualTo(expectedCount);
     }
 
     private Map<String, Object> createResultRow(String geneId, String geneName, String assayId, double expressionLevel) {
