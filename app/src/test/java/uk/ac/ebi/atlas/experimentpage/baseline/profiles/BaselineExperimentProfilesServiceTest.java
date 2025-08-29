@@ -13,6 +13,7 @@ import uk.ac.ebi.atlas.model.experiment.sample.BiologicalReplicate;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.model.ExpressionUnit;
+import uk.ac.ebi.atlas.search.SemanticQuery;
 import uk.ac.ebi.atlas.web.RnaSeqBaselineRequestPreferences;
 
 import java.util.Arrays;
@@ -80,6 +81,7 @@ public class BaselineExperimentProfilesServiceTest {
 
     private void initializeRequestPreferences() {
         requestPrefs = new RnaSeqBaselineRequestPreferences();
+        requestPrefs.setGeneQuery(SemanticQuery.create());
         requestPrefs.setUnit(ExpressionUnit.Absolute.Rna.TPM);
         requestPrefs.setCutoff(CUTOFF);
         requestPrefs.setHeatmapMatrixSize(HEATMAP_SIZE);
