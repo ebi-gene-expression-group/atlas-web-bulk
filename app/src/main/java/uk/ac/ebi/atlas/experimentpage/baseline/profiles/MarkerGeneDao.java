@@ -78,6 +78,9 @@ public class MarkerGeneDao {
         @NotNull String assayParamName) {
 
         var markerGeneRankLimit = (double) (MAX_NUMBER_OF_MARKER_GENES / columnHeaders.size());
+        if (markerGeneRankLimit < 1) {
+            markerGeneRankLimit = 1;
+        }
 
         final List<String> assayNames = getAssayNames(columnHeaders, assayParamName);
 
