@@ -15,7 +15,7 @@ import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,7 +48,8 @@ public class MarkerGeneDao {
             ") " +
         "SELECT gene_id, gene_name, assay, expression_level " +
         "FROM filtered_data " +
-        "WHERE gene_id IN (SELECT gene_id FROM ranked_genes)";
+        "WHERE gene_id IN (SELECT gene_id FROM ranked_genes) " +
+        "ORDER BY ARRAY_POSITION(ARRAY[%s]::text[], assay::text), expression_level DESC";
 
     private static final String COUNT_MARKER_GENES =
         "SELECT COUNT(DISTINCT gene_id) " +
@@ -86,7 +87,7 @@ public class MarkerGeneDao {
 
         var assayInClause = String.join(",", Collections.nCopies(assayNames.size(), "?"));
 
-        var sql = String.format(FETCH_MARKER_GENES, assayInClause);
+        var sql = String.format(FETCH_MARKER_GENES, assayInClause, assayInClause);
 
         List<Object> queryParams =  createQueryParams(experimentAccession, preferences, assayNames, markerGeneRankLimit);
 
@@ -124,6 +125,7 @@ public class MarkerGeneDao {
         queryParams.add(preferences.getUnit().getDatabaseValue());
         queryParams.add(preferences.getCutoff());
         queryParams.add(markerGeneRankLimit);
+        queryParams.addAll(assayNames);
 
         return queryParams;
     }
@@ -160,7 +162,7 @@ public class MarkerGeneDao {
         List<AssayGroup> assayGroups,
         JsonArray columnHeaders) {
 
-        var profilesMap = new HashMap<String, BaselineProfile>();
+        var profilesMap = new LinkedHashMap<String, BaselineProfile>();
 
         for (var row : results) {
             var geneId = (String) row.get("gene_id");
