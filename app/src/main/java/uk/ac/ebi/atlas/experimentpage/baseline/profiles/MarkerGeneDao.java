@@ -40,6 +40,7 @@ public class MarkerGeneDao {
             "  AND assay IN (%s)" +
             "  AND expression_unit = ?" +
             "  AND expression_level >= ?" +
+            "  AND marker_gene_rank IS NOT NULL" +
             "), " +
             "ranked_genes AS (" +
             "  SELECT DISTINCT gene_id" +
