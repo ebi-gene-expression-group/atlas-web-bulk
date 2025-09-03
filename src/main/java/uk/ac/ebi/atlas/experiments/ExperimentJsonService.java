@@ -50,12 +50,13 @@ public class ExperimentJsonService {
     }
 
     public ImmutableSet<JsonObject> getPublicExperimentsJson() {
-        // Sort by experiment type according to the above precedence list and then by display name
+        //Sort by experiment type according to the above precedence list and then by loadDate
         return experimentTrader.getPublicExperiments().stream()
                 .sorted(Comparator
-                        .<Experiment>comparingInt(experiment ->
-                                EXPERIMENT_TYPE_PRECEDENCE_LIST.indexOf(experiment.getType()))
-                        .thenComparing(Experiment::getDisplayName))
+                        .<Experiment>comparingInt(e ->
+                                EXPERIMENT_TYPE_PRECEDENCE_LIST.indexOf(e.getType()))
+                        .thenComparing(Experiment::getLoadDate,
+                                Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(experimentJsonSerializer::serialize)
                 .collect(toImmutableSet());
     }
