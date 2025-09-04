@@ -50,7 +50,7 @@ public class BaselineExperimentProfilesService {
                                                                 JsonArray columnHeaders) {
         if (preferences.isSpecific()) {
             var geneProfilesList = markerGeneDao.fetchMarkerGeneProfiles(
-                experimentAccession, assayGroups, preferences, columnHeaders, "factorValue");
+                experimentAccession, assayGroups, preferences, columnHeaders);
             geneProfilesList.setTotalResultCount(fetchCount(experimentAccession, preferences));
 
             return geneProfilesList;
@@ -88,7 +88,7 @@ public class BaselineExperimentProfilesService {
 
         if (preferences.isSpecific()) {
             return markerGeneDao.fetchMarkerGeneProfiles(
-                experimentAccession, assayGroups, preferences, columnHeaders, "name");
+                experimentAccession, assayGroups, preferences, columnHeaders);
         }
 
         return baselineExperimentProfilesDao.fetchProfiles(

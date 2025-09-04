@@ -59,7 +59,6 @@ public class BaselineExperimentProfilesServiceTest {
     private static final String GENE_ID_2 = "ENSG00000002";
     private static final String ASSAY_ID_1 = "assay1";
     private static final String ASSAY_ID_2 = "assay2";
-    private static final String ASSAY_PARAM_NAME = "name";
     private static final double CUTOFF = 0.5;
     private static final int HEATMAP_SIZE = 50;
     private static final long EXPECTED_COUNT = 42L;
@@ -121,7 +120,7 @@ public class BaselineExperimentProfilesServiceTest {
     public void topGeneProfilesUsesPostgresWhenSpecificIsTrue() {
         requestPrefs.setSpecific(true);
         when(postgresDao.fetchMarkerGeneProfiles(
-                EXPERIMENT_ACCESSION, assayGroups, requestPrefs, mockColumnHeaders, "factorValue"))
+                EXPERIMENT_ACCESSION, assayGroups, requestPrefs, mockColumnHeaders))
                 .thenReturn(expectedProfiles);
 
         GeneProfilesList<BaselineProfile> result = subject.getTopGeneProfiles(
@@ -129,7 +128,7 @@ public class BaselineExperimentProfilesServiceTest {
 
         assertThat(result).isEqualTo(expectedProfiles);
         verify(postgresDao).fetchMarkerGeneProfiles(
-                EXPERIMENT_ACCESSION, assayGroups, requestPrefs, mockColumnHeaders, "factorValue");
+                EXPERIMENT_ACCESSION, assayGroups, requestPrefs, mockColumnHeaders);
         verify(topGenesService, never())
                 .searchMostExpressedGenesInBaselineExperiment(anyString(), any());
         verify(solrDao, never())
@@ -155,14 +154,14 @@ public class BaselineExperimentProfilesServiceTest {
         verify(solrDao)
                 .fetchProfiles(testGeneIds, assayGroups, requestPrefs, EXPERIMENT_ACCESSION);
         verify(postgresDao, never())
-                .fetchMarkerGeneProfiles(anyString(), anyList(), any(), any(), anyString());
+                .fetchMarkerGeneProfiles(anyString(), anyList(), any(), any());
     }
 
     @Test
     public void specificGeneProfilesUsesPostgresWhenSpecificIsTrue() {
         requestPrefs.setSpecific(true);
         when(postgresDao.fetchMarkerGeneProfiles(eq(EXPERIMENT_ACCESSION), eq(assayGroups), eq(requestPrefs),
-            eq(mockColumnHeaders), eq(ASSAY_PARAM_NAME)))
+            eq(mockColumnHeaders)))
                 .thenReturn(expectedProfiles);
 
         GeneProfilesList<BaselineProfile> result = subject.getGeneProfiles(
@@ -170,7 +169,7 @@ public class BaselineExperimentProfilesServiceTest {
 
         assertThat(result).isEqualTo(expectedProfiles);
         verify(postgresDao).fetchMarkerGeneProfiles(
-            eq(EXPERIMENT_ACCESSION), eq(assayGroups), eq(requestPrefs), eq(mockColumnHeaders), eq(ASSAY_PARAM_NAME));
+            eq(EXPERIMENT_ACCESSION), eq(assayGroups), eq(requestPrefs), eq(mockColumnHeaders));
         verify(solrDao, never())
                 .fetchProfiles(anyList(), anyList(), any(), anyString());
     }
@@ -189,7 +188,7 @@ public class BaselineExperimentProfilesServiceTest {
         verify(solrDao)
                 .fetchProfiles(eq(testGeneIds), eq(assayGroups), eq(requestPrefs), eq(EXPERIMENT_ACCESSION));
         verify(postgresDao, never())
-                .fetchMarkerGeneProfiles(anyString(), anyList(), any(), any(), anyString());
+                .fetchMarkerGeneProfiles(anyString(), anyList(), any(), any());
     }
 
     @Test

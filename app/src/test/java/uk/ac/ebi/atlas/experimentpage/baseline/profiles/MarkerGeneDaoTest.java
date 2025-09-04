@@ -46,7 +46,6 @@ public class MarkerGeneDaoTest {
     private static final String GENE_NAME_2 = "Gene2";
     private static final String ASSAY_ID_1 = "assay1";
     private static final String ASSAY_ID_2 = "assay2";
-    private static final String ASSAY_PARAM_NAME = "factorValue";
     private static final double EXPRESSION_LEVEL_1 = 10.5;
     private static final double EXPRESSION_LEVEL_2 = 20.3;
     private static final double CUTOFF = 0.5;
@@ -90,8 +89,7 @@ public class MarkerGeneDaoTest {
             EXPERIMENT_ACCESSION,
             Arrays.asList(assayGroup1, assayGroup2),
             preferences,
-            mockColumnHeaders,
-            ASSAY_PARAM_NAME);
+            mockColumnHeaders);
 
         assertThat(result).isEmpty();
     }
@@ -114,8 +112,7 @@ public class MarkerGeneDaoTest {
             EXPERIMENT_ACCESSION,
             Arrays.asList(assayGroup1, assayGroup2),
             preferences,
-            mockColumnHeaders,
-            ASSAY_PARAM_NAME);
+            mockColumnHeaders);
 
         assertThat(result).hasSize(mockResults.size());
 
