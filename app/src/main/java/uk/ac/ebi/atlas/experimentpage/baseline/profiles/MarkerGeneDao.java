@@ -1,6 +1,7 @@
 package uk.ac.ebi.atlas.experimentpage.baseline.profiles;
 
 import com.google.gson.JsonArray;
+import org.apache.commons.text.StringSubstitutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -10,8 +11,7 @@ import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,17 +31,22 @@ public class MarkerGeneDao {
     private static final String FETCH_MARKER_GENES =
         "SELECT gene_id, gene_name, assay_id, expression_level " +
         "FROM gxa_marker_gene " +
-        "WHERE experiment_accession = ? " +
-            "AND assay_id IN (%s) " +
+        "WHERE experiment_accession = '${experiment_accession}' " +
+            "AND assay_id IN (${assay_ids}) " +
             "AND gene_id IN ( " +
                 "SELECT DISTINCT gene_id " +
                 "FROM gxa_marker_gene " +
-                "WHERE experiment_accession = ? " +
-                "AND assay_id IN (%s) " +
-                "AND marker_gene_rank <= ?) " +
-            "AND expression_unit = ? " +
-            "AND expression_level >= ? " +
-        "ORDER BY ARRAY_POSITION(ARRAY[%s]::text[], assay_id::text), expression_level DESC";
+                "WHERE experiment_accession = '${experiment_accession}' " +
+                "AND assay_id IN (${assay_ids}) " +
+                "AND marker_gene_rank <= ${marker_gene_rank} " +
+                "AND expression_unit = '${expression_unit}' " +
+                "AND expression_level >= ${expression_level}) " +
+            "AND expression_unit = '${expression_unit}' " +
+            "AND expression_level >= ${expression_level} " +
+            "ORDER BY marker_gene_rank IS NULL, " +
+            "ARRAY_POSITION(ARRAY[${assay_ids}]::text[], assay_id::text), " +
+            "marker_gene_rank, " +
+            "expression_level DESC";
 
     private static final String COUNT_MARKER_GENES =
         "SELECT COUNT(DISTINCT gene_id) " +
@@ -76,13 +81,12 @@ public class MarkerGeneDao {
 
         final List<String> assayGroupIDs = getAssayGroupIDs(columnHeaders);
 
-        var assayIDInClause = String.join(",", Collections.nCopies(assayGroupIDs.size(), "?"));
+        Map<String, String> queryParams =  createQueryParams(experimentAccession, preferences, assayGroupIDs, markerGeneRankLimit);
 
-        var sql = String.format(FETCH_MARKER_GENES, assayIDInClause, assayIDInClause, assayIDInClause);
+        var substitutor = new StringSubstitutor(queryParams);
+        var sql = substitutor.replace(FETCH_MARKER_GENES);
 
-        List<Object> queryParams =  createQueryParams(experimentAccession, preferences, assayGroupIDs, markerGeneRankLimit);
-
-        var results = executeQuery(sql, queryParams);
+        var results = executeQuery(sql);
 
         return createGeneProfilesList(results, assayGroups);
     }
@@ -108,21 +112,52 @@ public class MarkerGeneDao {
         return jdbcTemplate.queryForObject(COUNT_MARKER_GENES, Long.class, queryParams);
     }
 
-    private static List<Object> createQueryParams(@NotNull String experimentAccession, @NotNull BaselineRequestPreferences<?> preferences,
-                                                  List<String> assayNames, double markerGeneRankLimit) {
-        List<Object> queryParams = new ArrayList<>();
-        queryParams.add(experimentAccession);
-        queryParams.addAll(assayNames);
-        queryParams.add(experimentAccession);
-        queryParams.addAll(assayNames);
-        queryParams.add(markerGeneRankLimit);
-        queryParams.add(preferences.getUnit().getDatabaseValue());
-        queryParams.add(preferences.getCutoff());
-        queryParams.addAll(assayNames);
+    /**
+     * Creates a map of query parameters used in the SQL query for marker gene retrieval.
+     *
+     * This method prepares parameters that will be used with StringSubstitutor to replace
+     * placeholders in the SQL query. It handles proper formatting of the parameters,
+     * including putting single quotes around assay IDs for SQL compatibility.
+     *
+     * @param experimentAccession The experiment accession identifier
+     * @param preferences The baseline request preferences containing filtering criteria
+     *                   such as expression unit and cutoff threshold
+     * @param assayGroupIDs List of assay group identifiers to include in the query
+     * @param markerGeneRankLimit The maximum rank of marker genes to include in results
+     * @return A map of parameter names to their properly formatted string values
+     *         for use in SQL query substitution
+     */
+    private static Map<String, String> createQueryParams(
+        @NotNull String experimentAccession,
+        @NotNull BaselineRequestPreferences<?> preferences,
+        List<String> assayGroupIDs,
+        double markerGeneRankLimit) {
+    
+        Map<String, String> queryParams = new HashMap<>();
+
+        queryParams.put("experiment_accession", experimentAccession);
+        var assayIDsWithQuotes = assayGroupIDs.stream()
+            .map(s -> "'" + s + "'")
+            .collect(Collectors.joining(","));
+        queryParams.put("assay_ids", assayIDsWithQuotes);
+        queryParams.put("marker_gene_rank", String.valueOf(markerGeneRankLimit));
+        queryParams.put("expression_unit", preferences.getUnit().getDatabaseValue());
+        queryParams.put("expression_level", String.valueOf(preferences.getCutoff()));
 
         return queryParams;
     }
 
+    /**
+     * Extracts assay group IDs from a JsonArray of column headers.
+     *
+     * This method processes a JsonArray of column headers where each element is a JsonObject
+     * containing information about an assay group. It filters and extracts valid assay group IDs,
+     * excluding any that are null, missing, or empty.
+     *
+     * @param columnHeaders A JsonArray containing column header objects, each with potentially
+     *                     an "assayGroupId" field
+     * @return A list of non-empty assay group ID strings extracted from the column headers
+     */
     private static List<String> getAssayGroupIDs(JsonArray columnHeaders) {
         return IntStream.range(0, columnHeaders.size())
             .mapToObj(i -> columnHeaders.get(i).getAsJsonObject())
@@ -137,11 +172,10 @@ public class MarkerGeneDao {
      * Executes a SQL query and returns the results.
      *
      * @param sql The SQL query to execute
-     * @param params The parameters for the SQL query
      * @return The query results as a list of maps
      */
-    private List<Map<String, Object>> executeQuery(String sql, List<?> params) {
-        return jdbcTemplate.queryForList(sql, params.toArray(new Object[0]));
+    private List<Map<String, Object>> executeQuery(String sql) {
+        return jdbcTemplate.queryForList(sql);
     }
 
     /**
