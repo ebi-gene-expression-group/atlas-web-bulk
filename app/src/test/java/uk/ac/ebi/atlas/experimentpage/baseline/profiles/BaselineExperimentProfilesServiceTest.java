@@ -57,8 +57,8 @@ public class BaselineExperimentProfilesServiceTest {
     private static final String EXPERIMENT_ACCESSION = "E-MTAB-1234";
     private static final String GENE_ID_1 = "ENSG00000001";
     private static final String GENE_ID_2 = "ENSG00000002";
-    private static final String ASSAY_ID_1 = "assay1";
-    private static final String ASSAY_ID_2 = "assay2";
+    private static final String ASSAY_GROUP_ID_1 = "g1";
+    private static final String ASSAY_GROUP_ID_2 = "g2";
     private static final double CUTOFF = 0.5;
     private static final int HEATMAP_SIZE = 50;
     private static final long EXPECTED_COUNT = 42L;
@@ -87,10 +87,10 @@ public class BaselineExperimentProfilesServiceTest {
     }
 
     private void initializeAssayGroups() {
-        BiologicalReplicate replicate1 = BiologicalReplicate.create(ASSAY_ID_1);
-        BiologicalReplicate replicate2 = BiologicalReplicate.create(ASSAY_ID_2);
-        var assayGroup1 = new AssayGroup("g1", Collections.singleton(replicate1));
-        var assayGroup2 = new AssayGroup("g2", Collections.singleton(replicate2));
+        BiologicalReplicate replicate1 = BiologicalReplicate.create(ASSAY_GROUP_ID_1);
+        BiologicalReplicate replicate2 = BiologicalReplicate.create(ASSAY_GROUP_ID_2);
+        var assayGroup1 = new AssayGroup(ASSAY_GROUP_ID_1, Collections.singleton(replicate1));
+        var assayGroup2 = new AssayGroup(ASSAY_GROUP_ID_2, Collections.singleton(replicate2));
         assayGroups = Arrays.asList(assayGroup1, assayGroup2);
     }
 
