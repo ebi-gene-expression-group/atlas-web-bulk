@@ -3,6 +3,7 @@ package uk.ac.ebi.atlas.experimentpage.baseline.profiles;
 import com.google.gson.JsonArray;
 import org.apache.commons.text.StringSubstitutor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
@@ -11,10 +12,7 @@ import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,7 +27,7 @@ public class MarkerGeneDao {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String FETCH_MARKER_GENES =
-        "SELECT gene_id, gene_name, assay_id, expression_level " +
+        "SELECT gene_id, gene_name, assay_id, expression_level, marker_gene_rank " +
         "FROM gxa_marker_gene " +
         "WHERE experiment_accession = '${experiment_accession}' " +
             "AND assay_id IN (${assay_ids}) " +
@@ -44,7 +42,6 @@ public class MarkerGeneDao {
             "AND expression_unit = '${expression_unit}' " +
             "AND expression_level >= ${expression_level} " +
             "ORDER BY marker_gene_rank IS NULL, " +
-            "ARRAY_POSITION(ARRAY[${assay_ids}]::text[], assay_id::text), " +
             "marker_gene_rank, " +
             "expression_level DESC";
 
@@ -81,14 +78,95 @@ public class MarkerGeneDao {
 
         final List<String> assayGroupIDs = getAssayGroupIDs(columnHeaders);
 
-        Map<String, String> queryParams =  createQueryParams(experimentAccession, preferences, assayGroupIDs, markerGeneRankLimit);
+        Map<String, String> queryParams = createQueryParams(experimentAccession, preferences, assayGroupIDs, markerGeneRankLimit);
 
         var substitutor = new StringSubstitutor(queryParams);
         var sql = substitutor.replace(FETCH_MARKER_GENES);
 
         var results = executeQuery(sql);
+        
+        // Sort results based on assayGroupIDs order before processing
+        sortResultsByAssayOrder(results, assayGroupIDs);
 
         return createGeneProfilesList(results, assayGroups);
+    }
+
+    /**
+     * Sorts the query results based on the order of assay IDs provided.
+     * This replaces the ARRAY_POSITION function used in PostgresSQL.
+     *
+     * @param results The database query results to sort
+     * @param assayGroupIDs The ordered list of assay group IDs
+     */
+    private void sortResultsByAssayOrder(List<Map<String, Object>> results, List<String> assayGroupIDs) {
+        var assayPositionMap = getAssayPositionMap(assayGroupIDs);
+
+        results.sort((a, b) -> {
+            // 1. Sort by marker_gene_rank IS NULL (null last)
+            Object rankA = a.get("marker_gene_rank");
+            Object rankB = b.get("marker_gene_rank");
+            boolean aIsNull = rankA == null;
+            boolean bIsNull = rankB == null;
+            
+            if (aIsNull && !bIsNull) {
+                return 1;  // Null last
+            } else if (!aIsNull && bIsNull) {
+                return -1; // Null last
+            }
+
+            var assayIDPosition = sortByAssayIDPosition(a, b, assayPositionMap);
+            if (assayIDPosition != null) return assayIDPosition;
+
+            var markerGeneRank = sortByMarkerGeneRank(aIsNull, bIsNull, (Number) rankA, (Number) rankB);
+            if (markerGeneRank != null) return markerGeneRank;
+
+            return sortByExpressionLevel(a, b);
+        });
+    }
+
+    private static @NotNull Map<String, Integer> getAssayPositionMap(List<String> assayGroupIDs) {
+        Map<String, Integer> assayPositionMap = new HashMap<>();
+        for (int i = 0; i < assayGroupIDs.size(); i++) {
+            assayPositionMap.put(assayGroupIDs.get(i), i);
+        }
+        return assayPositionMap;
+    }
+
+    private static @Nullable Integer sortByAssayIDPosition(Map<String, Object> a, Map<String, Object> b, Map<String, Integer> assayPositionMap) {
+        String assayIdA = (String) a.get("assay_id");
+        String assayIdB = (String) b.get("assay_id");
+
+        Integer posA = assayPositionMap.getOrDefault(assayIdA, Integer.MAX_VALUE);
+        Integer posB = assayPositionMap.getOrDefault(assayIdB, Integer.MAX_VALUE);
+
+        int posCompare = posA.compareTo(posB);
+        if (posCompare != 0) {
+            return posCompare;
+        }
+        return null;
+    }
+
+    private static @Nullable Integer sortByMarkerGeneRank(boolean aIsNull, boolean bIsNull, Number rankA, Number rankB) {
+        if (aIsNull && bIsNull) {
+            // Both nulls, consider them equal for this criterion
+            return 0;
+        }
+
+        Double rankValueA = rankA.doubleValue();
+        Double rankValueB = rankB.doubleValue();
+
+        int rankCompare = rankValueA.compareTo(rankValueB);
+        if (rankCompare != 0) {
+            return rankCompare;
+        }
+        return null;
+    }
+
+    private static int sortByExpressionLevel(Map<String, Object> a, Map<String, Object> b) {
+        Double exprA = ((Number) a.get("expression_level")).doubleValue();
+        Double exprB = ((Number) b.get("expression_level")).doubleValue();
+
+        return -exprA.compareTo(exprB);
     }
 
     /**
@@ -166,7 +244,6 @@ public class MarkerGeneDao {
             .filter(id -> !id.isEmpty())
             .collect(Collectors.toList());
     }
-
 
     /**
      * Executes a SQL query and returns the results.
