@@ -44,8 +44,8 @@ public class MarkerGeneDaoTest {
     private static final String GENE_ID_2 = "ENSG00000002";
     private static final String GENE_NAME_1 = "Gene1";
     private static final String GENE_NAME_2 = "Gene2";
-    private static final String ASSAY_ID_1 = "assay1";
-    private static final String ASSAY_ID_2 = "assay2";
+    private static final String ASSAY_GROUP_ID_1 = "g1";
+    private static final String ASSAY_GROUP_ID_2 = "g2";
     private static final double EXPRESSION_LEVEL_1 = 10.5;
     private static final double EXPRESSION_LEVEL_2 = 20.3;
     private static final double CUTOFF = 0.5;
@@ -61,19 +61,19 @@ public class MarkerGeneDaoTest {
         preferences.setHeatmapMatrixSize(MAX_NUMBER_OF_MARKER_GENES);
         preferences.setSpecific(true);
 
-        BiologicalReplicate replicate1 = BiologicalReplicate.create(ASSAY_ID_1);
-        BiologicalReplicate replicate2 = BiologicalReplicate.create(ASSAY_ID_2);
+        BiologicalReplicate replicate1 = BiologicalReplicate.create(ASSAY_GROUP_ID_1);
+        BiologicalReplicate replicate2 = BiologicalReplicate.create(ASSAY_GROUP_ID_2);
 
-        assayGroup1 = new AssayGroup("g1", Collections.singleton(replicate1));
-        assayGroup2 = new AssayGroup("g2", Collections.singleton(replicate2));
+        assayGroup1 = new AssayGroup(ASSAY_GROUP_ID_1, Collections.singleton(replicate1));
+        assayGroup2 = new AssayGroup(ASSAY_GROUP_ID_2, Collections.singleton(replicate2));
 
         initializeMockColumnHeaders();
     }
 
     private void initializeMockColumnHeaders() {
         mockColumnHeaders = new JsonArray();
-        mockColumnHeaders.add(getHeader(assayGroup1, ASSAY_ID_1));
-        mockColumnHeaders.add(getHeader(assayGroup2, ASSAY_ID_2));
+        mockColumnHeaders.add(getHeader(assayGroup1, ASSAY_GROUP_ID_1));
+        mockColumnHeaders.add(getHeader(assayGroup2, ASSAY_GROUP_ID_2));
     }
 
     private @NotNull JsonObject getHeader(AssayGroup assayGroup1, String assayId1) {
@@ -97,16 +97,11 @@ public class MarkerGeneDaoTest {
     @Test
     public void fetchMarkerGeneProfilesReturnsCorrectProfiles() {
         List<Map<String, Object>> mockResults = Arrays.asList(
-                createResultRow(GENE_ID_1, GENE_NAME_1, ASSAY_ID_1, EXPRESSION_LEVEL_1),
-                createResultRow(GENE_ID_2, GENE_NAME_2, ASSAY_ID_2, EXPRESSION_LEVEL_2)
+                createResultRow(GENE_ID_1, GENE_NAME_1, ASSAY_GROUP_ID_1, EXPRESSION_LEVEL_1),
+                createResultRow(GENE_ID_2, GENE_NAME_2, ASSAY_GROUP_ID_2, EXPRESSION_LEVEL_2)
         );
 
-        when(jdbcTemplate.queryForList(
-            anyString(), eq(EXPERIMENT_ACCESSION), eq(ASSAY_ID_1), eq(ASSAY_ID_2),
-                eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()),
-                eq(CUTOFF),
-                eq((double) (MAX_NUMBER_OF_MARKER_GENES / mockColumnHeaders.size()))))
-                .thenReturn(mockResults);
+        when(jdbcTemplate.queryForList(anyString())).thenReturn(mockResults);
 
         GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
             EXPERIMENT_ACCESSION,
@@ -120,6 +115,7 @@ public class MarkerGeneDaoTest {
                 .filter(p -> p.getId().equals(GENE_ID_1))
                 .findFirst()
                 .orElse(null);
+
         assertThat(profile1).isNotNull();
         assertThat(profile1.getName()).isEqualTo(GENE_NAME_1);
         assertThat(profile1.getExpression(assayGroup1).getLevel()).isEqualTo(EXPRESSION_LEVEL_1);
@@ -149,7 +145,7 @@ public class MarkerGeneDaoTest {
         Map<String, Object> row = new HashMap<>();
         row.put("gene_id", geneId);
         row.put("gene_name", geneName);
-        row.put("assay", assayId);
+        row.put("assay_id", assayId);
         row.put("expression_level", expressionLevel);
         return row;
     }
