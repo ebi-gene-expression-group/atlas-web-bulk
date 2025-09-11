@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 public class ExperimentPageServiceTest {
     private Experiment experiment;
     private ExperimentPageRequestPreferences<?> preferences;
-    private ExperimentType experimentType = ExperimentType.RNASEQ_MRNA_BASELINE;
+    private final ExperimentType experimentType = ExperimentType.RNASEQ_MRNA_BASELINE;
 
     @Before
     public void setUp() {
@@ -54,14 +54,14 @@ public class ExperimentPageServiceTest {
         assertThat(
                 new ExperimentPageService()
                         .experimentDownloadLink(experiment, "", rnaSeqBaselineRequestPreferences).toString(),
-                containsString("unit=TPM"));
+                containsString("unit=" + ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()));
 
         rnaSeqBaselineRequestPreferences.setUnit(ExpressionUnit.Absolute.Rna.FPKM);
 
         assertThat(
                 new ExperimentPageService()
                         .experimentDownloadLink(experiment, "", rnaSeqBaselineRequestPreferences).toString(),
-                containsString("unit=FPKM"));
+                containsString("unit=" + ExpressionUnit.Absolute.Rna.FPKM.getDatabaseValue()));
     }
 
     @Test
