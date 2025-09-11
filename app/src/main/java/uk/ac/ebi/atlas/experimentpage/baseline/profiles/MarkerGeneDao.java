@@ -1,10 +1,11 @@
 package uk.ac.ebi.atlas.experimentpage.baseline.profiles;
 
 import com.google.gson.JsonArray;
-import org.apache.commons.text.StringSubstitutor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineExpression;
@@ -12,7 +13,10 @@ import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
 import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
 import uk.ac.ebi.atlas.web.BaselineRequestPreferences;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -24,23 +28,23 @@ import java.util.stream.IntStream;
 public class MarkerGeneDao {
 
     private static final int MAX_NUMBER_OF_MARKER_GENES = 50;
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private static final String FETCH_MARKER_GENES =
         "SELECT gene_id, gene_name, assay_id, expression_level, marker_gene_rank " +
         "FROM gxa_marker_gene " +
-        "WHERE experiment_accession = '${experiment_accession}' " +
-            "AND assay_id IN (${assay_ids}) " +
+        "WHERE experiment_accession = :experiment_accession " +
+            "AND assay_id IN (:assay_ids) " +
             "AND gene_id IN ( " +
                 "SELECT DISTINCT gene_id " +
                 "FROM gxa_marker_gene " +
-                "WHERE experiment_accession = '${experiment_accession}' " +
-                "AND assay_id IN (${assay_ids}) " +
-                "AND marker_gene_rank <= ${marker_gene_rank} " +
-                "AND expression_unit = '${expression_unit}' " +
-                "AND expression_level >= ${expression_level}) " +
-            "AND expression_unit = '${expression_unit}' " +
-            "AND expression_level >= ${expression_level} " +
+                "WHERE experiment_accession = :experiment_accession " +
+                "AND assay_id IN (:assay_ids) " +
+                "AND marker_gene_rank <= :marker_gene_rank " +
+                "AND expression_unit = :expression_unit " +
+                "AND expression_level >= :expression_level) " +
+            "AND expression_unit = :expression_unit " +
+            "AND expression_level >= :expression_level " +
             "ORDER BY marker_gene_rank IS NULL, " +
             "marker_gene_rank, " +
             "expression_level DESC";
@@ -48,11 +52,11 @@ public class MarkerGeneDao {
     private static final String COUNT_MARKER_GENES =
         "SELECT COUNT(DISTINCT gene_id) " +
             "FROM gxa_marker_gene " +
-            "WHERE experiment_accession = ? " +
-            "AND expression_unit = ? " +
-            "AND expression_level >= ?";
+            "WHERE experiment_accession = :experiment_accession " +
+            "AND expression_unit = :expression_unit " +
+            "AND expression_level >= :expression_level";
 
-    public MarkerGeneDao(JdbcTemplate jdbcTemplate) {
+    public MarkerGeneDao(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -71,21 +75,17 @@ public class MarkerGeneDao {
         @NotNull BaselineRequestPreferences<?> preferences,
         @NotNull JsonArray columnHeaders) {
 
-        var markerGeneRankLimit = (double) (MAX_NUMBER_OF_MARKER_GENES / columnHeaders.size());
+        var markerGeneRankLimit = MAX_NUMBER_OF_MARKER_GENES / columnHeaders.size();
         if (markerGeneRankLimit < 1) {
             markerGeneRankLimit = 1;
         }
 
         final List<String> assayGroupIDs = getAssayGroupIDs(columnHeaders);
 
-        Map<String, String> queryParams = createQueryParams(experimentAccession, preferences, assayGroupIDs, markerGeneRankLimit);
+        var queryParams = createQueryParams(experimentAccession, preferences, assayGroupIDs, markerGeneRankLimit);
 
-        var substitutor = new StringSubstitutor(queryParams);
-        var sql = substitutor.replace(FETCH_MARKER_GENES);
-
-        var results = executeQuery(sql);
+        var results = executeQuery(FETCH_MARKER_GENES, queryParams);
         
-        // Sort results based on assayGroupIDs order before processing
         sortResultsByAssayOrder(results, assayGroupIDs);
 
         return createGeneProfilesList(results, assayGroups);
@@ -148,7 +148,6 @@ public class MarkerGeneDao {
 
     private static @Nullable Integer sortByMarkerGeneRank(boolean aIsNull, boolean bIsNull, Number rankA, Number rankB) {
         if (aIsNull && bIsNull) {
-            // Both nulls, consider them equal for this criterion
             return 0;
         }
 
@@ -181,13 +180,13 @@ public class MarkerGeneDao {
         @NotNull String experimentAccession,
         @NotNull BaselineRequestPreferences<?> preferences) {
 
-        var queryParams = new Object[] {
-            experimentAccession,
-            preferences.getUnit().getDatabaseValue(),
-            preferences.getCutoff()
-        };
+        var queryParams = new MapSqlParameterSource()
+            .addValue("experiment_accession", experimentAccession)
+            .addValue("expression_unit", preferences.getUnit().getDatabaseValue())
+            .addValue("expression_level", preferences.getCutoff());
 
-        return jdbcTemplate.queryForObject(COUNT_MARKER_GENES, Long.class, queryParams);
+        var countOfMarkerGenes = jdbcTemplate.queryForObject(COUNT_MARKER_GENES, queryParams, Long.class);
+        return countOfMarkerGenes == null ? 0 : countOfMarkerGenes;
     }
 
     /**
@@ -205,24 +204,18 @@ public class MarkerGeneDao {
      * @return A map of parameter names to their properly formatted string values
      *         for use in SQL query substitution
      */
-    private static Map<String, String> createQueryParams(
+    private static SqlParameterSource createQueryParams(
         @NotNull String experimentAccession,
         @NotNull BaselineRequestPreferences<?> preferences,
         List<String> assayGroupIDs,
-        double markerGeneRankLimit) {
-    
-        Map<String, String> queryParams = new HashMap<>();
+        int markerGeneRankLimit) {
 
-        queryParams.put("experiment_accession", experimentAccession);
-        var assayIDsWithQuotes = assayGroupIDs.stream()
-            .map(s -> "'" + s + "'")
-            .collect(Collectors.joining(","));
-        queryParams.put("assay_ids", assayIDsWithQuotes);
-        queryParams.put("marker_gene_rank", String.valueOf(markerGeneRankLimit));
-        queryParams.put("expression_unit", preferences.getUnit().getDatabaseValue());
-        queryParams.put("expression_level", String.valueOf(preferences.getCutoff()));
-
-        return queryParams;
+        return new MapSqlParameterSource()
+            .addValue("experiment_accession", experimentAccession)
+            .addValue("assay_ids", assayGroupIDs)
+            .addValue("marker_gene_rank", markerGeneRankLimit)
+            .addValue("expression_unit", preferences.getUnit().getDatabaseValue())
+            .addValue("expression_level", preferences.getCutoff());
     }
 
     /**
@@ -251,8 +244,8 @@ public class MarkerGeneDao {
      * @param sql The SQL query to execute
      * @return The query results as a list of maps
      */
-    private List<Map<String, Object>> executeQuery(String sql) {
-        return jdbcTemplate.queryForList(sql);
+    private List<Map<String, Object>> executeQuery(String sql, SqlParameterSource queryParams) {
+        return jdbcTemplate.queryForList(sql, queryParams);
     }
 
     /**

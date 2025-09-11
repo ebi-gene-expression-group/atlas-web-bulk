@@ -8,12 +8,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.jdbc.core.JdbcTemplate;
-import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
-import uk.ac.ebi.atlas.model.experiment.sample.BiologicalReplicate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import uk.ac.ebi.atlas.model.ExpressionUnit;
 import uk.ac.ebi.atlas.model.GeneProfilesList;
 import uk.ac.ebi.atlas.model.experiment.baseline.BaselineProfile;
-import uk.ac.ebi.atlas.model.ExpressionUnit;
+import uk.ac.ebi.atlas.model.experiment.sample.AssayGroup;
+import uk.ac.ebi.atlas.model.experiment.sample.BiologicalReplicate;
 import uk.ac.ebi.atlas.web.RnaSeqBaselineRequestPreferences;
 
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -30,7 +32,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class MarkerGeneDaoTest {
     @Mock
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     private RnaSeqBaselineRequestPreferences preferences;
     private AssayGroup assayGroup1;
@@ -101,7 +103,7 @@ public class MarkerGeneDaoTest {
                 createResultRow(GENE_ID_2, GENE_NAME_2, ASSAY_GROUP_ID_2, EXPRESSION_LEVEL_2)
         );
 
-        when(jdbcTemplate.queryForList(anyString())).thenReturn(mockResults);
+        when(jdbcTemplate.queryForList(anyString(), any(SqlParameterSource.class))).thenReturn(mockResults);
 
         GeneProfilesList<BaselineProfile> result = subject.fetchMarkerGeneProfiles(
             EXPERIMENT_ACCESSION,
@@ -133,8 +135,7 @@ public class MarkerGeneDaoTest {
     public void fetchCountReturnsCorrectCount() {
         final long expectedCount = 42L;
         when(jdbcTemplate.queryForObject(
-            anyString(), eq(Long.class), eq(EXPERIMENT_ACCESSION),
-            eq(ExpressionUnit.Absolute.Rna.TPM.getDatabaseValue()), eq(CUTOFF)))
+            anyString(), any(SqlParameterSource.class), eq(Long.class)))
                 .thenReturn(expectedCount);
 
         long count = subject.fetchCount(EXPERIMENT_ACCESSION, preferences);
