@@ -49,6 +49,8 @@ public class JsonBaselineGeneInExperimentController extends JsonExperimentContro
             @PathVariable String geneId,
             @RequestParam(defaultValue = "") String accessKey) {
 
+        preferences.setSpecific(false);
+
         BaselineExperiment experiment =
                 (BaselineExperiment) experimentTrader.getExperiment(experimentAccession, accessKey);
         JsonObject result = new JsonObject();
