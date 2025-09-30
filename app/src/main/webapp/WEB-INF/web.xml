@@ -45,9 +45,14 @@
         <!-- Uncomment if you want a slower start-up time but a faster first-page load -->
         <!--<load-on-startup>1</load-on-startup>-->
     </servlet>
+
     <servlet-mapping>
         <servlet-name>dispatcher</servlet-name>
         <url-pattern>/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>*.txt</url-pattern>
     </servlet-mapping>
 
     <listener>
