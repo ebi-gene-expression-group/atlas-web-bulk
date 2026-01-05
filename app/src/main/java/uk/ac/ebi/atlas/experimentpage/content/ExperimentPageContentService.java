@@ -11,7 +11,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.atlas.commons.readers.TsvStreamer;
 import uk.ac.ebi.atlas.experimentpage.ExperimentDesignFile;
-import uk.ac.ebi.atlas.experimentpage.ExpressionAtlasContentService;
 import uk.ac.ebi.atlas.experimentpage.ExternallyAvailableContentService;
 import uk.ac.ebi.atlas.experimentpage.json.JsonBaselineExperimentController;
 import uk.ac.ebi.atlas.experimentpage.qc.MicroarrayQcFiles;
@@ -39,14 +38,11 @@ public class ExperimentPageContentService {
             .create();
 
     private final DataFileHub dataFileHub;
-    private final ExpressionAtlasContentService expressionAtlasContentService;
     private final ExperimentTrader experimentTrader;
 
     public ExperimentPageContentService(DataFileHub dataFileHub,
-                                        ExpressionAtlasContentService expressionAtlasContentService,
                                         ExperimentTrader experimentTrader) {
         this.dataFileHub = dataFileHub;
-        this.expressionAtlasContentService = expressionAtlasContentService;
         this.experimentTrader = experimentTrader;
     }
 
@@ -141,23 +137,6 @@ public class ExperimentPageContentService {
                                 "data",
                                 formatTable(tsvStreamer.get().collect(Collectors.toList()))));
             }
-        }
-
-        if(!expressionAtlasContentService.list(
-                experiment.getAccession(),
-                accessKey,
-                ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION).isEmpty()) {
-            supplementaryInformationTabs.add(
-                    customContentTab(
-                            "resources",
-                            "Resources",
-                            "url",
-                            new JsonPrimitive(
-                                    ExternallyAvailableContentService.listResourcesUrl(
-                                            experiment.getAccession(),
-                                            accessKey,
-                                            ExternallyAvailableContent.ContentType.SUPPLEMENTARY_INFORMATION)))
-            );
         }
 
         if (experiment.getType().isMicroarray() &&
