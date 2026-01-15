@@ -6,6 +6,7 @@ plugins {
 group = 'uk.ac.ebi.ge'
 version = '37.6.0'
 
+
 sourceCompatibility = 11
 targetCompatibility = 11
 
