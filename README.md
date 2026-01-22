@@ -1,8 +1,13 @@
 # Expression Atlas
 
+## CI/CD
+
+Jenkins Build job is [Bulk Expression Atlas - Develop](https://gene-expression.ebi.ac.uk/jenkins/job/Bulk%20Expression%20Atlas%20-%20Develop/)
+
 ## Prepare your development environment
 
 ### TL;DR
+
 ```bash
 ./docker/prepare-dev-environment/gradle-cache/run.sh -r -l gradle-cache.log && \
 ./docker/prepare-dev-environment/volumes/run.sh -r -l volumes.log && \
