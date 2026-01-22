@@ -274,6 +274,14 @@ The script `debug-single-test.sh` is a shortcut for this task. It takes the same
 ./debug-single-test.sh TEST_NAME
 ```
 
+## Remote Debugging
+
+Tomcat can be run in debug mode when started with `catalina jpda run`. The default debug port is 8000. You then need to run locally a java remote debug session and connect to the webapp tomcat host.
+
+### Debugging in VS Code
+
+Set a launch configuration that connects to the Tomcat host on the debug port.
+
 ## Run web application
 
 Please check this first in the troubleshooting session: [Known Build Issue](#known-build-issue)
