@@ -63,12 +63,14 @@ pipeline {
             timeout (time: 2, unit: "HOURS")
           }
           steps {
-//                 sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
-//                 sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
+            catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+              sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
+              sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
                 sh './gradlew --no-watch-fs :atlas-web-core:jacocoTestReport'
           }
         }
       }
+    }
     }
 
 
@@ -106,11 +108,13 @@ pipeline {
             timeout (time: 2, unit: "HOURS")
           }
           steps {
+            catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
             sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
-//             sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
+              sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
             sh './gradlew --no-watch-fs :app:jacocoTestReport'
           }
+        }
         }
 
         stage('–– Build ––') {
@@ -173,6 +177,13 @@ pipeline {
 
   post {
     always {
+      junit 'atlas-web-core/build/ut/**/*.xml'
+      junit 'atlas-web-core/build/it/**/*.xml'
+
+      junit 'app/build/ut/**/*.xml'
+      junit 'app/build/it/**/*.xml'
+      junit 'app/build/e2e/**/*.xml'
+
       archiveArtifacts artifacts: 'atlas-web-core/build/reports/**', fingerprint: true, allowEmptyArchive: true
       archiveArtifacts artifacts: 'app/build/reports/**', fingerprint: true, allowEmptyArchive: true
       archiveArtifacts artifacts: 'app/src/main/webapp/resources/js-bundles/report.html', fingerprint: true, allowEmptyArchive: true
