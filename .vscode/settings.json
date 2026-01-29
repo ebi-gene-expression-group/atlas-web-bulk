@@ -3,7 +3,9 @@
     "java.configuration.runtimes": [
         {
             "name": "JavaSE-11",
-            "path": "/usr/local/opt/openjdk@11/"
+            "path": "/usr/local/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home",
+            "default": true
         }
-    ]
+    ],
+    "java.jdt.ls.java.home": "/usr/local/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home"
 }
