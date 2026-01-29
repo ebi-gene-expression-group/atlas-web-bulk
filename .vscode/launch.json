@@ -9,7 +9,7 @@
             "name": "debug gxa on k8s",
             "request": "attach",
             "hostName": "hh-rke-wp-webadmin-35-master-1.caas.ebi.ac.uk", // k8s node address
-            "port": 32071, // check in services in k8s cluster
+            "port": 30631, // check in services in k8s cluster
             "projectName": "atlas-web-core"
         }
     ]
