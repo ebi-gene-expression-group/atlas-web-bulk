@@ -4,6 +4,20 @@
 
 Jenkins Build job is [Bulk Expression Atlas - Develop](https://gene-expression.ebi.ac.uk/jenkins/job/Bulk%20Expression%20Atlas%20-%20Develop/)
 
+## IDE Setup
+These instructions are for VS Code
+
+1. set workspace to use a jdk 11 by adding your jdk 11 path in [the workspace's settings.json](.vscode/settings.json)
+
+```json
+"java.configuration.runtimes": [
+        {
+            "name": "JavaSE-11",
+            "path": "/usr/local/opt/openjdk@11/"
+        }
+    ]
+```
+
 ## Prepare your development environment
 
 ### TL;DR
