@@ -13,6 +13,10 @@ pipeline {
     }
   }
 
+  environment {
+    ORG_GRADLE_PROJECT_buildNumber = "${env.BUILD_NUMBER}"
+  }
+
   stages {
     stage('Scale SolrCloud') {
      steps {

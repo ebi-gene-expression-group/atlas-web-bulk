@@ -4,7 +4,8 @@ plugins {
 }
 
 group = 'uk.ac.ebi.ge'
-version = '37.6.0'
+
+version = project.version + (project.hasProperty('buildNumber') ? ".${buildNumber}" : "")
 
 
 sourceCompatibility = 11

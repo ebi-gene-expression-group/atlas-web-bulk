@@ -18,7 +18,7 @@ gitProperties {
 }
 
 war {
-    // Let’s clean the exploded WAR if it’s there
+    // Let's clean the exploded WAR if it's there
     def destinationPath = '../webapps'
     def artifactName = 'gxa'
     doFirst {
@@ -27,6 +27,18 @@ war {
 
     archiveFileName = "${artifactName}.war"
     destinationDirectory = file "${destinationPath}"
+
+    manifest {
+        def buildNumberValue = project.findProperty('buildNumber') ?: ''
+        attributes(
+                'Implementation-Title': artifactName,
+                'Implementation-Version': project.version.toString(),
+                'Built-By': System.getProperty('user.name'),
+                'Build-Jdk': "${System.getProperty('java.version')} (${System.getProperty('java.vendor')})",
+                'Gradle-Version': org.gradle.util.GradleVersion.current().version,
+                'Build-Number': buildNumberValue.toString()
+        )
+    }
 }
 
 def cache2kVersion = '1.2.4.Final'
