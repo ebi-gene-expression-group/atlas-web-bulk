@@ -7,5 +7,6 @@
             "default": true
         }
     ],
-    "java.jdt.ls.java.home": "/usr/local/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home"
+    "java.jdt.ls.java.home": "/usr/local/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home",
+    "java.import.gradle.java.home": "/usr/local/opt/openjdk@11"
 }

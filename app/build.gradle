@@ -70,3 +70,48 @@ dependencies {
 
     testImplementation 'com.zaxxer:HikariCP:3.3.1'
 }
+
+// Convenience tasks for running different categories of tests from the `app` module
+
+tasks.register('utTests', Test) {
+    description = 'Runs app unit tests (*Test).'
+    group = 'verification'
+
+    // Reuse the standard test sources and classpath
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    // Only run classes that end with 'Test'
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching '*Test'
+    }
+}
+
+tasks.register('itTests', Test) {
+    description = 'Runs app integration tests (*IT) excluding *WIT.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching '*IT'
+    }
+    // Match the CLI flag -PexcludeTests=**/*WIT.class
+    exclude '**/*WIT.class'
+}
+
+tasks.register('e2eTests', Test) {
+    description = 'Runs app end-to-end tests (*WIT).'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching '*WIT'
+    }
+}
