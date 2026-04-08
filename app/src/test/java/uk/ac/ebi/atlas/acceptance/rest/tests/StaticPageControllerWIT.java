@@ -12,7 +12,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.ac.ebi.atlas.configuration.TestConfig;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -47,6 +49,8 @@ public class StaticPageControllerWIT {
     public void help() throws Exception {
         this.mockMvc.perform(get("/help/index.html"))
                 .andExpect(status().isOk())
+                .andExpect(content().string(containsString(
+                        "https://www.ebi.ac.uk/data-protection/privacy-notice/embl-ebi-public-website/")))
                 .andExpect(view().name("help/index"));
     }
 }
