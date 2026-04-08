@@ -19,8 +19,21 @@
   - SolrCloud and ZooKeeper
   - Tomcat configuration files
 
+If you use Colima (recommended on macOS if you don’t use Docker Desktop), start it with enough resources before running
+any setup script:
+```bash
+colima start --cpu 4 --memory 12 --disk 120
+docker context use colima
+docker info
+```
+On Apple Silicon, if any image fails because of architecture compatibility, restart Colima with:
+```bash
+colima stop
+colima start --arch x86_64 --cpu 4 --memory 12 --disk 120
+```
+
 Files written by Solr, PostgreSQL and Tomcat are kept in volumes which will be reused even if the containers are
-removed (e.g. when running `docker-compose down`).  If you want to start afresh delete the old volume(s) (e.g. for
+removed (e.g. when running `docker compose down`).  If you want to start afresh delete the old volume(s) (e.g. for
 Postgres `docker volume rm gxa-pgdata`) and re-run the necessary script to return to the
 initial state. You can find the volume names used by each service in the `volumes` section of its Docker Compose YAML
 file.
@@ -180,7 +193,7 @@ gxa-gradle exited with code 0
 
 Press `Ctrl+C` to stop the container and clean any leftovers:
 ```bash
-docker-compose \
+docker compose \
 --env-file ./docker/dev.env \
 -f ./docker/docker-compose-gradle.yml \
 -f ./docker/docker-compose-postgres-test.yml \
@@ -195,7 +208,7 @@ You will find very convenient to use the script `execute-all-tests.sh`.
 ./execute-all-tests.sh
 ```
 
-The script uses `docker-compose run`, and control returns to your shell once the tasks have finished, but you’ll need
+The script uses `docker compose run`, and control returns to your shell once the tasks have finished, but you’ll need
 to clean up the service containers anyway.
 
 ### Execute a single test
@@ -204,7 +217,7 @@ impractical. In such situations you can use
 [Gradle’s continuous build execution](https://blog.gradle.org/introducing-continuous-build). See the example below for
 e.g. `GenePageControllerIT.java`:
 ```bash
-docker-compose \
+docker compose \
 --env-file ./docker/dev.env \
 -f ./docker/docker-compose-gradle.yml \
 -f ./docker/docker-compose-postgres-test.yml \
