@@ -67,7 +67,35 @@ if [ "${REMOVE_VOLUMES}" = "true" ]; then
 fi
 
 print_stage_name "🛫 Spin up service to load test experiments in Postgres"
-eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "up --build >> ${LOG_FILE} 2>&1"
+eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "up --build -d >> ${LOG_FILE} 2>&1"
+print_done
+
+print_stage_name "⏳ Waiting for postgres-populator container"
+ATTEMPTS=0
+POPULATOR_CONTAINER_ID=""
+while [ "${ATTEMPTS}" -lt 60 ]; do
+  POPULATOR_CONTAINER_ID=$(eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "ps -q postgres-populator 2>> ${LOG_FILE}" | tr -d '\n')
+  if [ -n "${POPULATOR_CONTAINER_ID}" ]; then
+    break
+  fi
+  sleep 1
+  ATTEMPTS=$((ATTEMPTS + 1))
+done
+if [ -z "${POPULATOR_CONTAINER_ID}" ]; then
+  print_error
+  exit 1
+fi
+print_done
+
+print_stage_name "⏳ Wait for postgres-populator to finish"
+set +e
+eval "${DOCKER_COMPOSE_COMMAND_VARS}" "${DOCKER_COMPOSE_COMMAND}" "wait postgres-populator >> ${LOG_FILE} 2>&1"
+POPULATOR_EXIT_CODE=$?
+set -e
+if [ "${POPULATOR_EXIT_CODE}" -ne 0 ]; then
+  print_error
+  exit ${POPULATOR_EXIT_CODE}
+fi
 print_done
 
 print_stage_name "🛬 Bring down all services"
