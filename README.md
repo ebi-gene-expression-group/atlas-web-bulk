@@ -21,6 +21,16 @@ These instructions are for VS Code
     ]
 ```
 
+## running gradle from commandline
+
+Add a jdk 11 to the path before running gradle.
+
+```bash
+export JAVA_HOME=/usr/local/opt/openjdk@11/
+export PATH=$JAVA_HOME/bin:$PATH
+./gradlew tasks
+```
+
 ## Prepare your development environment
 
 ### TL;DR
@@ -264,7 +274,8 @@ If you want to use a debugger, add the option `-PremoteDebug` to the command of 
 
 Be aware that Gradle won’t execute the tests until you attach a remote debugger to port 5005. It will notify you when
 it’s ready with the following message:
-```
+
+```text
 > Task :app:test
 Listening for transport dt_socket at address: 5005
 <===========--> 90% EXECUTING [5s]
@@ -309,6 +320,7 @@ Set a launch configuration that connects to the Tomcat host on the debug port.
 Please check this first in the troubleshooting session: [Known Build Issue](#known-build-issue)
 
 The web application is compiled in two stages:
+
 1. Front end JavaScript packages are transpiled into “bundles” with [Webpack](https://webpack.js.org/)
 2. Bundles and back end Java code are built as a WAR file
 
@@ -316,11 +328,13 @@ Lastly, Tomcat deploys the WAR file according to `app/src/main/webapp/META-INF/c
 might work but no testing has been carried out in this regard.
 
 For the first step you can run the following script:
+
 ```bash
  ./compile-front-end-packages.sh -iu
 ```
 
 The second step is simply:
+
 ```bash
 ./gradlew :app:war
 ```
