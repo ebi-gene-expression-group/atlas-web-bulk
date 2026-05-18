@@ -1,0 +1,23 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "gradle",
+			"id": "/Users/amnon/dev/atlas-web-bulkapp:itTestsapp",
+			"script": "app:itTests",
+			"description": "Runs app integration tests (*IT) excluding *WIT.",
+			"group": "verification",
+			"project": "app",
+			"buildFile": "/Users/amnon/dev/atlas-web-bulk/app/build.gradle",
+			"rootProject": "atlas-web-bulk",
+			"projectFolder": "/Users/amnon/dev/atlas-web-bulk",
+			"workspaceFolder": "/Users/amnon/dev/atlas-web-bulk",
+			"args": "",
+			"javaDebug": false,
+			"problemMatcher": [
+				"$gradle"
+			],
+			"label": "gradle: app:itTests"
+		}
+	]
+}

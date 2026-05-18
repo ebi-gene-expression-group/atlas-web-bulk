@@ -26,10 +26,11 @@ public class LatestExperimentsService {
 
                         var experimentCount = latestExperimentsDao.fetchPublicExperimentsCount(experimentTypes);
                         var latestExperimentInfo =
-                                latestExperimentsDao.fetchLatestExperimentAccessions(experimentTypes).stream()
-                                        .map(experimentTrader::getPublicExperiment)
-                                        .map(experimentJsonSerializer::serialize)
-                                        .collect(toImmutableSet());
+                                latestExperimentsDao.fetchLatestExperimentAccessions(experimentTypes)
+                                    .stream()
+                                    .flatMap(experimentTrader::safeGetPublicExperiment)
+                                    .map(experimentJsonSerializer::serialize)
+                                    .collect(toImmutableSet());
 
                         return ImmutableMap.of(
                                 "experimentCount", experimentCount,
