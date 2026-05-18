@@ -148,6 +148,7 @@ test {
 
   useJUnitPlatform()
   maxHeapSize = '4096m'
+  maxParallelForks = 2
 }
 
 jacocoTestReport {
@@ -158,3 +159,10 @@ jacocoTestReport {
   }
 }
 
+tasks.register('printVersion') {
+  group = 'build'
+  description = 'Prints resolved project.version (same as built artefacts when buildNumber matches CI).'
+  doLast {
+    println version
+  }
+}

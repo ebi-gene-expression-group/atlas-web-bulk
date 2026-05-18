@@ -18,13 +18,14 @@ pipeline {
 
   environment {
     ORG_GRADLE_PROJECT_buildNumber = "${env.BUILD_NUMBER}"
+    APP_NAME="gxa"
   }
 
   stages {
     stage('Scale SolrCloud') {
-     steps {
-       container('kubectl') {}
-     }
+      steps {
+        container('kubectl') {}
+      }
     }
 
     stage('Provision Gradle') {
@@ -47,18 +48,18 @@ pipeline {
                     '-Pflyway.url=jdbc:postgresql://localhost:5432/postgres ' +
                     '-Pflyway.user=postgres ' +
                     '-Pflyway.password=postgres ' +
-                    '-Pflyway.locations=filesystem:./schemas/flyway/gxa ' +
-                    '-Pflyway.schemas=gxa ' +
+                    '-Pflyway.locations=filesystem:./schemas/flyway/${env.APP_NAME} ' +
+                    '-Pflyway.schemas=${env.APP_NAME} ' +
                     'flywayMigrate'
             sh './gradlew --no-watch-fs ' +
                     '-PdataFilesLocation=/test-data ' +
-                    '-PexperimentFilesLocation=/test-data/gxa ' +
+                    '-PexperimentFilesLocation=/test-data/${env.APP_NAME} ' +
                     '-PexperimentDesignLocation=/root/expdesign-rw ' +
-                    '-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=gxa ' +
+                    '-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} ' +
                     '-PjdbcUsername=postgres ' +
                     '-PjdbcPassword=postgres ' +
-                    '-PzkHosts=gxa-solrcloud-zookeeper-0.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,gxa-solrcloud-zookeeper-1.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,gxa-solrcloud-zookeeper-2.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 ' +
-                    '-PsolrHosts=http://gxa-solrcloud-0.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-1.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-2.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-3.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr ' +
+                    '-PzkHosts=${env.APP_NAME}-solrcloud-zookeeper-0.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,${env.APP_NAME}-solrcloud-zookeeper-1.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,${env.APP_NAME}-solrcloud-zookeeper-2.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 ' +
+                    '-PsolrHosts=http://${env.APP_NAME}-solrcloud-0.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-1.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-2.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-3.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr ' +
                     '-PsolrUser=solr ' +
                     '-PsolrPassword=SolrRocks ' +
                     ':atlas-web-core:testClasses'
@@ -73,7 +74,7 @@ pipeline {
             catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
               sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
               sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
-                sh './gradlew --no-watch-fs :atlas-web-core:jacocoTestReport'
+              sh './gradlew --no-watch-fs :atlas-web-core:jacocoTestReport'
           }
         }
       }
@@ -92,18 +93,18 @@ pipeline {
                     '-Pflyway.url=jdbc:postgresql://localhost:5432/postgres ' +
                     '-Pflyway.user=postgres ' +
                     '-Pflyway.password=postgres ' +
-                    '-Pflyway.locations=filesystem:./schemas/flyway/gxa ' +
-                    '-Pflyway.schemas=gxa ' +
+                    '-Pflyway.locations=filesystem:./schemas/flyway/${env.APP_NAME} ' +
+                    '-Pflyway.schemas=${env.APP_NAME} ' +
                     'flywayMigrate'
             sh './gradlew --no-watch-fs ' +
                     '-PdataFilesLocation=/test-data ' +
-                    '-PexperimentFilesLocation=/test-data/gxa ' +
+                    '-PexperimentFilesLocation=/test-data/${env.APP_NAME} ' +
                     '-PexperimentDesignLocation=/root/expdesign-rw ' +
-                    '-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=gxa ' +
+                    '-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} ' +
                     '-PjdbcUsername=postgres ' +
                     '-PjdbcPassword=postgres ' +
-                    '-PzkHosts=gxa-solrcloud-zookeeper-0.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,gxa-solrcloud-zookeeper-1.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,gxa-solrcloud-zookeeper-2.gxa-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 ' +
-                    '-PsolrHosts=http://gxa-solrcloud-0.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-1.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-2.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://gxa-solrcloud-3.gxa-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr ' +
+                    '-PzkHosts=${env.APP_NAME}-solrcloud-zookeeper-0.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,${env.APP_NAME}-solrcloud-zookeeper-1.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,${env.APP_NAME}-solrcloud-zookeeper-2.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 ' +
+                    '-PsolrHosts=http://${env.APP_NAME}-solrcloud-0.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-1.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-2.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-3.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr ' +
                     '-PsolrUser=solr ' +
                     '-PsolrPassword=SolrRocks ' +
                     ':app:testClasses'
@@ -116,12 +117,12 @@ pipeline {
           }
           steps {
             catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-            sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
-            sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
+              sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
+              sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
               sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
-            sh './gradlew --no-watch-fs :app:jacocoTestReport'
-          }
-        }
+              sh './gradlew --no-watch-fs :app:jacocoTestReport'
+            }
+          } 
         }
 
         stage('–– Build ––') {
@@ -171,7 +172,7 @@ pipeline {
               }
               steps {
                 sh './gradlew --no-watch-fs :app:war'
-                archiveArtifacts artifacts: 'webapps/gxa.war', fingerprint: true
+                archiveArtifacts artifacts: 'webapps/${env.APP_NAME}.war', fingerprint: true
               }
             }
           }
@@ -179,8 +180,6 @@ pipeline {
       }
     }
   }
-
-
 
   post {
     always {
@@ -194,6 +193,24 @@ pipeline {
       archiveArtifacts artifacts: 'atlas-web-core/build/reports/**', fingerprint: true, allowEmptyArchive: true
       archiveArtifacts artifacts: 'app/build/reports/**', fingerprint: true, allowEmptyArchive: true
       archiveArtifacts artifacts: 'app/src/main/webapp/resources/js-bundles/report.html', fingerprint: true, allowEmptyArchive: true
+    }
+    success {
+      script {
+        if (env.BRANCH_NAME == 'develop') {
+          def ver = sh(
+            script: './gradlew --no-watch-fs -q :app:printVersion',
+            returnStdout: true
+          ).trim()
+
+          echo "Tagging and pushing version ${ver}"
+          def tags = ["${ver}", "${ver}-cli"]
+          tags.each { tag ->
+            echo "Tagging and pushing version ${tag}"
+            sh "git tag -a ${tag} -m 'build ${env.BUILD_NUMBER}' ${env.GIT_COMMIT}"
+            sh "git push origin ${tag}"
+          }
+        }
+      }
     }
   }
 }
