@@ -1,0 +1,94 @@
+pipeline {
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    disableConcurrentBuilds()
+  }
+
+  parameters {
+    // Passed automatically when triggered from the WAR pipeline.
+    // Fill in manually when running standalone.
+    string(
+      name: 'APP_VERSION',
+      defaultValue: '',
+      description: 'Image tag to push (e.g. 1.2.3). Leave blank to derive from last successful WAR build.'
+    )
+    string(
+      name: 'UPSTREAM_JOB',
+      defaultValue: 'atlas-web-bulk',
+      description: 'Jenkins job to copy the WAR artifact from.'
+    )
+    string(
+      name: 'UPSTREAM_BUILD_NUMBER',
+      defaultValue: '',
+      description: 'Build number to copy WAR from. Leave blank to use the last successful build.'
+    )
+  }
+
+  agent {
+    kubernetes {
+      cloud 'gke-autopilot'
+      workspaceVolume dynamicPVC(storageClassName: 'premium-rwo', accessModes: 'ReadWriteOnce', requestsSize: '2Gi')
+      yamlFile 'jenkins-k8s-pod-docker.yaml'
+    }
+  }
+
+  environment {
+    APP_NAME = 'gxa'
+    REGISTRY = 'dockerhub.ebi.ac.uk'
+    IMAGE    = 'dockerhub.ebi.ac.uk/ebi-gene-expression/atlas-web-bulk'
+  }
+
+  stages {
+    stage('Copy WAR artifact') {
+      steps {
+        script {
+          def selector = params.UPSTREAM_BUILD_NUMBER
+            ? specific(params.UPSTREAM_BUILD_NUMBER)
+            : lastSuccessful()
+
+          copyArtifacts(
+            projectName: params.UPSTREAM_JOB,
+            selector: selector,
+            filter: "webapps/${env.APP_NAME}.war"
+          )
+        }
+      }
+    }
+
+    stage('Build and push Docker image') {
+      options {
+        timeout(time: 1, unit: 'HOURS')
+      }
+      steps {
+        script {
+          // If APP_VERSION was not passed by the upstream trigger, fall back to
+          // reading it from the WAR manifest via Gradle.
+          def appVersion = params.APP_VERSION ?: sh(
+            script: './gradlew --no-watch-fs -q :app:printVersion',
+            returnStdout: true
+          ).trim()
+
+          container('kaniko') {
+            // Requires a Jenkins "Username with password" credential with ID
+            // 'ebi-docker-registry' — username and API key for dockerhub.ebi.ac.uk
+            withCredentials([usernamePassword(
+              credentialsId: 'ebi-docker-registry',
+              usernameVariable: 'REGISTRY_USER',
+              passwordVariable: 'REGISTRY_PASSWORD'
+            )]) {
+              sh """
+                mkdir -p /kaniko/.docker
+                AUTH=\$(printf '%s:%s' "\$REGISTRY_USER" "\$REGISTRY_PASSWORD" | base64 | tr -d '\\n')
+                printf '{"auths":{"${env.REGISTRY}":{"auth":"%s"}}}' "\$AUTH" > /kaniko/.docker/config.json
+                /kaniko/executor \\
+                    --context "\$WORKSPACE" \\
+                    --dockerfile "\$WORKSPACE/Dockerfile" \\
+                    --destination ${env.IMAGE}:${appVersion}
+              """
+            }
+          }
+        }
+      }
+    }
+  }
+}
