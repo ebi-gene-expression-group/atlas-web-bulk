@@ -29,9 +29,6 @@ RUN groupadd -g "${APP_GID}" "${APP_USER}" \
 # and expect webapps/<APP_NAME>.war.
 ARG WAR_FILE=webapps/${APP_NAME}.war
 
-# Copy the application WAR into Tomcat using the /<APP_NAME> context path
-COPY ${WAR_FILE} /usr/local/tomcat/webapps/${APP_NAME}.war
-
 # Enable the Tomcat Manager webapp. The manager lives in webapps.dist/ in the
 # base image; copying it here means the init container in the Helm chart is no
 # longer needed to populate the tomcat-webapps PVC.
@@ -39,6 +36,9 @@ COPY ${WAR_FILE} /usr/local/tomcat/webapps/${APP_NAME}.war
 # by the Helm chart at runtime.
 RUN cp -r /usr/local/tomcat/webapps.dist/manager /usr/local/tomcat/webapps/manager \
  && chown -R "${APP_UID}:${APP_GID}" /usr/local/tomcat/webapps/manager
+
+# Copy the application WAR into Tomcat using the /<APP_NAME> context path
+COPY ${WAR_FILE} /usr/local/tomcat/webapps/${APP_NAME}.war
 
 # Expose the default HTTP port. Debug and other ports are controlled
 # at the Kubernetes level via Helm values (tomcat.debug.*).
