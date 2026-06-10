@@ -199,6 +199,7 @@ pipeline {
         kubernetes {
           cloud 'gke-autopilot'
           workspaceVolume dynamicPVC(storageClassName: 'premium-rwo', accessModes: 'ReadWriteOnce', requestsSize: '2Gi')
+          defaultContainer 'openjdk'
           yamlFile 'jenkins-k8s-pod-docker.yaml'
         }
       }
@@ -259,10 +260,18 @@ def resolveAppVersion() {
     return params.APP_VERSION.trim()
   }
 
-  def fromManifest = sh(
-    script: "unzip -p webapps/${env.APP_NAME}.war META-INF/MANIFEST.MF | awk -F': ' '/Implementation-Version/{print \$2; exit}'",
-    returnStdout: true
-  ).trim()
+  def fromManifest = container('openjdk') {
+    sh(
+      script: """
+        set -e
+        MANIFEST_DIR=\$(mktemp -d)
+        cd "\${MANIFEST_DIR}"
+        jar xf "\${WORKSPACE}/webapps/${env.APP_NAME}.war" META-INF/MANIFEST.MF
+        awk -F': ' '/Implementation-Version/{print \$2; exit}' META-INF/MANIFEST.MF
+      """,
+      returnStdout: true
+    ).trim()
+  }
   if (fromManifest) {
     return fromManifest
   }
