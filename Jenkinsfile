@@ -164,19 +164,7 @@ pipeline {
           ).trim()
 
           echo "Tagging and pushing version ${ver}"
-          container('jnlp') {
-            sh '''
-              git config user.email "jenkins@ebi.ac.uk"
-              git config user.name "Jenkins CI"
-            '''
-            ["${ver}", "${ver}-cli"].each { tag ->
-              echo "Tagging and pushing ${tag}"
-              sh """
-                git tag -fa '${tag}' -m 'build ${env.BUILD_NUMBER}' '${env.GIT_COMMIT}'
-                git push -f origin 'refs/tags/${tag}'
-              """
-            }
-          }
+          pushGitTags(ver)
         }
       }
     }
@@ -223,6 +211,28 @@ def resolveAppVersion() {
     script: './gradlew --no-watch-fs -q :app:printVersion',
     returnStdout: true
   ).trim()
+}
+
+def pushGitTags(String ver) {
+  container('jnlp') {
+    withCredentials([usernamePassword(
+      credentialsId: 'github-atlas-web-bulk',
+      usernameVariable: 'GIT_USER',
+      passwordVariable: 'GIT_TOKEN'
+    )]) {
+      sh '''
+        git config user.email "jenkins@ebi.ac.uk"
+        git config user.name "Jenkins CI"
+      '''
+      ["${ver}", "${ver}-cli"].each { tag ->
+        echo "Tagging and pushing ${tag}"
+        sh """
+          git tag -fa '${tag}' -m 'build ${env.BUILD_NUMBER}' '${env.GIT_COMMIT}'
+          git push -f "https://\${GIT_USER}:\${GIT_TOKEN}@github.com/ebi-gene-expression-group/atlas-web-bulk.git" 'refs/tags/${tag}'
+        """
+      }
+    }
+  }
 }
 
 def pushDockerImage(String appVersion) {
