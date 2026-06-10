@@ -33,7 +33,7 @@ pipeline {
         timeout (time: 20, unit: "MINUTES")
       }
       steps {
-        sh './gradlew --no-watch-fs --parallel'
+        sh './gradlew --no-watch-fs'
       }
     }
 
@@ -42,14 +42,14 @@ pipeline {
         timeout (time: 1, unit: "HOURS")
       }
       steps {
-        sh './gradlew --no-watch-fs --parallel ' +
+        sh './gradlew --no-watch-fs ' +
                 '-Pflyway.url=jdbc:postgresql://localhost:5432/postgres ' +
                 '-Pflyway.user=postgres ' +
                 '-Pflyway.password=postgres ' +
                 "-Pflyway.locations=filesystem:./schemas/flyway/${env.APP_NAME} " +
                 "-Pflyway.schemas=${env.APP_NAME} " +
                 'flywayMigrate'
-        sh './gradlew --no-watch-fs --parallel ' +
+        sh './gradlew --no-watch-fs ' +
                 '-PdataFilesLocation=/test-data ' +
                 "-PexperimentFilesLocation=/test-data/${env.APP_NAME} " +
                 '-PexperimentDesignLocation=/root/expdesign-rw ' +
@@ -70,7 +70,8 @@ pipeline {
       }
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-          sh './gradlew --no-watch-fs --parallel -PtestResultsPath=ut :atlas-web-core:test :app:test --tests *Test'
+          sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
+          sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
         }
       }
     }
