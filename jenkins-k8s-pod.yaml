@@ -78,6 +78,15 @@ spec:
           value: "postgres"
         - name: POSTGRES_PASSWORD
           value: "postgres"
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:debug
+      command: ["/busybox/cat"]
+      tty: true
+      resources:
+        requests:
+          memory: "1Gi"
+        limits:
+          memory: "2Gi"
   volumes:
     - name: gxa-data
       persistentVolumeClaim:
