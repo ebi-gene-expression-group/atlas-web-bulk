@@ -63,10 +63,10 @@ export -f update_npm_package
 cd app/src/main/javascript
 
 find modules -type d -mindepth 1 -maxdepth 1 | \
-  xargs -n1 -t -P 2 -I {} bash -c \
+  xargs -n1 -t -P 4 -I {} bash -c \
     "cd {}; update_npm_package; npm run prepare"
 find bundles -type d -mindepth 1 -maxdepth 1 | \
-  xargs -n1 -t -P 2 -I {} bash -c \
+  xargs -n1 -t -P 4 -I {} bash -c \
     "cd {}; update_npm_package"
 
 update_npm_package

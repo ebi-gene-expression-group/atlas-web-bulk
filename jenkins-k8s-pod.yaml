@@ -19,27 +19,31 @@ spec:
       resources:
         requests:
           memory: "256Mi"
+          cpu: "1"
         limits:
           memory: "256Mi"
+          cpu: "1"
     - name: jnlp
       resources:
         requests:
           memory: "512Mi"
+          cpu: "1"
         limits:
           memory: "512Mi"
+          cpu: "1"
     - name: openjdk
       image: eclipse-temurin:11
       resources:
         requests:
           memory: "4.5Gi"
-          cpu: "2"
+          cpu: "4"
           ephemeral-storage: "6Gi"
         limits:
-          cpu: "2"
+          cpu: "4"
           memory: "6Gi"
       env:
       - name: GRADLE_OPTS
-        value: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
+        value: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4"
       - name: GRADLE_RO_DEP_CACHE
         value: "/root/gradle-ro-dep-cache"
       command: [ "/bin/sh" ]
@@ -74,6 +78,15 @@ spec:
           value: "postgres"
         - name: POSTGRES_PASSWORD
           value: "postgres"
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:debug
+      command: ["/busybox/cat"]
+      tty: true
+      resources:
+        requests:
+          memory: "1Gi"
+        limits:
+          memory: "2Gi"
   volumes:
     - name: gxa-data
       persistentVolumeClaim:
