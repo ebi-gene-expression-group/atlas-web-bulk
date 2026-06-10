@@ -164,11 +164,18 @@ pipeline {
           ).trim()
 
           echo "Tagging and pushing version ${ver}"
-          def tags = ["${ver}", "${ver}-cli"]
-          tags.each { tag ->
-            echo "Tagging and pushing version ${tag}"
-            sh "git tag -a ${tag} -m 'build ${env.BUILD_NUMBER}' ${env.GIT_COMMIT}"
-            sh "git push origin ${tag}"
+          container('jnlp') {
+            sh '''
+              git config user.email "jenkins@ebi.ac.uk"
+              git config user.name "Jenkins CI"
+            '''
+            ["${ver}", "${ver}-cli"].each { tag ->
+              echo "Tagging and pushing ${tag}"
+              sh """
+                git tag -fa '${tag}' -m 'build ${env.BUILD_NUMBER}' '${env.GIT_COMMIT}'
+                git push -f origin 'refs/tags/${tag}'
+              """
+            }
           }
         }
       }
@@ -219,7 +226,7 @@ def resolveAppVersion() {
 }
 
 def pushDockerImage(String appVersion) {
-  echo "Building and pushing ${env.IMAGE}:${appVersion}"
+  echo "Building and pushing ${env.IMAGE}:${appVersion} and ${env.IMAGE}:latest"
   container('kaniko') {
     withCredentials([usernamePassword(
       credentialsId: 'gitlab-gxa-container-registry',
@@ -233,7 +240,8 @@ def pushDockerImage(String appVersion) {
         /kaniko/executor \\
             --context "\$WORKSPACE" \\
             --dockerfile "\$WORKSPACE/Dockerfile" \\
-            --destination ${env.IMAGE}:${appVersion}
+            --destination ${env.IMAGE}:${appVersion} \\
+            --destination ${env.IMAGE}:latest
       """
     }
   }
