@@ -68,8 +68,13 @@ function update_npm_package {
       echo ">> $PWD$ rm -rf node_modules package-lock.json"
       rm -rf node_modules package-lock.json
     fi
-    echo ">> $PWD$ npm install --silent"
-    npm install --silent
+    if [ "$INIT" = true ] || [ "$UPGRADE" = true ] || [ ! -f package-lock.json ]; then
+      echo ">> $PWD$ npm install --silent"
+      npm install --silent
+    else
+      echo ">> $PWD$ npm ci --silent"
+      npm ci --silent
+    fi
     if [ "$AUDIT" = true ]; then
       echo ">> $PWD$ npm audit fix --silent"
       npm audit fix --silent
