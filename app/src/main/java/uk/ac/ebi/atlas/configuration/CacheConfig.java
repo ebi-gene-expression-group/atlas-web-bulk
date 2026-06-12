@@ -4,6 +4,7 @@ import org.cache2k.configuration.Cache2kConfiguration;
 import org.cache2k.extra.spring.SpringCache2kCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -20,10 +21,13 @@ public class CacheConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheConfig.class);
     private static final long DEFAULT_CACHE_CAPACITY =
             Cache2kConfiguration.of(Object.class, Object.class).getEntryCapacity();
-    private Path experimentsDirPath;
+    private final Path experimentsDirPath;
+    private final long ensemblCacheEntryCapacity;
 
-    public CacheConfig(Path experimentsDirPath) {
+    public CacheConfig(Path experimentsDirPath,
+                       @Value("${ensembl.cache.entry.capacity:50000}") long ensemblCacheEntryCapacity) {
         this.experimentsDirPath = experimentsDirPath;
+        this.ensemblCacheEntryCapacity = ensemblCacheEntryCapacity;
     }
 
     @Bean
@@ -50,7 +54,9 @@ public class CacheConfig {
 
                 // Used for sitemap.xml files
                 builder -> builder.name("publicBioentityIdentifiers").eternal(true),
-                builder -> builder.name("publicSpecies").eternal(true));
+                builder -> builder.name("publicSpecies").eternal(true),
+
+                builder -> builder.name("ensemblSpecies").entryCapacity(ensemblCacheEntryCapacity));
     }
 
     private Optional<Long> countExperimentDirectories() {
