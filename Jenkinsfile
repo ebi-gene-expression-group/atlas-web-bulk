@@ -29,8 +29,6 @@ pipeline {
     APP_NAME = 'gxa'
     REGISTRY = 'dockerhub.ebi.ac.uk'
     IMAGE = 'dockerhub.ebi.ac.uk/ebi-gene-expression/atlas-web-bulk/gxa'
-    NPM_CONFIG_LOGLEVEL = 'silent'
-    PARALLEL_JOBS = '4'
   }
 
   stages {
@@ -119,7 +117,7 @@ pipeline {
             sh 'apt update && apt install -y libglu1-mesa gcc'
             sh 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash'
             sh 'bash -lc "source $HOME/.nvm/nvm.sh && nvm install 14 --lts"'
-            sh 'bash -lc "source $HOME/.nvm/nvm.sh && npm install -g --silent npm-check-updates"'
+            sh 'bash -lc "source $HOME/.nvm/nvm.sh && npm install -g npm-check-updates"'
           }
         }
 
@@ -128,7 +126,8 @@ pipeline {
             timeout (time: 1, unit: "HOURS")
           }
           steps {
-            sh 'bash -lc \'source "$HOME/.nvm/nvm.sh"; ./compile-front-end-packages.sh -p\''
+            sh 'bash -lc \'if [ "$BRANCH_NAME" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi; ' +
+                    'source "$HOME/.nvm/nvm.sh"; ./compile-front-end-packages.sh ${WEBPACK_OPTS}\''
           }
         }
 
