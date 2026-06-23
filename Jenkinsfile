@@ -32,12 +32,7 @@ pipeline {
   }
 
   stages {
-    stage('Scale SolrCloud') {
-      when { expression { !params.SKIP_TESTS } }
-      steps {
-        container('kubectl') {}
-      }
-    }
+
 
     stage('Provision Gradle') {
       options {
@@ -67,8 +62,8 @@ pipeline {
                 "-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} " +
                 '-PjdbcUsername=postgres ' +
                 '-PjdbcPassword=postgres ' +
-                "-PzkHosts=${env.APP_NAME}-solrcloud-zookeeper-0.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,${env.APP_NAME}-solrcloud-zookeeper-1.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181,${env.APP_NAME}-solrcloud-zookeeper-2.${env.APP_NAME}-solrcloud-zookeeper-headless.jenkins-gene-expression.svc.cluster.local:2181 " +
-                "-PsolrHosts=http://${env.APP_NAME}-solrcloud-0.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-1.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-2.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr,http://${env.APP_NAME}-solrcloud-3.${env.APP_NAME}-solrcloud-headless.jenkins-gene-expression.svc.cluster.local:8983/solr " +
+                "-PzkHosts=${env.APP_NAME}-solrcloud-zookeeper-client.${env.APP_NAME}-ci-solrcloud.svc.cluster.local:2181 " +
+                "-PsolrHosts=http://${env.APP_NAME}-solrcloud-common.${env.APP_NAME}-ci-solrcloud.svc.cluster.local/solr " +
                 '-PsolrUser=solr ' +
                 '-PsolrPassword=SolrRocks ' +
                 ':atlas-web-core:testClasses :app:testClasses'
