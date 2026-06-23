@@ -17,8 +17,8 @@ pipeline {
 
   agent {
     kubernetes {
-      cloud 'gke-autopilot'
-      workspaceVolume dynamicPVC(storageClassName: 'premium-rwo', accessModes: 'ReadWriteOnce', requestsSize: '6Gi')
+      cloud 'hh-webadmin-35'
+      workspaceVolume dynamicPVC(storageClassName: 'standard-nfs-production', accessModes: 'ReadWriteOnce', requestsSize: '6Gi')
       defaultContainer 'openjdk'
       yamlFile 'jenkins-k8s-pod.yaml'
     }
