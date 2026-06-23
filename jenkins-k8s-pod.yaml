@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  namespace: jenkins-gene-expression
+  namespace: gxa-jenkins
 spec:
-  serviceAccountName: admin-jenkins-gene-expression
+  serviceAccountName: jenkins-cloud
   # If we set workspaceVolume dynamicPVC() or workspaceVolume persistentVolumeClaimWorkspaceVolume() we need to add a
   # fsGroup 1000 to make the /home/jenkins/agent directory writable. Otherwise, we get the following exception in the
   # jnlp container:
@@ -37,17 +37,20 @@ spec:
       args: [ "-c", "mkdir -p /root/expdesign-rw && cp /test-data/expdesign/* /root/expdesign-rw ; sleep 2h" ]
       volumeMounts:
         - mountPath: /test-data/gxa/magetab
-          name: gxa-experiments
+          name: services-volume
+          subPath: fg/atlas/environments/ci/experiments
           readOnly: true
         - mountPath: /test-data/expdesign
-          name: gxa-expdesign
+          name: services-volume
+          subPath: fg/atlas/environments/ci/expdesign
           readOnly: true
         - mountPath: /test-data/ontology
           name: services-volume
           subPath: fg/atlas/ontology
           readOnly: true
         - mountPath: /test-data/bioentity_properties
-          name: bioentity-properties
+          name: services-volume
+          subPath: fg/atlas/bioentity_properties/gxa
           readOnly: true
     - name: postgres
       image: postgres:16-alpine
@@ -77,21 +80,6 @@ spec:
           memory: "2Gi"
           cpu: "1"
   volumes:
-    - name: gxa-experiments
-      nfs:
-        server: hh-isi-srv-vlan1496.ebi.ac.uk
-        path: /ifs/public/services/fg/atlas/environments/ci/experiments
-        readOnly: true
-    - name: gxa-expdesign
-      nfs:
-        server: hh-isi-srv-vlan1496.ebi.ac.uk
-        path: /ifs/public/services/fg/atlas/environments/ci/expdesign
-        readOnly: true
-    - name: bioentity-properties
-      nfs:
-        server: hh-isi-srv-vlan1496.ebi.ac.uk
-        path: /ifs/public/services/fg/atlas/bioentity_properties/gxa
-        readOnly: true
     - name: services-volume
       nfs:
         server: hh-isi-srv-vlan1496.ebi.ac.uk
