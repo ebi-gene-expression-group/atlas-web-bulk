@@ -249,12 +249,14 @@ def pushDockerImage(String appVersion) {
       passwordVariable: 'REGISTRY_PASSWORD'
     )]) {
       sh """
-        set -euxo pipefail
+        set -eu
+        set -x
         test -n "\$REGISTRY_USER"
         test -n "\$REGISTRY_PASSWORD"
         test -f "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
 
-        KANIKO_CONTEXT=\$(mktemp -d /tmp/kaniko-context.XXXXXX)
+        mkdir -p /tmp
+        KANIKO_CONTEXT=\$(mktemp -d -p /tmp kaniko-context.XXXXXX)
         trap 'rm -rf "\$KANIKO_CONTEXT"' EXIT
         cp -a "\${WORKSPACE}/." "\$KANIKO_CONTEXT/"
 
