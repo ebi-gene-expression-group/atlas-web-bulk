@@ -47,11 +47,9 @@ spec:
           cpu: "500m"
     - name: openjdk
       image: eclipse-temurin:11
-      # Must match jnlp (uid 1000): Jenkins durable-task logs under workspace/@tmp are
-      # created by the agent as jenkins and are not writable by other UIDs.
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
+      # Run as root (image default): Jenkins durable-task dirs under workspace/@tmp are
+      # owned by jnlp (uid 1000) and only root can write there reliably; apt/nvm in the
+      # Jenkinsfile also require root. Init container keeps uid 2921 for codon symlinks.
       resources:
         requests:
           memory: "2.5Gi"
