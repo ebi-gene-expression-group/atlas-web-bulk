@@ -94,6 +94,9 @@ spec:
           name: services-volume
           subPath: fg/atlas/bioentity_properties/gxa
           readOnly: true
+        - mountPath: /gradle-ro-dep-cache
+          name: gradle-ro-dep-cache
+          readOnly: true
     - name: postgres
       image: postgres:16-alpine
       resources:
@@ -128,3 +131,7 @@ spec:
       nfs:
         server: hh-isi-srv-vlan1496.ebi.ac.uk
         path: /ifs/public/services
+    - name: gradle-ro-dep-cache
+      persistentVolumeClaim:
+        claimName: gradle-7.0-ro-dep-cache-rox
+        readOnly: true
