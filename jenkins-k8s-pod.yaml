@@ -22,6 +22,9 @@ spec:
           cpu: "500m"
     - name: openjdk
       image: eclipse-temurin:11
+      securityContext:
+        runAsUser: 2921
+        runAsGroup: 1146
       resources:
         requests:
           memory: "2.5Gi"
@@ -37,8 +40,8 @@ spec:
       args: [ "-c", "mkdir -p /root/expdesign-rw && cp /test-data/expdesign/* /root/expdesign-rw ; sleep 2h" ]
       volumeMounts:
         - mountPath: /test-data/gxa/magetab
-          name: services-volume
-          subPath: fg/atlas/environments/ci/experiments
+          name: codon-volume
+          subPath: .snapshot/gxa_codon_2025-10-14_13:34/experiments
           readOnly: true
         - mountPath: /test-data/expdesign
           name: services-volume
@@ -76,6 +79,11 @@ spec:
         limits:
           memory: "2Gi"
   volumes:
+    - name: codon-volume
+      nfs:
+        server: hh-isi-srv-vlan1496.ebi.ac.uk
+        path: /ifs/public/ro/gxa_codon
+        readOnly: true
     - name: services-volume
       nfs:
         server: hh-isi-srv-vlan1496.ebi.ac.uk
