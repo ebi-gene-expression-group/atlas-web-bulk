@@ -115,8 +115,21 @@ spec:
           value: "postgres"
     - name: kaniko
       image: gcr.io/kaniko-project/executor:debug
+      securityContext:
+        runAsUser: 0
       command: ["/busybox/cat"]
       tty: true
+      env:
+        - name: HTTP_PROXY
+          value: "http://hx-wwwcache.ebi.ac.uk:3128"
+        - name: HTTPS_PROXY
+          value: "http://hx-wwwcache.ebi.ac.uk:3128"
+        - name: http_proxy
+          value: "http://hx-wwwcache.ebi.ac.uk:3128"
+        - name: https_proxy
+          value: "http://hx-wwwcache.ebi.ac.uk:3128"
+        - name: NO_PROXY
+          value: "localhost,127.0.0.1,dockerhub.ebi.ac.uk,.ebi.ac.uk,*.cluster.local,*.svc,*.svc.cluster.local"
       resources:
         requests:
           memory: "1Gi"
