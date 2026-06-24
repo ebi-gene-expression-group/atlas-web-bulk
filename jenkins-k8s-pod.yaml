@@ -61,8 +61,20 @@ spec:
       env:
       - name: GRADLE_OPTS
         value: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4"
+      - name: GRADLE_USER_HOME
+        value: "/tmp/gradle"
+      - name: HTTP_PROXY
+        value: "http://hx-wwwcache.ebi.ac.uk:3128"
+      - name: HTTPS_PROXY
+        value: "http://hx-wwwcache.ebi.ac.uk:3128"
+      - name: http_proxy
+        value: "http://hx-wwwcache.ebi.ac.uk:3128"
+      - name: https_proxy
+        value: "http://hx-wwwcache.ebi.ac.uk:3128"
+      - name: NO_PROXY
+        value: "localhost,127.0.0.1,*.cluster.local,*.svc,*.svc.cluster.local"
       command: [ "/bin/sh" ]
-      args: [ "-c", "mkdir -p /tmp/expdesign-rw && cp /test-data/expdesign/* /tmp/expdesign-rw/ ; sleep 2h" ]
+      args: [ "-c", "mkdir -p /tmp/gradle /tmp/expdesign-rw && cp /test-data/expdesign/* /tmp/expdesign-rw/ ; sleep 2h" ]
       volumeMounts:
         - mountPath: /test-data/gxa/magetab
           name: experiments-snapshot

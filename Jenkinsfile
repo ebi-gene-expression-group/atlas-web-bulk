@@ -42,7 +42,7 @@ pipeline {
         container('jnlp') {
           sh 'chmod -R g+w .'
         }
-        sh './gradlew --no-watch-fs'
+        sh 'mkdir -p build && ./gradlew --no-watch-fs'
       }
     }
 
