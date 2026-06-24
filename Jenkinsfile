@@ -152,7 +152,10 @@ pipeline {
           }
           steps {
             script {
-              pushDockerImage(resolveAppVersion())
+              echo 'Resolving application version from WAR manifest...'
+              def appVersion = resolveAppVersion()
+              echo "Resolved application version: ${appVersion}"
+              pushDockerImage(appVersion)
             }
           }
         }
@@ -197,21 +200,22 @@ pipeline {
 
 def resolveAppVersion() {
   def fromManifest = container('openjdk') {
-    sh(
-      script: """
-        set -e
-        MANIFEST_DIR=\$(mktemp -d)
-        cd "\${MANIFEST_DIR}"
-        jar xf "\${WORKSPACE}/webapps/${env.APP_NAME}.war" META-INF/MANIFEST.MF
-        awk -F': ' '/Implementation-Version/{print \$2; exit}' META-INF/MANIFEST.MF
-      """,
-      returnStdout: true
-    ).trim()
+    sh """
+      set -eu
+      echo "Reading Implementation-Version from \${WORKSPACE}/webapps/${env.APP_NAME}.war"
+      ls -lh "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
+      MANIFEST_DIR=\$(mktemp -d)
+      cd "\${MANIFEST_DIR}"
+      jar xf "\${WORKSPACE}/webapps/${env.APP_NAME}.war" META-INF/MANIFEST.MF
+      awk -F': ' '/Implementation-Version/{print \$2; exit}' META-INF/MANIFEST.MF > "\${WORKSPACE}/.app-version"
+    """
+    readFile('.app-version').trim()
   }
   if (fromManifest) {
     return fromManifest
   }
 
+  echo 'WAR manifest had no Implementation-Version; falling back to Gradle printVersion'
   return sh(
     script: './gradlew --no-watch-fs -q :app:printVersion',
     returnStdout: true
@@ -243,24 +247,27 @@ def pushGitTags(String ver) {
 def pushDockerImage(String appVersion) {
   echo "Building and pushing ${env.IMAGE}:${appVersion} and ${env.IMAGE}:latest"
   container('kaniko') {
+    sh """
+      set -eu
+      echo "kaniko: workspace=\${WORKSPACE}"
+      ls -lh "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
+      test -f "\${WORKSPACE}/Dockerfile"
+    """
     withCredentials([usernamePassword(
       credentialsId: 'gitlab-gxa-container-registry',
       usernameVariable: 'REGISTRY_USER',
       passwordVariable: 'REGISTRY_PASSWORD'
     )]) {
       sh """
+        set +x
         set -eu
-        set -x
+        echo "kaniko: writing registry auth config"
         test -n "\$REGISTRY_USER"
         test -n "\$REGISTRY_PASSWORD"
-        test -f "\${WORKSPACE}/Dockerfile"
-        test -f "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
-        ls -lh "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
-
         mkdir -p /kaniko/.docker
         AUTH=\$(printf '%s:%s' "\$REGISTRY_USER" "\$REGISTRY_PASSWORD" | base64 | tr -d '\\n')
         printf '{"auths":{"${env.REGISTRY}":{"auth":"%s"}}}' "\$AUTH" > /kaniko/.docker/config.json
-
+        echo "kaniko: starting image build"
         /kaniko/executor \\
             --verbosity=info \\
             --context "\${WORKSPACE}" \\
