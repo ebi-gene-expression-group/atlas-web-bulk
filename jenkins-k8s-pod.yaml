@@ -47,9 +47,11 @@ spec:
           cpu: "500m"
     - name: openjdk
       image: eclipse-temurin:11
+      # Must match jnlp (uid 1000): Jenkins durable-task logs under workspace/@tmp are
+      # created by the agent as jenkins and are not writable by other UIDs.
       securityContext:
-        runAsUser: 2921
-        runAsGroup: 1146
+        runAsUser: 1000
+        runAsGroup: 1000
       resources:
         requests:
           memory: "2.5Gi"
@@ -73,6 +75,8 @@ spec:
         value: "http://hx-wwwcache.ebi.ac.uk:3128"
       - name: NO_PROXY
         value: "localhost,127.0.0.1,*.cluster.local,*.svc,*.svc.cluster.local"
+      - name: JAVA_TOOL_OPTIONS
+        value: "-Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttp.proxyPort=3128 -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttps.proxyPort=3128"
       command: [ "/bin/sh" ]
       args: [ "-c", "mkdir -p /tmp/gradle /tmp/expdesign-rw && cp /test-data/expdesign/* /tmp/expdesign-rw/ ; sleep 2h" ]
       volumeMounts:

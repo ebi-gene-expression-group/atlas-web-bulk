@@ -39,18 +39,16 @@ pipeline {
         timeout (time: 20, unit: "MINUTES")
       }
       steps {
-        container('jnlp') {
-          sh 'chmod -R g+w .'
-        }
         sh '''
           if [ -d /gradle-ro-dep-cache/modules-2 ]; then
+            echo "Gradle RO dep cache seeded."
             export GRADLE_RO_DEP_CACHE=/gradle-ro-dep-cache
           else
             echo "Gradle RO dep cache not seeded yet (/gradle-ro-dep-cache/modules-2 missing); downloading dependencies."
             unset GRADLE_RO_DEP_CACHE
           fi
           mkdir -p build
-          ./gradlew --no-watch-fs --info
+          ./gradlew --no-watch-fs --console=plain --info tasks
         '''
       }
     }
