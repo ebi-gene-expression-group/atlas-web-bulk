@@ -13,7 +13,7 @@ spec:
     fsGroup: 1000
   initContainers:
     - name: init-experiments-snapshot
-      image: busybox
+      image: busybox:1.28.0-glibc
       securityContext:
         runAsUser: 2921
         runAsGroup: 1146
