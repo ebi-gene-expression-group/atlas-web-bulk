@@ -132,9 +132,12 @@ spec:
           value: "localhost,127.0.0.1,dockerhub.ebi.ac.uk,.ebi.ac.uk,*.cluster.local,*.svc,*.svc.cluster.local"
       resources:
         requests:
-          memory: "1Gi"
-        limits:
           memory: "2Gi"
+          cpu: "500m"
+        limits:
+          memory: "4Gi"
+          cpu: "2"
+          ephemeral-storage: "8Gi"
   volumes:
     - name: experiments-snapshot
       emptyDir: {}

@@ -253,12 +253,9 @@ def pushDockerImage(String appVersion) {
         set -x
         test -n "\$REGISTRY_USER"
         test -n "\$REGISTRY_PASSWORD"
+        test -f "\${WORKSPACE}/Dockerfile"
         test -f "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
-
-        mkdir -p /tmp
-        KANIKO_CONTEXT=\$(mktemp -d -p /tmp kaniko-context.XXXXXX)
-        trap 'rm -rf "\$KANIKO_CONTEXT"' EXIT
-        cp -a "\${WORKSPACE}/." "\$KANIKO_CONTEXT/"
+        ls -lh "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
 
         mkdir -p /kaniko/.docker
         AUTH=\$(printf '%s:%s' "\$REGISTRY_USER" "\$REGISTRY_PASSWORD" | base64 | tr -d '\\n')
@@ -266,8 +263,8 @@ def pushDockerImage(String appVersion) {
 
         /kaniko/executor \\
             --verbosity=info \\
-            --context "dir://\${KANIKO_CONTEXT}" \\
-            --dockerfile "\${KANIKO_CONTEXT}/Dockerfile" \\
+            --context "\${WORKSPACE}" \\
+            --dockerfile "\${WORKSPACE}/Dockerfile" \\
             --destination ${env.IMAGE}:${appVersion} \\
             --destination ${env.IMAGE}:latest
       """
