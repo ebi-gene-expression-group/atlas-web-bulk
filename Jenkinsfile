@@ -58,7 +58,7 @@ pipeline {
         sh './gradlew --no-watch-fs ' +
                 '-PdataFilesLocation=/test-data ' +
                 "-PexperimentFilesLocation=/test-data/${env.APP_NAME} " +
-                '-PexperimentDesignLocation=/root/expdesign-rw ' +
+                '-PexperimentDesignLocation=/tmp/expdesign-rw ' +
                 "-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} " +
                 '-PjdbcUsername=postgres ' +
                 '-PjdbcPassword=postgres ' +
