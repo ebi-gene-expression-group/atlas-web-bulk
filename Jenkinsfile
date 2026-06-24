@@ -39,6 +39,9 @@ pipeline {
         timeout (time: 20, unit: "MINUTES")
       }
       steps {
+        container('jnlp') {
+          sh 'chmod -R g+w .'
+        }
         sh './gradlew --no-watch-fs'
       }
     }
