@@ -1,0 +1,68 @@
+# One-off job to populate gradle-7.0-ro-dep-cache-rox on hh-webadmin-35.
+#
+# The PVC is mounted where Gradle writes caches (/home/gradle/.gradle/caches).
+# Jenkins pods mount the same PVC read-only at /gradle-ro-dep-cache (GRADLE_RO_DEP_CACHE).
+#
+# Apply:  kubectl delete job gradle-ro-dep-cache-seed -n gxa-jenkins --ignore-not-found
+#         kubectl apply -f jenkins/gradle-ro-dep-cache-seed-job.yaml
+# Watch:  kubectl logs -n gxa-jenkins -f job/gradle-ro-dep-cache-seed
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gradle-ro-dep-cache-seed
+  namespace: gxa-jenkins
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed
+          image: gradle:7.0-jdk11
+          command:
+            - bash
+            - -c
+            - |
+              set -euxo pipefail
+              git clone --recurse-submodules --depth 1 -b develop \
+                https://github.com/ebi-gene-expression-group/atlas-web-bulk.git /work
+              cd /work
+              # Image ships Gradle 7.0 — no wrapper zip download needed.
+              gradle --no-daemon --info \
+                :atlas-web-core:compileJava \
+                :atlas-web-core:compileTestJava \
+                :app:compileJava \
+                :app:compileTestJava \
+                :cli:compileJava
+              test -d /home/gradle/.gradle/caches/modules-2
+              echo "Seeded $(find /home/gradle/.gradle/caches/modules-2 -type f | wc -l) files under modules-2"
+          env:
+            - name: GRADLE_OPTS
+              value: "-Dorg.gradle.daemon=false"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttp.proxyPort=3128 -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttps.proxyPort=3128"
+            - name: HTTP_PROXY
+              value: "http://hx-wwwcache.ebi.ac.uk:3128"
+            - name: HTTPS_PROXY
+              value: "http://hx-wwwcache.ebi.ac.uk:3128"
+            - name: http_proxy
+              value: "http://hx-wwwcache.ebi.ac.uk:3128"
+            - name: https_proxy
+              value: "http://hx-wwwcache.ebi.ac.uk:3128"
+            - name: NO_PROXY
+              value: "localhost,127.0.0.1,*.cluster.local,*.svc,*.svc.cluster.local"
+          volumeMounts:
+            - name: gradle-ro-dep-cache
+              mountPath: /home/gradle/.gradle/caches
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+      volumes:
+        - name: gradle-ro-dep-cache
+          persistentVolumeClaim:
+            claimName: gradle-7.0-ro-dep-cache-rox

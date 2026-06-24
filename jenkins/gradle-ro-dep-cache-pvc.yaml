@@ -1,0 +1,16 @@
+# Shared read-only Gradle dependency cache for Jenkins CI pods in gxa-jenkins.
+# PVC root holds Gradle caches/ content (including modules-2/). Seed once:
+#   kubectl delete job gradle-ro-dep-cache-seed -n gxa-jenkins --ignore-not-found
+#   kubectl apply -f jenkins/gradle-ro-dep-cache-seed-job.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gradle-7.0-ro-dep-cache-rox
+  namespace: gxa-jenkins
+spec:
+  storageClassName: standard-nfs-production
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 20Gi
