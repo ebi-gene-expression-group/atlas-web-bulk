@@ -42,7 +42,16 @@ pipeline {
         container('jnlp') {
           sh 'chmod -R g+w .'
         }
-        sh 'mkdir -p build && ./gradlew --no-watch-fs'
+        sh '''
+          if [ -d /gradle-ro-dep-cache/modules-2 ]; then
+            export GRADLE_RO_DEP_CACHE=/gradle-ro-dep-cache
+          else
+            echo "Gradle RO dep cache not seeded yet (/gradle-ro-dep-cache/modules-2 missing); downloading dependencies."
+            unset GRADLE_RO_DEP_CACHE
+          fi
+          mkdir -p build
+          ./gradlew --no-watch-fs --info
+        '''
       }
     }
 
