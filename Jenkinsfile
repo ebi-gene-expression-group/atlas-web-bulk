@@ -251,7 +251,7 @@ def pushDockerImage(String appVersion) {
       set -eu
       echo "kaniko: workspace=\${WORKSPACE}"
       ls -lh "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
-      echo "contents of workspace:
+      echo "contents of workspace:"
       ls -laR "\${WORKSPACE}"
       test -f "\${WORKSPACE}/Dockerfile"
     """
