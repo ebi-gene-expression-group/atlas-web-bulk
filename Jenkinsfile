@@ -230,14 +230,26 @@ def pushGitTags(String ver) {
       passwordVariable: 'GIT_TOKEN'
     )]) {
       sh '''
+        set +x
+        set -eu
         git config user.email "jenkins@ebi.ac.uk"
         git config user.name "Jenkins CI"
       '''
       ["${ver}", "${ver}-cli"].each { tag ->
-        echo "Tagging and pushing ${tag}"
+        echo "Tagging and pushing ${tag} (commit ${env.GIT_COMMIT})"
         sh """
+          set +x
+          set -eu
           git tag -fa '${tag}' -m 'build ${env.BUILD_NUMBER}' '${env.GIT_COMMIT}'
-          git push -f "https://\${GIT_USER}:\${GIT_TOKEN}@github.com/ebi-gene-expression-group/atlas-web-bulk.git" 'refs/tags/${tag}'
+          PUSH_LOG=\$(mktemp)
+          if ! git -c http.lowSpeedLimit=1 -c http.lowSpeedTime=60 push -f \\
+              "https://\${GIT_USER}:\${GIT_TOKEN}@github.com/ebi-gene-expression-group/atlas-web-bulk.git" \\
+              'refs/tags/${tag}' 2>"\${PUSH_LOG}"; then
+            echo "git push failed for tag ${tag}:"
+            cat "\${PUSH_LOG}"
+            exit 1
+          fi
+          echo "Pushed tag ${tag}"
         """
       }
     }
@@ -252,7 +264,6 @@ def pushDockerImage(String appVersion) {
       echo "kaniko: workspace=\${WORKSPACE}"
       ls -lh "\${WORKSPACE}/webapps/${env.APP_NAME}.war"
       echo "contents of workspace:"
-      ls -laR "\${WORKSPACE}"
       test -f "\${WORKSPACE}/Dockerfile"
     """
     withCredentials([usernamePassword(
