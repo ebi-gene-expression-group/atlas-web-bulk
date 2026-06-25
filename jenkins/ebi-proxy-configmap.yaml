@@ -1,0 +1,13 @@
+# Shared outbound proxy settings for Jenkins CI pods (gxa-jenkins namespace).
+# Referenced via envFrom in jenkins-k8s-pod.yaml (jnlp, openjdk, kaniko).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ebi-proxy
+  namespace: gxa-jenkins
+data:
+  HTTP_PROXY: "http://hx-wwwcache.ebi.ac.uk:3128"
+  HTTPS_PROXY: "http://hx-wwwcache.ebi.ac.uk:3128"
+  http_proxy: "http://hx-wwwcache.ebi.ac.uk:3128"
+  https_proxy: "http://hx-wwwcache.ebi.ac.uk:3128"
+  NO_PROXY: "localhost,127.0.0.1,dockerhub.ebi.ac.uk,.ebi.ac.uk,*.cluster.local,*.svc,*.svc.cluster.local"

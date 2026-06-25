@@ -6,6 +6,7 @@ Jenkins CI pods for **atlas-web-bulk** can reuse a shared Gradle dependency cach
 
 | Component | File | Purpose |
 |-----------|------|---------|
+| ConfigMap | `ebi-proxy-configmap.yaml` | Shared `HTTP(S)_PROXY` / `NO_PROXY` for CI pods |
 | PVC | `gradle-ro-dep-cache-pvc.yaml` | NFS-backed volume holding `modules-2/` |
 | Seed job | `gradle-ro-dep-cache-seed-job.yaml` | One-off job that populates the PVC |
 | Pod template | `../jenkins-k8s-pod.yaml` | Mounts the PVC read-only at `/gradle-ro-dep-cache` |
@@ -24,7 +25,15 @@ The seed job writes to `/home/gradle/.gradle/caches` (Gradle’s default cache l
 
 ## One-time setup
 
-### 1. Create the PVC
+### 1. Create the proxy ConfigMap
+
+```bash
+kubectl apply -f jenkins/ebi-proxy-configmap.yaml
+```
+
+Pods reference this via `envFrom.configMapRef` (`ebi-proxy` in `gxa-jenkins`).
+
+### 2. Create the PVC
 
 ```bash
 kubectl apply -f jenkins/gradle-ro-dep-cache-pvc.yaml
@@ -33,7 +42,7 @@ kubectl get pvc gradle-7.0-ro-dep-cache-rox -n gxa-jenkins
 
 Wait until `STATUS` is `Bound`.
 
-### 2. Seed the cache
+### 3. Seed the cache
 
 The seed job clones `atlas-web-bulk` from GitHub and runs compile tasks so Gradle resolves and stores dependencies under `modules-2/`.
 
@@ -49,7 +58,7 @@ Expect `BUILD SUCCESSFUL` and a line like:
 Seeded 1422 files under modules-2
 ```
 
-### 3. Confirm Jenkins can use the cache
+### 4. Confirm Jenkins can use the cache
 
 Ensure `jenkins-k8s-pod.yaml` is configured in Jenkins (Kubernetes cloud pod template) with the `gradle-ro-dep-cache` volume. On the next build, the **Provision Gradle** stage should log nothing about a missing cache, and dependency downloads should be minimal.
 

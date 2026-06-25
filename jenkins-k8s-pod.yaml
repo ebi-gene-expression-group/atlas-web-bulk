@@ -38,17 +38,9 @@ spec:
           mountPath: /experiments_snapshot
   containers:
     - name: jnlp
-      env:
-        - name: HTTP_PROXY
-          value: "http://hx-wwwcache.ebi.ac.uk:3128"
-        - name: HTTPS_PROXY
-          value: "http://hx-wwwcache.ebi.ac.uk:3128"
-        - name: http_proxy
-          value: "http://hx-wwwcache.ebi.ac.uk:3128"
-        - name: https_proxy
-          value: "http://hx-wwwcache.ebi.ac.uk:3128"
-        - name: NO_PROXY
-          value: "localhost,127.0.0.1,*.cluster.local,*.svc,*.ebi.ac.uk,dockerhub.ebi.ac.uk"
+      envFrom:
+        - configMapRef:
+            name: ebi-proxy
       resources:
         requests:
           memory: "512Mi"
@@ -69,21 +61,14 @@ spec:
         limits:
           cpu: "4"
           memory: "4Gi"
+      envFrom:
+        - configMapRef:
+            name: ebi-proxy
       env:
       - name: GRADLE_OPTS
         value: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4"
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
-      - name: HTTP_PROXY
-        value: "http://hx-wwwcache.ebi.ac.uk:3128"
-      - name: HTTPS_PROXY
-        value: "http://hx-wwwcache.ebi.ac.uk:3128"
-      - name: http_proxy
-        value: "http://hx-wwwcache.ebi.ac.uk:3128"
-      - name: https_proxy
-        value: "http://hx-wwwcache.ebi.ac.uk:3128"
-      - name: NO_PROXY
-        value: "localhost,127.0.0.1,*.cluster.local,*.svc,*.svc.cluster.local"
       - name: JAVA_TOOL_OPTIONS
         value: "-Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttp.proxyPort=3128 -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttps.proxyPort=3128"
       command: [ "/bin/sh" ]
@@ -130,17 +115,9 @@ spec:
         runAsUser: 0
       command: ["/busybox/cat"]
       tty: true
-      env:
-        - name: HTTP_PROXY
-          value: "http://hx-wwwcache.ebi.ac.uk:3128"
-        - name: HTTPS_PROXY
-          value: "http://hx-wwwcache.ebi.ac.uk:3128"
-        - name: http_proxy
-          value: "http://hx-wwwcache.ebi.ac.uk:3128"
-        - name: https_proxy
-          value: "http://hx-wwwcache.ebi.ac.uk:3128"
-        - name: NO_PROXY
-          value: "localhost,127.0.0.1,dockerhub.ebi.ac.uk,.ebi.ac.uk,*.cluster.local,*.svc,*.svc.cluster.local"
+      envFrom:
+        - configMapRef:
+            name: ebi-proxy
       resources:
         requests:
           memory: "2Gi"
