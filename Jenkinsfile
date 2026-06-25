@@ -234,6 +234,20 @@ def pushGitTags(String ver) {
         set -eu
         git config user.email "jenkins@ebi.ac.uk"
         git config user.name "Jenkins CI"
+        API_LOG=$(mktemp)
+        HTTP_CODE=$(curl -sS -o "${API_LOG}" -w '%{http_code}' \
+          -u "x-access-token:${GIT_TOKEN}" \
+          https://api.github.com/repos/ebi-gene-expression-group/atlas-web-bulk)
+        if [ "${HTTP_CODE}" != "200" ]; then
+          echo "GitHub API check failed (HTTP ${HTTP_CODE}). Token cannot access atlas-web-bulk."
+          cat "${API_LOG}"
+          echo "Fix Jenkins credential github-atlas-web-bulk: PAT needs repo write on this repo,"
+          echo "and if the org uses SSO you must Authorize the token for ebi-gene-expression-group"
+          echo "at https://github.com/settings/tokens"
+          exit 1
+        fi
+        PERMS=$(grep -E '"push"|"admin"' "${API_LOG}" || true)
+        echo "GitHub repo access OK (${PERMS})"
       '''
       ["${ver}", "${ver}-cli"].each { tag ->
         echo "Tagging and pushing ${tag} (commit ${env.GIT_COMMIT})"
@@ -243,7 +257,7 @@ def pushGitTags(String ver) {
           git tag -fa '${tag}' -m 'build ${env.BUILD_NUMBER}' '${env.GIT_COMMIT}'
           PUSH_LOG=\$(mktemp)
           if ! git -c http.lowSpeedLimit=1 -c http.lowSpeedTime=60 push -f \\
-              "https://\${GIT_USER}:\${GIT_TOKEN}@github.com/ebi-gene-expression-group/atlas-web-bulk.git" \\
+              "https://x-access-token:\${GIT_TOKEN}@github.com/ebi-gene-expression-group/atlas-web-bulk.git" \\
               'refs/tags/${tag}' 2>"\${PUSH_LOG}"; then
             echo "git push failed for tag ${tag}:"
             cat "\${PUSH_LOG}"

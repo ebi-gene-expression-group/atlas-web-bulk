@@ -11,10 +11,21 @@ kind: Job
 metadata:
   name: gradle-ro-dep-cache-seed
   namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: gxa-jenkins
+    app.kubernetes.io/component: gradle-cache-seed
+    app.kubernetes.io/managed-by: atlas-web-bulk
+    atlas.ebi.ac.uk/jenkins-integration: fg-public
 spec:
   backoffLimit: 1
   ttlSecondsAfterFinished: 86400
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gxa-jenkins
+        app.kubernetes.io/component: gradle-cache-seed
+        app.kubernetes.io/managed-by: atlas-web-bulk
+        atlas.ebi.ac.uk/jenkins-integration: fg-public
     spec:
       restartPolicy: Never
       containers:
@@ -42,16 +53,9 @@ spec:
               value: "-Dorg.gradle.daemon=false"
             - name: JAVA_TOOL_OPTIONS
               value: "-Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttp.proxyPort=3128 -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttps.proxyPort=3128"
-            - name: HTTP_PROXY
-              value: "http://hx-wwwcache.ebi.ac.uk:3128"
-            - name: HTTPS_PROXY
-              value: "http://hx-wwwcache.ebi.ac.uk:3128"
-            - name: http_proxy
-              value: "http://hx-wwwcache.ebi.ac.uk:3128"
-            - name: https_proxy
-              value: "http://hx-wwwcache.ebi.ac.uk:3128"
-            - name: NO_PROXY
-              value: "localhost,127.0.0.1,*.cluster.local,*.svc,*.svc.cluster.local"
+          envFrom:
+            - configMapRef:
+                name: ebi-proxy
           volumeMounts:
             - name: gradle-ro-dep-cache
               mountPath: /home/gradle/.gradle/caches

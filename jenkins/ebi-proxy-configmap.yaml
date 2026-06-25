@@ -5,6 +5,11 @@ kind: ConfigMap
 metadata:
   name: ebi-proxy
   namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: gxa-jenkins
+    app.kubernetes.io/component: proxy
+    app.kubernetes.io/managed-by: atlas-web-bulk
+    atlas.ebi.ac.uk/jenkins-integration: fg-public
 data:
   HTTP_PROXY: "http://hx-wwwcache.ebi.ac.uk:3128"
   HTTPS_PROXY: "http://hx-wwwcache.ebi.ac.uk:3128"

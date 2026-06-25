@@ -7,6 +7,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: gradle-7.0-ro-dep-cache-rox
   namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: gxa-jenkins
+    app.kubernetes.io/component: gradle-cache
+    app.kubernetes.io/managed-by: atlas-web-bulk
+    atlas.ebi.ac.uk/jenkins-integration: fg-public
 spec:
   storageClassName: standard-nfs-production
   accessModes:
