@@ -52,7 +52,12 @@ spec:
             - name: GRADLE_OPTS
               value: "-Dorg.gradle.daemon=false"
             - name: JAVA_TOOL_OPTIONS
-              value: "-Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttp.proxyPort=3128 -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttps.proxyPort=3128"
+              value: >-
+                -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
+                -Dhttp.proxyPort=3128
+                -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
+                -Dhttps.proxyPort=3128
+                -Dhttp.nonProxyHosts=localhost|127.0.0.1|*.svc|*.svc.cluster.local|kubernetes.default
           envFrom:
             - configMapRef:
                 name: ebi-proxy

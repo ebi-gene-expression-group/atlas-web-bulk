@@ -41,11 +41,9 @@ pipeline {
       steps {
         sh '''
           if [ -d /gradle-ro-dep-cache/modules-2 ]; then
-            echo "Gradle RO dep cache seeded."
-            export GRADLE_RO_DEP_CACHE=/gradle-ro-dep-cache
+            echo "Gradle RO dep cache: /gradle-ro-dep-cache/modules-2 present"
           else
-            echo "Gradle RO dep cache not seeded yet (/gradle-ro-dep-cache/modules-2 missing); downloading dependencies."
-            unset GRADLE_RO_DEP_CACHE
+            echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
           fi
           mkdir -p build
           ./gradlew --no-watch-fs --console=plain --info tasks
