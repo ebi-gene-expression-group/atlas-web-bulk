@@ -65,15 +65,13 @@ spec:
         - configMapRef:
             name: ebi-proxy
       env:
+      # Proxy JVM flags live in JAVA_TOOL_OPTIONS only. Do not duplicate them here:
+      # gradlew expands GRADLE_OPTS unquoted (eval set -- $GRADLE_OPTS), so | in
+      # http.nonProxyHosts is interpreted as shell pipes and breaks the java command line.
       - name: GRADLE_OPTS
         value: >-
           -Dorg.gradle.daemon=false
-          -Dorg.gradle.workers.max=4 
-          -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk 
-          -Dhttp.proxyPort=3128
-          -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
-          -Dhttps.proxyPort=3128
-          -Dhttp.nonProxyHosts=localhost|127.0.0.1|*.svc|*.svc.cluster.local|kubernetes.default
+          -Dorg.gradle.workers.max=4
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
       - name: GRADLE_RO_DEP_CACHE
