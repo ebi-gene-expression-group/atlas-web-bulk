@@ -44,18 +44,19 @@ while getopts ":iuph" opt; do
 done
 
 function update_npm_package {
+  local BASENAME=$(basename "$PWD")
   if [ "$UPGRADE" = true ]; then
-      echo ">> $PWD$ ncu /@ebi-gene-expression-group/ --pre 1 -u"
-      ncu /@ebi-gene-expression-group/ --pre 1 -u
-    fi
-    if [ "$INIT" = true ]; then
-      echo ">> $PWD$ rm -rf node_modules package-lock.json"
-      rm -rf node_modules package-lock.json
-    fi
-    echo ">> $PWD$ npm install"
-    npm install
-    echo ">> $PWD$ npm audit fix"
-    npm audit fix
+    echo ">> [$BASENAME] Running ncu to upgrade @ebi-gene-expression-group packages to latest (including pre-releases)..."
+    ncu /@ebi-gene-expression-group/ --pre 1 -u
+  fi
+  if [ "$INIT" = true ]; then
+    echo ">> [$BASENAME] Removing node_modules and package-lock.json for a clean install..."
+    rm -rf node_modules package-lock.json
+  fi
+  echo ">> [$BASENAME] Running npm install..."
+  npm install
+  echo ">> [$BASENAME] Running npm audit fix..."
+  npm audit fix
 }
 
 export -f update_npm_package
