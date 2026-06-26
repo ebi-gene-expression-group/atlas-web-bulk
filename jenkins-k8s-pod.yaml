@@ -100,6 +100,15 @@ spec:
         - mountPath: /gradle-ro-dep-cache
           name: gradle-ro-dep-cache
           readOnly: true
+        - name: codon-volume
+          mountPath: /test-data/gxa/release-metadata.json
+          subPath: release-metadata.json
+          readOnly: true
+        - name: codon-volume
+          mountPath: /test-data/gxa/species-properties.json
+          subPath: species-properties.json
+          readOnly: true
+
     - name: postgres
       image: postgres:16-alpine
       resources:
