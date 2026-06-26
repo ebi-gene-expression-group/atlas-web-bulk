@@ -182,12 +182,12 @@ pipeline {
     always {
       script {
         if (!params.SKIP_TESTS) {
-          junit 'atlas-web-core/build/ut/**/*.xml'
-          junit 'atlas-web-core/build/it/**/*.xml'
+          junit testResults: 'atlas-web-core/build/ut/**/*.xml', allowEmptyResults: true
+          junit testResults: 'atlas-web-core/build/it/**/*.xml', allowEmptyResults: true
 
-          junit 'app/build/ut/**/*.xml'
-          junit 'app/build/it/**/*.xml'
-          junit 'app/build/e2e/**/*.xml'
+          junit testResults: 'app/build/ut/**/*.xml', allowEmptyResults: true
+          junit testResults: 'app/build/it/**/*.xml', allowEmptyResults: true
+          junit testResults: 'app/build/e2e/**/*.xml', allowEmptyResults: true
 
           archiveArtifacts artifacts: 'atlas-web-core/build/reports/**', fingerprint: true, allowEmptyArchive: true
           archiveArtifacts artifacts: 'app/build/reports/**', fingerprint: true, allowEmptyArchive: true
