@@ -70,7 +70,12 @@ spec:
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
       - name: JAVA_TOOL_OPTIONS
-        value: "-Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttp.proxyPort=3128 -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk -Dhttps.proxyPort=3128"
+        value: >
+          -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
+          -Dhttp.proxyPort=3128
+          -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
+          -Dhttps.proxyPort=3128
+          -Dhttp.nonProxyHosts=localhost|127.0.0.1|*.svc|*.svc.cluster.local|kubernetes.default
       command: [ "/bin/sh" ]
       args: [ "-c", "mkdir -p /tmp/gradle /tmp/expdesign-rw && cp /test-data/expdesign/* /tmp/expdesign-rw/ ; sleep 2h" ]
       volumeMounts:
