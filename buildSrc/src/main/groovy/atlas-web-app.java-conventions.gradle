@@ -17,14 +17,17 @@ targetCompatibility = 11
 
 repositories {
   mavenCentral()
-  // For ae-efo-loader
-  // Ideally mavenLocal() would be the last repo to have as fallback, but we won’t have access to our Artifactory
-  // unless we’re on the VPN, in which case the build fails
-  mavenLocal()
+  // Internal Artifactory (VPN / office network only) — ae-efo-loader is not on Maven Central.
+  // Scope to uk.ac.ebi.fg so CI does not time out resolving Maven Central deps via this repo.
   maven {
     url "http://45.88.81.151/artifactory/maven-local/"
     allowInsecureProtocol true
+    content {
+      includeGroup "uk.ac.ebi.fg"
+    }
   }
+  // Last-resort fallback for locally published artefacts
+  mavenLocal()
 }
 
 dependencies {
