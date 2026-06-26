@@ -12,6 +12,10 @@ spec:
   securityContext:
     fsGroup: 1000
   initContainers:
+    # Fail fast if the codon snapshot path is missing. Symlinks in emptyDir were avoided:
+    # openjdk runs as root for Jenkins (@tmp, apt); root following symlinks into NFS
+    # (root_squash) cannot read fg_atlas-owned experiment data. Mount the snapshot
+    # directory directly in openjdk instead (same pattern as release-metadata.json).
     - name: init-experiments-snapshot
       image: busybox:1.28.0-glibc
       securityContext:
@@ -27,15 +31,11 @@ spec:
             echo "ERROR: experimentsSourceDir does not exist: $EXPERIMENTS_SOURCE_DIR" >&2
             exit 1
           fi
-          ln -s "$EXPERIMENTS_SOURCE_DIR"/E-* /experiments_snapshot/
-          echo "Number of experiments in snapshot: $(ls /experiments_snapshot | wc -l)"
+          echo "Experiments snapshot present: $(ls -d "$EXPERIMENTS_SOURCE_DIR"/E-* 2>/dev/null | wc -l) experiments"
       volumeMounts:
         - name: codon-volume
           mountPath: /atlas-data/gxa_codon
-        - name: services-volume
-          mountPath: /atlas-data/services
-        - name: experiments-snapshot
-          mountPath: /experiments_snapshot
+          readOnly: true
   containers:
     - name: jnlp
       envFrom:
@@ -52,7 +52,8 @@ spec:
       image: eclipse-temurin:11
       # Run as root (image default): Jenkins durable-task dirs under workspace/@tmp are
       # owned by jnlp (uid 1000) and only root can write there reliably; apt/nvm in the
-      # Jenkinsfile also require root. Init container keeps uid 2921 for codon symlinks.
+      # Jenkinsfile also require root. Experiment data is a direct codon NFS subPath mount
+      # (not emptyDir symlinks) so files keep fg_atlas ownership (2921:1146).
       resources:
         requests:
           memory: "2.5Gi"
@@ -89,7 +90,8 @@ spec:
       args: [ "-c", "mkdir -p /tmp/gradle /tmp/expdesign-rw && cp /test-data/expdesign/* /tmp/expdesign-rw/ ; sleep 2h" ]
       volumeMounts:
         - mountPath: /test-data/gxa/magetab
-          name: experiments-snapshot
+          name: codon-volume
+          subPath: .snapshot/gxa_codon_2025-10-14_13:34/experiments
           readOnly: true
         - mountPath: /atlas-data/gxa_codon
           name: codon-volume
@@ -152,8 +154,6 @@ spec:
           cpu: "2"
           ephemeral-storage: "8Gi"
   volumes:
-    - name: experiments-snapshot
-      emptyDir: {}
     - name: codon-volume
       nfs:
         server: hh-isi-srv-vlan1496.ebi.ac.uk
