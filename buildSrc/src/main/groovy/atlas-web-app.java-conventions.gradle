@@ -113,7 +113,8 @@ processTestResources {
     expand(
             jdbcUrl: project.hasProperty('jdbcUrl') ? jdbcUrl : 'jdbc:postgresql://localhost:5432/gxpgxadev',
             jdbcUsername: project.hasProperty('jdbcUsername') ? jdbcUsername : 'atlasdev',
-            jdbcPassword: project.hasProperty('jdbcPassword') ? jdbcPassword : 'atlasdev'
+            jdbcPassword: project.hasProperty('jdbcPassword') ? jdbcPassword : 'atlasdev',
+            jdbcMaxPoolSize: project.hasProperty('jdbcMaxPoolSize') ? jdbcMaxPoolSize : '20'
     )
   }
 

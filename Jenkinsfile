@@ -29,6 +29,8 @@ pipeline {
     APP_NAME = 'gxa'
     REGISTRY = 'dockerhub.ebi.ac.uk'
     IMAGE = 'dockerhub.ebi.ac.uk/ebi-gene-expression/atlas-web-bulk/gxa'
+    // 4 parallel test forks × 20 default Hikari pool exceeds sidecar Postgres max_connections (100).
+    GRADLE_CI_TEST_PROPS = '-PjdbcMaxPoolSize=5'
   }
 
   stages {
@@ -71,6 +73,7 @@ pipeline {
                   "-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} " +
                   '-PjdbcUsername=postgres ' +
                   '-PjdbcPassword=postgres ' +
+                  "${env.GRADLE_CI_TEST_PROPS} " +
                   "-PzkHosts=${env.APP_NAME}-solrcloud-zookeeper-client.${env.APP_NAME}-ci-solrcloud.svc.cluster.local:2181 " +
                   "-PsolrHosts=http://${env.APP_NAME}-solrcloud-common.${env.APP_NAME}-ci-solrcloud.svc.cluster.local/solr " +
                   '-PsolrUser=admin ' +
@@ -87,8 +90,8 @@ pipeline {
       }
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-          sh './gradlew --no-watch-fs -PtestResultsPath=ut :atlas-web-core:test --tests *Test'
-          sh './gradlew --no-watch-fs -PtestResultsPath=ut :app:test --tests *Test'
+          sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=ut :atlas-web-core:test --tests *Test"
+          sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=ut :app:test --tests *Test"
         }
       }
     }
@@ -101,10 +104,10 @@ pipeline {
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
           withSolrCredentials {
-            sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
-            sh './gradlew --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT ' +
+            sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=it :atlas-web-core:test --tests *IT"
+            sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT " +
                     '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
-            sh './gradlew --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT ' +
+            sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=e2e :app:test --tests *WIT " +
                     '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
           }
           sh './gradlew --no-watch-fs --parallel :atlas-web-core:jacocoTestReport :app:jacocoTestReport'
