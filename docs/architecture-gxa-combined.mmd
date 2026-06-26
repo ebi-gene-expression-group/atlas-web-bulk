@@ -1,0 +1,38 @@
+
+flowchart TB
+    direction TB
+    
+    subgraph top[" "]
+        direction LR
+
+        subgraph ingest["DATA INGESTION"]
+            direction TB
+            a1["📝 Annotare"]
+            a2["🗄️ BioStudies / ArrayExpress"]
+            a3["🖥️ Codon / iRAP"]
+            a1 --> a2 --> a3
+        end
+
+        subgraph runtime["RUNTIME"]
+            direction TB
+            browser["🌐 Browser"]
+            gxa["☕ gxa.war · Tomcat 8 · Spring 5.1.6"]
+            ext["🏛️ EBI · Europe PMC · GSA · 🧬 Reactome"]
+            browser --> gxa --> ext
+        end
+    end
+
+    subgraph data["DATA TIER"]
+        direction TB
+        nfs_prod["📁 /nfs/production/fg/atlas"]
+        a4["⚙️ Bulk loading + CLI"]
+        nfs_pub["📁 /nfs/public/rw/fg/atlas"]
+        idx["🐘 PostgreSQL · 🔍 SolrCloud 8.7"]
+        nfs_prod --> a4 --> nfs_pub --> idx
+    end
+
+    style top fill:none,stroke:none
+
+    a3 -->|"write bundles"| nfs_prod
+    gxa -->|"read files"| nfs_pub
+    gxa -->|"query"| idx
