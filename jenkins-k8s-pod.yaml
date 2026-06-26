@@ -95,7 +95,7 @@ spec:
           readOnly: true
         - mountPath: /test-data/bioentity_properties
           name: services-volume
-          subPath: fg/atlas/bioentity_properties/gxa
+          subPath: fg/atlas/bioentity_properties
           readOnly: true
         - mountPath: /gradle-ro-dep-cache
           name: gradle-ro-dep-cache
