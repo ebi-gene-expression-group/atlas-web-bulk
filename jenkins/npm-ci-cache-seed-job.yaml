@@ -1,0 +1,66 @@
+# One-off job to warm npm-ci-cache-rwx on hh-webadmin-35.
+# Uses the same Node toolchain as Jenkins (nvm + Node 14 LTS on eclipse-temurin:11).
+#
+# Apply:  kubectl delete job npm-ci-cache-seed -n gxa-jenkins --ignore-not-found
+#         kubectl apply -f jenkins/npm-ci-cache-seed-job.yaml
+# Watch:  kubectl logs -n gxa-jenkins -f job/npm-ci-cache-seed
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: npm-ci-cache-seed
+  namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: gxa-jenkins
+    app.kubernetes.io/component: npm-cache-seed
+    app.kubernetes.io/managed-by: atlas-web-bulk
+    atlas.ebi.ac.uk/jenkins-integration: fg-public
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gxa-jenkins
+        app.kubernetes.io/component: npm-cache-seed
+        app.kubernetes.io/managed-by: atlas-web-bulk
+        atlas.ebi.ac.uk/jenkins-integration: fg-public
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed
+          image: eclipse-temurin:11
+          command:
+            - bash
+            - -c
+            - |
+              set -euxo pipefail
+              echo 'APT::Acquire::Retries "10";' > /etc/apt/apt.conf.d/80-retries
+              apt-get update
+              apt-get install -y --no-install-recommends git curl ca-certificates libglu1-mesa gcc
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+              bash -lc 'source "$HOME/.nvm/nvm.sh" && nvm install 14 --lts'
+              bash -lc 'source "$HOME/.nvm/nvm.sh" && npm install -g npm-check-updates'
+              git clone --recurse-submodules --depth 1 -b develop \
+                https://github.com/ebi-gene-expression-group/atlas-web-bulk.git /work
+              export npm_config_cache=/npm-cache
+              mkdir -p /npm-cache
+              bash -lc 'source "$HOME/.nvm/nvm.sh" && cd /work && export npm_config_cache=/npm-cache SKIP_WEBPACK=true && ./compile-front-end-packages.sh'
+              test -d /npm-cache/_cacache
+              echo "Seeded $(find /npm-cache/_cacache -type f | wc -l) files under _cacache"
+          envFrom:
+            - configMapRef:
+                name: ebi-proxy
+          volumeMounts:
+            - name: npm-ci-cache
+              mountPath: /npm-cache
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+      volumes:
+        - name: npm-ci-cache
+          persistentVolumeClaim:
+            claimName: npm-ci-cache-rwx

@@ -1,0 +1,21 @@
+# Shared npm download cache (_cacache) for Jenkins CI pods in gxa-jenkins.
+# Mount at /npm-cache and set npm_config_cache=/npm-cache. Seed once:
+#   kubectl delete job npm-ci-cache-seed -n gxa-jenkins --ignore-not-found
+#   kubectl apply -f jenkins/npm-ci-cache-seed-job.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: npm-ci-cache-rwx
+  namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: gxa-jenkins
+    app.kubernetes.io/component: npm-cache
+    app.kubernetes.io/managed-by: atlas-web-bulk
+    atlas.ebi.ac.uk/jenkins-integration: fg-public
+spec:
+  storageClassName: standard-nfs-production
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi

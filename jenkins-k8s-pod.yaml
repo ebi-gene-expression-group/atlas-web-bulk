@@ -69,6 +69,8 @@ spec:
         value: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4"
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
+      - name: npm_config_cache
+        value: "/npm-cache"
       - name: JAVA_TOOL_OPTIONS
         value: >
           -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
@@ -100,6 +102,8 @@ spec:
         - mountPath: /gradle-ro-dep-cache
           name: gradle-ro-dep-cache
           readOnly: true
+        - mountPath: /npm-cache
+          name: npm-ci-cache
         - name: codon-volume
           mountPath: /test-data/gxa/release-metadata.json
           subPath: release-metadata.json
@@ -155,3 +159,6 @@ spec:
       persistentVolumeClaim:
         claimName: gradle-7.0-ro-dep-cache-rox
         readOnly: true
+    - name: npm-ci-cache
+      persistentVolumeClaim:
+        claimName: npm-ci-cache-rwx

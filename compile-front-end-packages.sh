@@ -61,6 +61,11 @@ function update_npm_package {
 
 export -f update_npm_package
 
+if [ -n "${npm_config_cache:-}" ]; then
+  mkdir -p "${npm_config_cache}"
+  echo "Using npm download cache at ${npm_config_cache}"
+fi
+
 cd app/src/main/javascript
 
 find modules -type d -mindepth 1 -maxdepth 1 | \
@@ -71,5 +76,9 @@ find bundles -type d -mindepth 1 -maxdepth 1 | \
     "cd {}; update_npm_package"
 
 update_npm_package
+if [ "${SKIP_WEBPACK:-}" = true ]; then
+  echo ">> Skipping webpack (SKIP_WEBPACK=true)"
+  exit 0
+fi
 echo ">> $PWD$ npx webpack $WEBPACK_OPTS"
 npx webpack $WEBPACK_OPTS
