@@ -65,18 +65,20 @@ pipeline {
                 "-Pflyway.locations=filesystem:./schemas/flyway/${env.APP_NAME} " +
                 "-Pflyway.schemas=${env.APP_NAME} " +
                 'flywayMigrate'
-        sh './gradlew --no-watch-fs ' +
-                '-PdataFilesLocation=/test-data ' +
-                "-PexperimentFilesLocation=/test-data/${env.APP_NAME} " +
-                '-PexperimentDesignLocation=/tmp/expdesign-rw ' +
-                "-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} " +
-                '-PjdbcUsername=postgres ' +
-                '-PjdbcPassword=postgres ' +
-                "-PzkHosts=${env.APP_NAME}-solrcloud-zookeeper-client.${env.APP_NAME}-ci-solrcloud.svc.cluster.local:2181 " +
-                "-PsolrHosts=http://${env.APP_NAME}-solrcloud-common.${env.APP_NAME}-ci-solrcloud.svc.cluster.local/solr " +
-                '-PsolrUser=solr ' +
-                '-PsolrPassword=SolrRocks ' +
-                ':atlas-web-core:testClasses :app:testClasses'
+        withSolrCredentials {
+          sh './gradlew --no-watch-fs ' +
+                  '-PdataFilesLocation=/test-data ' +
+                  "-PexperimentFilesLocation=/test-data/${env.APP_NAME} " +
+                  '-PexperimentDesignLocation=/tmp/expdesign-rw ' +
+                  "-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} " +
+                  '-PjdbcUsername=postgres ' +
+                  '-PjdbcPassword=postgres ' +
+                  "-PzkHosts=${env.APP_NAME}-solrcloud-zookeeper-client.${env.APP_NAME}-ci-solrcloud.svc.cluster.local:2181 " +
+                  "-PsolrHosts=http://${env.APP_NAME}-solrcloud-common.${env.APP_NAME}-ci-solrcloud.svc.cluster.local/solr " +
+                  '-PsolrUser=admin ' +
+                  '-PsolrPassword="${SOLR_PASS}" ' +
+                  ':atlas-web-core:testClasses :app:testClasses'
+        }
       }
     }
 
@@ -100,9 +102,13 @@ pipeline {
       }
       steps {
         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-          sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
-          sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT'
-          sh './gradlew -PsolrUser=solr -PsolrPassword=SolrRocks --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT'
+          withSolrCredentials {
+            sh './gradlew --no-watch-fs -PtestResultsPath=it :atlas-web-core:test --tests *IT'
+            sh './gradlew --no-watch-fs -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT ' +
+                    '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
+            sh './gradlew --no-watch-fs -PtestResultsPath=e2e :app:test --tests *WIT ' +
+                    '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
+          }
           sh './gradlew --no-watch-fs --parallel :atlas-web-core:jacocoTestReport :app:jacocoTestReport'
         }
       }
@@ -194,6 +200,22 @@ pipeline {
           archiveArtifacts artifacts: 'app/src/main/webapp/resources/js-bundles/report.html', fingerprint: true, allowEmptyArchive: true
         }
       }
+    }
+  }
+}
+
+def withSolrCredentials(Closure body) {
+  // Secret text credential: Solr Operator bootstrap admin password for gxa-ci-solrcloud.
+  // kubectl get secret gxa-solrcloud-security-bootstrap -n gxa-ci-solrcloud \
+  //   -o jsonpath='{.data.admin}' | base64 -d
+  withCredentials([string(credentialsId: 'gxa-ci-solr-admin', variable: 'SOLR_PASS')]) {
+    withEnv([
+      'SOLR_USER=admin',
+      "JAVA_TOOL_OPTIONS=${env.JAVA_TOOL_OPTIONS ?: ''} " +
+        '-Dsolr.httpclient.builder.factory=org.apache.solr.client.solrj.impl.PreemptiveBasicAuthClientBuilderFactory ' +
+        "-Dbasicauth=admin:${env.SOLR_PASS}",
+    ]) {
+      body()
     }
   }
 }
