@@ -154,7 +154,7 @@ test {
   maxHeapSize = '1024m'
   maxParallelForks = project.hasProperty('maxParallelForks') 
         ? maxParallelForks 
-        : 1
+        : 2
 }
 
 jacocoTestReport {
