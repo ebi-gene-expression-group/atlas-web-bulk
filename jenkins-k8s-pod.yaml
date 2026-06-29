@@ -12,10 +12,7 @@ spec:
   securityContext:
     fsGroup: 1000
   initContainers:
-    # Fail fast if the codon snapshot path is missing. Symlinks in emptyDir were avoided:
-    # openjdk runs as root for Jenkins (@tmp, apt); root following symlinks into NFS
-    # (root_squash) cannot read fg_atlas-owned experiment data. Mount the snapshot
-    # directory directly in openjdk instead (same pattern as release-metadata.json).
+    # Fail fast if the codon snapshot path is missing.
     - name: init-experiments-snapshot
       image: busybox:1.28.0-glibc
       securityContext:
@@ -50,10 +47,12 @@ spec:
           cpu: "500m"
     - name: openjdk
       image: eclipse-temurin:11
-      # Run as root (image default): Jenkins durable-task dirs under workspace/@tmp are
-      # owned by jnlp (uid 1000) and only root can write there reliably; apt/nvm in the
-      # Jenkinsfile also require root. Experiment data is a direct codon NFS subPath mount
-      # (not emptyDir symlinks) so files keep fg_atlas ownership (2921:1146).
+      # fg_atlas (2921:1146) reads codon NFS (Isilon root_squash). supplementalGroups
+      # 1000 matches pod fsGroup so the Jenkins workspace PVC is writable.
+      securityContext:
+        runAsUser: 2921
+        runAsGroup: 1146
+        supplementalGroups: [1000]
       resources:
         requests:
           memory: "2.5Gi"
@@ -121,6 +120,29 @@ spec:
           mountPath: /test-data/gxa/species-properties.json
           subPath: species-properties.json
           readOnly: true
+
+    # Root only for apt/nvm and front-end native builds (gcc, libglu1-mesa). Gradle uses openjdk (2921).
+    - name: node-build
+      image: eclipse-temurin:11
+      securityContext:
+        runAsUser: 0
+      envFrom:
+        - configMapRef:
+            name: ebi-proxy
+      env:
+      - name: npm_config_cache
+        value: "/npm-cache"
+      command: [ "/bin/sh", "-c", "sleep 2h" ]
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "500m"
+        limits:
+          memory: "4Gi"
+          cpu: "2"
+      volumeMounts:
+        - mountPath: /npm-cache
+          name: npm-ci-cache
 
     - name: postgres
       image: postgres:16-alpine

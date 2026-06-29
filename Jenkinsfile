@@ -125,19 +125,21 @@ pipeline {
             timeout (time: 1, unit: "HOURS")
           }
           steps {
-            sh '''
-              if [ -d /npm-cache/_cacache ]; then
-                echo "npm CI cache: reusing /npm-cache"
-              else
-                echo "npm CI cache: empty or not seeded; npm install will populate /npm-cache"
-              fi
-              mkdir -p /npm-cache
-            '''
-            sh 'echo \'APT::Acquire::Retries "10";\' > /etc/apt/apt.conf.d/80-retries'
-            sh 'apt update && apt install -y libglu1-mesa gcc'
-            sh 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash'
-            sh 'bash -lc "source $HOME/.nvm/nvm.sh && nvm install 14 --lts"'
-            sh 'bash -lc "source $HOME/.nvm/nvm.sh && npm install -g npm-check-updates"'
+            container('node-build') {
+              sh '''
+                if [ -d /npm-cache/_cacache ]; then
+                  echo "npm CI cache: reusing /npm-cache"
+                else
+                  echo "npm CI cache: empty or not seeded; npm install will populate /npm-cache"
+                fi
+                mkdir -p /npm-cache
+              '''
+              sh 'echo \'APT::Acquire::Retries "10";\' > /etc/apt/apt.conf.d/80-retries'
+              sh 'apt update && apt install -y libglu1-mesa gcc'
+              sh 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash'
+              sh 'bash -lc "source $HOME/.nvm/nvm.sh && nvm install 14 --lts"'
+              sh 'bash -lc "source $HOME/.nvm/nvm.sh && npm install -g npm-check-updates"'
+            }
           }
         }
 
@@ -146,8 +148,10 @@ pipeline {
             timeout (time: 1, unit: "HOURS")
           }
           steps {
-            sh 'bash -lc \'if [ "$BRANCH_NAME" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi; ' +
-                    'source "$HOME/.nvm/nvm.sh"; ./compile-front-end-packages.sh ${WEBPACK_OPTS}\''
+            container('node-build') {
+              sh 'bash -lc \'if [ "$BRANCH_NAME" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi; ' +
+                      'source "$HOME/.nvm/nvm.sh"; ./compile-front-end-packages.sh ${WEBPACK_OPTS}\''
+            }
           }
         }
 
