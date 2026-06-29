@@ -153,8 +153,8 @@ test {
   useJUnitPlatform()
   maxHeapSize = '1024m'
   maxParallelForks = project.hasProperty('maxParallelForks') 
-        ? maxParallelFork 
-        : 2
+        ? maxParallelForks 
+        : 1
 }
 
 jacocoTestReport {
