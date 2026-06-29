@@ -36,6 +36,11 @@ spec:
             - -c
             - |
               set -euxo pipefail
+              # ebi-proxy ConfigMap (envFrom): HTTP_PROXY, NO_PROXY. Java needs system properties.
+              proxy_host="${HTTP_PROXY#*://}"
+              proxy_host="${proxy_host%%:*}"
+              proxy_port="${HTTP_PROXY##*:}"
+              export JAVA_TOOL_OPTIONS="-Dhttp.proxyHost=${proxy_host} -Dhttp.proxyPort=${proxy_port} -Dhttps.proxyHost=${proxy_host} -Dhttps.proxyPort=${proxy_port} -Dhttp.nonProxyHosts=${NO_PROXY//,/|}"
               git clone --recurse-submodules --depth 1 -b develop \
                 https://github.com/ebi-gene-expression-group/atlas-web-bulk.git /work
               cd /work
@@ -48,19 +53,12 @@ spec:
                 :cli:compileJava
               test -d /home/gradle/.gradle/caches/modules-2
               echo "Seeded $(find /home/gradle/.gradle/caches/modules-2 -type f | wc -l) files under modules-2"
-          env:
-            - name: GRADLE_OPTS
-              value: "-Dorg.gradle.daemon=false"
-            - name: JAVA_TOOL_OPTIONS
-              value: >-
-                -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
-                -Dhttp.proxyPort=3128
-                -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
-                -Dhttps.proxyPort=3128
-                -Dhttp.nonProxyHosts=localhost|127.0.0.1|*.svc|*.svc.cluster.local|kubernetes.default
           envFrom:
             - configMapRef:
                 name: ebi-proxy
+          env:
+            - name: GRADLE_OPTS
+              value: "-Dorg.gradle.daemon=false"
           volumeMounts:
             - name: gradle-ro-dep-cache
               mountPath: /home/gradle/.gradle/caches

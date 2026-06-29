@@ -152,8 +152,9 @@ test {
 
   useJUnitPlatform()
   maxHeapSize = '1024m'
-  maxParallelForks = 4
-}
+  maxParallelForks = project.hasProperty('maxParallelForks') 
+        ? maxParallelFork 
+        : 2
 
 jacocoTestReport {
   executionData.setFrom fileTree(dir: "${buildDir}/jacoco", include: '*.exec' )

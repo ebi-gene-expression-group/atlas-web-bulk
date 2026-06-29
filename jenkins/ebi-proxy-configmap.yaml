@@ -15,4 +15,4 @@ data:
   HTTPS_PROXY: "http://hx-wwwcache.ebi.ac.uk:3128"
   http_proxy: "http://hx-wwwcache.ebi.ac.uk:3128"
   https_proxy: "http://hx-wwwcache.ebi.ac.uk:3128"
-  NO_PROXY: "localhost,127.0.0.1,dockerhub.ebi.ac.uk,.ebi.ac.uk,*.cluster.local,*.svc,*.svc.cluster.local"
+  NO_PROXY: "localhost,127.0.0.1,dockerhub.ebi.ac.uk,.ebi.ac.uk,*.cluster.local,*.svc,*.svc.cluster.local,*.gxa-ci-solrcloud,*.gxa-jenkins"
