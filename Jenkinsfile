@@ -43,13 +43,15 @@ pipeline {
       }
       steps {
         sh '''
+          set -eu
+          echo "Provision Gradle: starting (user=$(id -u), workspace=${WORKSPACE:-unset})"
           if [ -d /gradle-ro-dep-cache/modules-2 ]; then
             echo "Gradle RO dep cache: /gradle-ro-dep-cache/modules-2 present"
           else
             echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
           fi
           mkdir -p build
-          ./gradlew --no-watch-fs --console=plain --info tasks
+          ./gradlew --no-watch-fs --console=plain tasks
         '''
       }
     }
