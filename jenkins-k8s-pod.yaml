@@ -75,7 +75,6 @@ spec:
           -Dhttp.proxyPort=3128
           -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
           -Dhttps.proxyPort=3128
-          -Dhttp.nonProxyHosts=localhost|127.0.0.1|dockerhub.ebi.ac.uk|.ebi.ac.uk|*.cluster.local|*.svc|*.svc.cluster.local|kubernetes.default|*.gxa-ci-solrcloud|*.gxa-jenkins
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
       - name: GRADLE_RO_DEP_CACHE
