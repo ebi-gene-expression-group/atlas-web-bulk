@@ -11,6 +11,7 @@ spec:
   # The securityContext in the pod is inherited, as it becomes the default pod template
   securityContext:
     fsGroup: 1000
+    supplementalGroups: [1146]
   initContainers:
     # Fail fast if the codon snapshot path is missing.
     - name: init-experiments-snapshot
@@ -47,13 +48,11 @@ spec:
           cpu: "500m"
     - name: openjdk
       image: eclipse-temurin:11
-      # Match jnlp workspace ownership (uid 1000). Gradle/Jenkins durable-task logs write
-      # under workspace/@tmp; uid 2921 cannot write there (dir mode 755). Codon NFS
-      # stays readable via supplementalGroups fg_atlas (1146).
+      # Match jnlp workspace ownership (uid 1000). Codon NFS readable via pod
+      # supplementalGroups fg_atlas (1146).
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
-        supplementalGroups: [1146]
       resources:
         requests:
           memory: "2.5Gi"
@@ -66,13 +65,17 @@ spec:
         - configMapRef:
             name: ebi-proxy
       env:
-      # Proxy JVM flags live in JAVA_TOOL_OPTIONS only. Do not duplicate them here:
-      # gradlew expands GRADLE_OPTS unquoted (eval set -- $GRADLE_OPTS), so | in
-      # http.nonProxyHosts is interpreted as shell pipes and breaks the java command line.
+      # gradlew passes GRADLE_OPTS to java via unquoted eval; proxy host/port here
+      # (no pipes). http.nonProxyHosts with | belongs in JAVA_TOOL_OPTIONS only.
       - name: GRADLE_OPTS
         value: >-
           -Dorg.gradle.daemon=false
           -Dorg.gradle.workers.max=4
+          -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
+          -Dhttp.proxyPort=3128
+          -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
+          -Dhttps.proxyPort=3128
+          -Dhttp.nonProxyHosts=localhost|127.0.0.1|dockerhub.ebi.ac.uk|.ebi.ac.uk|*.cluster.local|*.svc|*.svc.cluster.local|kubernetes.default|*.gxa-ci-solrcloud|*.gxa-jenkins
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
       - name: GRADLE_RO_DEP_CACHE
@@ -122,7 +125,7 @@ spec:
           subPath: species-properties.json
           readOnly: true
 
-    # Root only for apt/nvm and front-end native builds (gcc, libglu1-mesa). Gradle uses openjdk (2921).
+    # Root only for apt/nvm and front-end native builds (gcc, libglu1-mesa).
     - name: node-build
       image: eclipse-temurin:11
       securityContext:
