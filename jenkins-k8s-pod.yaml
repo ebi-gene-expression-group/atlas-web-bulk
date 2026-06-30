@@ -41,7 +41,7 @@ spec:
       resources:
         requests:
           memory: "512Mi"
-          cpu: "500m"
+          cpu: "200m"
         limits:
           memory: "512Mi"
           cpu: "500m"
@@ -56,10 +56,10 @@ spec:
       resources:
         requests:
           memory: "2.5Gi"
-          cpu: "1"
+          cpu: "500m"
           ephemeral-storage: "4Gi"
         limits:
-          cpu: "4"
+          cpu: "2"
           memory: "4Gi"
       envFrom:
         - configMapRef:
@@ -136,10 +136,10 @@ spec:
       resources:
         requests:
           memory: "2Gi"
-          cpu: "500m"
+          cpu: "200m"
         limits:
           memory: "4Gi"
-          cpu: "2"
+          cpu: "1"
       volumeMounts:
         - mountPath: /npm-cache
           name: npm-ci-cache
@@ -170,10 +170,10 @@ spec:
       resources:
         requests:
           memory: "2Gi"
-          cpu: "500m"
+          cpu: "200m"
         limits:
           memory: "4Gi"
-          cpu: "2"
+          cpu: "1"
           ephemeral-storage: "8Gi"
   volumes:
     - name: codon-volume
