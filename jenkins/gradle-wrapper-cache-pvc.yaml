@@ -1,0 +1,20 @@
+# Shared Gradle wrapper distribution for Jenkins CI pods in gxa-jenkins.
+# Populated by init-gradle-wrapper in jenkins-k8s-pod.yaml (curl via EBI proxy).
+# Mount at /tmp/gradle/wrapper (GRADLE_USER_HOME=/tmp/gradle).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gradle-wrapper-cache-rwx
+  namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: gxa-jenkins
+    app.kubernetes.io/component: gradle-wrapper-cache
+    app.kubernetes.io/managed-by: atlas-web-bulk
+    atlas.ebi.ac.uk/jenkins-integration: fg-public
+spec:
+  storageClassName: standard-nfs-production
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi

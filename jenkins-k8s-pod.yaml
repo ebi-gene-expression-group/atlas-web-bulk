@@ -34,6 +34,37 @@ spec:
         - name: codon-volume
           mountPath: /atlas-data/gxa_codon
           readOnly: true
+    # gradlew downloads the wrapper zip via Java HTTPS proxy; EBI cache often returns
+    # 503 on CONNECT while curl -x works. Seed the shared wrapper PVC once per cluster.
+    - name: init-gradle-wrapper
+      image: curlimages/curl:8.5.0
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      envFrom:
+        - configMapRef:
+            name: ebi-proxy
+      command: ["sh", "-c"]
+      args:
+        - |
+          set -eu
+          URL='https://services.gradle.org/distributions/gradle-7.0-bin.zip'
+          HASH=$(printf '%s' "$URL" | sha256sum | awk '{print $1}')
+          DEST="/tmp/gradle/wrapper/dists/gradle-7.0-bin/${HASH}"
+          ZIP="${DEST}/gradle-7.0-bin.zip"
+          mkdir -p "${DEST}"
+          if [ -s "${ZIP}" ]; then
+            echo "Gradle wrapper zip cached: ${ZIP} ($(wc -c < "${ZIP}") bytes)"
+            exit 0
+          fi
+          PROXY="${HTTP_PROXY:-http://hx-wwwcache.ebi.ac.uk:3128}"
+          echo "Downloading Gradle wrapper via curl (${PROXY})..."
+          curl -fsSL -x "${PROXY}" -L --retry 3 --retry-delay 5 -o "${ZIP}.part" "${URL}"
+          mv "${ZIP}.part" "${ZIP}"
+          echo "Cached ${ZIP} ($(wc -c < "${ZIP}") bytes)"
+      volumeMounts:
+        - name: gradle-wrapper-cache
+          mountPath: /tmp/gradle/wrapper
   containers:
     - name: jnlp
       envFrom:
@@ -113,6 +144,8 @@ spec:
         - mountPath: /gradle-ro-dep-cache
           name: gradle-ro-dep-cache
           readOnly: true
+        - mountPath: /tmp/gradle/wrapper
+          name: gradle-wrapper-cache
         - mountPath: /npm-cache
           name: npm-ci-cache
         - name: codon-volume
@@ -191,6 +224,9 @@ spec:
       persistentVolumeClaim:
         claimName: gradle-7.0-ro-dep-cache-rox
         readOnly: true
+    - name: gradle-wrapper-cache
+      persistentVolumeClaim:
+        claimName: gradle-wrapper-cache-rwx
     - name: npm-ci-cache
       persistentVolumeClaim:
         claimName: npm-ci-cache-rwx
