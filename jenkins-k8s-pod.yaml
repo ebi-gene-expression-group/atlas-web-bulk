@@ -47,12 +47,13 @@ spec:
           cpu: "500m"
     - name: openjdk
       image: eclipse-temurin:11
-      # fg_atlas (2921:1146) reads codon NFS (Isilon root_squash). supplementalGroups
-      # 1000 matches pod fsGroup so the Jenkins workspace PVC is writable.
+      # Match jnlp workspace ownership (uid 1000). Gradle/Jenkins durable-task logs write
+      # under workspace/@tmp; uid 2921 cannot write there (dir mode 755). Codon NFS
+      # stays readable via supplementalGroups fg_atlas (1146).
       securityContext:
-        runAsUser: 2921
-        runAsGroup: 1146
-        supplementalGroups: [1000]
+        runAsUser: 1000
+        runAsGroup: 1000
+        supplementalGroups: [1146]
       resources:
         requests:
           memory: "2.5Gi"
