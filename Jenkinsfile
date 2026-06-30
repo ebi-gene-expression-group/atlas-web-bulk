@@ -13,6 +13,7 @@ pipeline {
       artifactNumToKeepStr: '5',
     ))
     disableConcurrentBuilds()
+    timeout(time: 1, unit: 'HOURS')
   }
 
   agent {
