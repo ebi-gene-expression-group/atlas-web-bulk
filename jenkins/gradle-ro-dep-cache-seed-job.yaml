@@ -36,20 +36,17 @@ spec:
             - -c
             - |
               set -euxo pipefail
-              # ebi-proxy ConfigMap (envFrom): HTTP_PROXY, NO_PROXY. Java needs system properties.
-              proxy_host="${HTTP_PROXY#*://}"
-              proxy_host="${proxy_host%%:*}"
-              proxy_port="${HTTP_PROXY##*:}"
-              export JAVA_TOOL_OPTIONS="-Dhttp.proxyHost=${proxy_host} -Dhttp.proxyPort=${proxy_port} -Dhttps.proxyHost=${proxy_host} -Dhttps.proxyPort=${proxy_port} -Dhttp.nonProxyHosts=${NO_PROXY//,/|}"
               git clone --recurse-submodules --depth 1 -b develop \
                 https://github.com/ebi-gene-expression-group/atlas-web-bulk.git /work
               cd /work
               # Image ships Gradle 7.0 — no wrapper zip download needed.
+              # compile* tasks skip runtimeOnly deps (e.g. urlrewritefilter); resolve runtimeClasspath too.
               gradle --no-daemon --info \
                 :atlas-web-core:compileJava \
                 :atlas-web-core:compileTestJava \
                 :app:compileJava \
                 :app:compileTestJava \
+                :app:dependencies --configuration runtimeClasspath \
                 :cli:compileJava
               test -d /home/gradle/.gradle/caches/modules-2
               echo "Seeded $(find /home/gradle/.gradle/caches/modules-2 -type f | wc -l) files under modules-2"
@@ -58,7 +55,19 @@ spec:
                 name: ebi-proxy
           env:
             - name: GRADLE_OPTS
-              value: "-Dorg.gradle.daemon=false"
+              value: >-
+                -Dorg.gradle.daemon=false
+                -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
+                -Dhttp.proxyPort=3128
+                -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
+                -Dhttps.proxyPort=3128
+            - name: JAVA_TOOL_OPTIONS
+              value: >-
+                -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
+                -Dhttp.proxyPort=3128
+                -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
+                -Dhttps.proxyPort=3128
+                -Dhttp.nonProxyHosts=localhost|127.0.0.1|dockerhub.ebi.ac.uk|.ebi.ac.uk|*.cluster.local|*.svc|*.svc.cluster.local|kubernetes.default|*.gxa-ci-solrcloud|*.gxa-jenkins
           volumeMounts:
             - name: gradle-ro-dep-cache
               mountPath: /home/gradle/.gradle/caches
