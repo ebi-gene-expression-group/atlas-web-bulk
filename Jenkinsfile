@@ -28,6 +28,9 @@ pipeline {
   environment {
     ORG_GRADLE_PROJECT_buildNumber = "${env.BUILD_NUMBER}"
     APP_NAME = 'gxa'
+    // SolrCloud Helm release in gxa-ci-solrcloud (not bare "gxa" — see atlas-k8s-ci-environment charts/solr-cloud/README.md)
+    SOLR_RELEASE = "${APP_NAME}-ci"
+    SOLR_NAMESPACE = "${APP_NAME}-ci-solrcloud"
     REGISTRY = 'dockerhub.ebi.ac.uk'
     IMAGE = 'dockerhub.ebi.ac.uk/ebi-gene-expression/atlas-web-bulk/gxa'
     // 4 parallel test forks × 20 default Hikari pool exceeds sidecar Postgres max_connections (100).
@@ -84,8 +87,8 @@ pipeline {
                   '-PjdbcUsername=postgres ' +
                   '-PjdbcPassword=postgres ' +
                   "${env.GRADLE_CI_TEST_PROPS} " +
-                  "-PzkHosts=${env.APP_NAME}-solrcloud-zookeeper-client.${env.APP_NAME}-ci-solrcloud.svc.cluster.local:2181 " +
-                  "-PsolrHosts=http://${env.APP_NAME}-solrcloud-common.${env.APP_NAME}-ci-solrcloud.svc.cluster.local/solr " +
+                  "-PzkHosts=${env.SOLR_RELEASE}-solrcloud-zookeeper-client.${env.SOLR_NAMESPACE}.svc.cluster.local:2181 " +
+                  "-PsolrHosts=http://${env.SOLR_RELEASE}-solrcloud-common.${env.SOLR_NAMESPACE}.svc.cluster.local/solr " +
                   '-PsolrUser=admin ' +
                   '-PsolrPassword="${SOLR_PASS}" ' +
                   ':atlas-web-core:testClasses :app:testClasses'
@@ -225,8 +228,8 @@ pipeline {
 }
 
 def withSolrCredentials(Closure body) {
-  // Secret text credential: Solr Operator bootstrap admin password for gxa-ci-solrcloud.
-  // kubectl get secret gxa-solrcloud-security-bootstrap -n gxa-ci-solrcloud \
+  // Secret text credential: Solr Operator bootstrap admin password for release gxa-ci.
+  // kubectl get secret gxa-ci-solrcloud-security-bootstrap -n gxa-ci-solrcloud \
   //   -o jsonpath='{.data.admin}' | base64 -d
   withCredentials([string(credentialsId: 'gxa-ci-solr-admin', variable: 'SOLR_PASS')]) {
     withEnv([
