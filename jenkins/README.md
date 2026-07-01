@@ -20,7 +20,7 @@ The seed job writes to `/home/gradle/.gradle/caches` (Gradle’s default cache l
 
 ## Gradle wrapper distribution cache
 
-Gradle 7.0 is downloaded once onto a shared PVC so `./gradlew` does not fetch `gradle-7.0-bin.zip` over the proxy on every build.
+Gradle 7.0 zip is stored on a shared PVC. **Provision Gradle** rewrites `gradle-wrapper.properties` to `distributionUrl=file:///gradle-wrapper-cache/.../gradle-7.0-bin.zip` so `./gradlew` reads the zip from NFS but **extracts and runs Gradle on local disk** (`GRADLE_USER_HOME=/tmp/gradle`) — avoiding `libnative-platform.so` failures on NFS.
 
 ### Layout
 
@@ -28,10 +28,10 @@ Gradle 7.0 is downloaded once onto a shared PVC so `./gradlew` does not fetch `g
 |-----------|------|---------|
 | PVC | `gradle-wrapper-cache-pvc.yaml` | NFS-backed volume holding `dists/gradle-7.0-bin/.../gradle-7.0-bin.zip` |
 | Seed job | `gradle-wrapper-cache-seed-job.yaml` | Optional one-off pre-populate (same path as init container) |
-| Pod template | `../jenkins-k8s-pod.yaml` | `init-gradle-wrapper` ensures zip on PVC; mount at `/tmp/gradle/wrapper` |
-| Pipeline | `../Jenkinsfile` | *Provision Gradle* verifies zip and runs `./gradlew -g /tmp/gradle` |
+| Pod template | `../jenkins-k8s-pod.yaml` | `init-gradle-wrapper` ensures zip on PVC; read-only mount at `/gradle-wrapper-cache` |
+| Pipeline | `../Jenkinsfile` | *Provision Gradle* patches `distributionUrl` to `file://` then runs `./gradlew` |
 
-The init container skips download when the zip is already present (from a previous pod or the seed job). `GRADLE_USER_HOME=/tmp/gradle` matches `gradle-wrapper.properties` (`distributionPath=wrapper/dists`).
+The init container skips download when the zip is already present. `GRADLE_USER_HOME=/tmp/gradle` is pod-local (not the PVC); only the zip lives on NFS.
 
 ### One-time setup (optional seed before first build)
 
@@ -88,7 +88,7 @@ Wait until `STATUS` is `Bound`.
 
 ### 3. Seed the Gradle cache
 
-The seed job clones `atlas-web-bulk` from GitHub and runs compile tasks so Gradle resolves and stores dependencies under `modules-2/`.
+The seed job clones `atlas-web-bulk` from GitHub and resolves compile/test/runtime/JaCoCo classpaths so Gradle stores dependencies under `modules-2/` (no compilation).
 
 ```bash
 kubectl delete job gradle-ro-dep-cache-seed -n gxa-jenkins --ignore-not-found
@@ -156,7 +156,7 @@ Seed jobs use the `develop` branch by default. Edit the clone command in the see
 |---------|----------------|
 | `Gradle RO dep cache not seeded yet` in Jenkins logs | Gradle seed job not run, failed, or `modules-2` missing on PVC |
 | `npm CI cache: empty or not seeded` in Jenkins logs | npm seed job not run yet; first build still works but downloads more |
-| `Task 'testCompileJava' not found` in Gradle seed job | Gradle 7+ uses `compileTestJava`; ensure seed job YAML is up to date |
+| Seed job fails on unknown configuration | Add the missing Gradle configuration to the seed job loop in `gradle-ro-dep-cache-seed-job.yaml` |
 | Seed job stuck downloading | Proxy env vars missing or cluster has no outbound access |
 | `Insufficient cpu` scheduling seed pod | Reduce seed job resource requests or free worker capacity |
 | Builds still slow on first Gradle stage | Wrapper zip missing on PVC — check init container logs or run `gradle-wrapper-cache-seed` |

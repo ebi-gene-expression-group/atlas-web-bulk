@@ -1,8 +1,8 @@
 # One-off job to populate gradle-wrapper-cache-rwx on hh-webadmin-35.
 #
-# gradlew expects the wrapper zip under:
-#   wrapper/dists/gradle-7.0-bin/2p9ebqfz6ilrfozi676ogco7n/gradle-7.0-bin.zip
-# (MD5 of distributionUrl, base-36 — see gradle-wrapper.jar PathAssembler)
+# gradlew expects the wrapper zip at:
+#   /gradle-wrapper-cache/dists/gradle-7.0-bin/2p9ebqfz6ilrfozi676ogco7n/gradle-7.0-bin.zip
+# CI sets distributionUrl=file://... in Provision Gradle; gradlew extracts to local GRADLE_USER_HOME.
 #
 # Apply:  kubectl delete job gradle-wrapper-cache-seed -n gxa-jenkins --ignore-not-found
 #         kubectl apply -f jenkins/gradle-wrapper-cache-seed-job.yaml
@@ -47,14 +47,13 @@ spec:
               set -eux
               DIST_URL='https://services.gradle.org/distributions/gradle-7.0-bin.zip'
               HASH='2p9ebqfz6ilrfozi676ogco7n'
-              DIST_ROOT="/tmp/gradle/wrapper/dists/gradle-7.0-bin/${HASH}"
+              DIST_ROOT="/gradle-wrapper-cache/dists/gradle-7.0-bin/${HASH}"
               ZIP="${DIST_ROOT}/gradle-7.0-bin.zip"
               MIN_BYTES=90000000
               if [ -f "${ZIP}" ] && [ "$(wc -c < "${ZIP}")" -ge "${MIN_BYTES}" ]; then
                 echo "Already seeded: ${ZIP} ($(wc -c < "${ZIP}") bytes)"
                 exit 0
               fi
-              rm -rf "${DIST_ROOT}/gradle-7.0"
               rm -f "${DIST_ROOT}/gradle-7.0-bin.zip.lck" "${DIST_ROOT}/gradle-7.0-bin.zip.part"
               mkdir -p "${DIST_ROOT}"
               PROXY="${HTTP_PROXY:-http://hx-wwwcache.ebi.ac.uk:3128}"
@@ -64,7 +63,7 @@ spec:
               echo "Seeded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
           volumeMounts:
             - name: wrapper-cache
-              mountPath: /tmp/gradle/wrapper
+              mountPath: /gradle-wrapper-cache
       volumes:
         - name: wrapper-cache
           persistentVolumeClaim:

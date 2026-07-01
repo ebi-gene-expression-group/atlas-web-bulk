@@ -40,14 +40,14 @@ spec:
                 https://github.com/ebi-gene-expression-group/atlas-web-bulk.git /work
               cd /work
               # Image ships Gradle 7.0 — no wrapper zip download needed.
-              # compile* tasks skip runtimeOnly deps (e.g. urlrewritefilter); resolve runtimeClasspath too.
-              gradle --no-daemon --info \
-                :atlas-web-core:compileJava \
-                :atlas-web-core:compileTestJava \
-                :app:compileJava \
-                :app:compileTestJava \
-                :app:dependencies --configuration runtimeClasspath \
-                :cli:compileJava
+              # Resolve classpaths only (no compile): populates modules-2/ for GRADLE_RO_DEP_CACHE.
+              ARGS=()
+              for project in :atlas-web-core :app :cli; do
+                for config in compileClasspath runtimeClasspath testCompileClasspath testRuntimeClasspath jacocoAgent jacocoAnt; do
+                  ARGS+=("${project}:dependencies" --configuration "${config}")
+                done
+              done
+              gradle --no-daemon --info "${ARGS[@]}"
               test -d /home/gradle/.gradle/caches/modules-2
               echo "Seeded $(find /home/gradle/.gradle/caches/modules-2 -type f | wc -l) files under modules-2"
           envFrom:
