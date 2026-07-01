@@ -18,7 +18,31 @@ Uses Gradle’s [`GRADLE_RO_DEP_CACHE`](https://docs.gradle.org/current/userguid
 
 The seed job writes to `/home/gradle/.gradle/caches` (Gradle’s default cache location). Jenkins pods mount the same PVC at `/gradle-ro-dep-cache` and point `GRADLE_RO_DEP_CACHE` there.
 
-**Gradle wrapper download:** `./gradlew` downloads `gradle-7.0-bin.zip` on first use (`GRADLE_USER_HOME=/tmp/gradle`). The *Provision Gradle* stage retries on intermittent proxy failures. See `jenkins/proxy-repro-report-2026-07-01.md` if IT needs evidence of proxy CONNECT issues.
+## Gradle wrapper distribution cache
+
+Gradle 7.0 is downloaded once onto a shared PVC so `./gradlew` does not fetch `gradle-7.0-bin.zip` over the proxy on every build.
+
+### Layout
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| PVC | `gradle-wrapper-cache-pvc.yaml` | NFS-backed volume holding `dists/gradle-7.0-bin/.../gradle-7.0-bin.zip` |
+| Seed job | `gradle-wrapper-cache-seed-job.yaml` | Optional one-off pre-populate (same path as init container) |
+| Pod template | `../jenkins-k8s-pod.yaml` | `init-gradle-wrapper` ensures zip on PVC; mount at `/tmp/gradle/wrapper` |
+| Pipeline | `../Jenkinsfile` | *Provision Gradle* verifies zip and runs `./gradlew -g /tmp/gradle` |
+
+The init container skips download when the zip is already present (from a previous pod or the seed job). `GRADLE_USER_HOME=/tmp/gradle` matches `gradle-wrapper.properties` (`distributionPath=wrapper/dists`).
+
+### One-time setup (optional seed before first build)
+
+```bash
+kubectl apply -f jenkins/gradle-wrapper-cache-pvc.yaml
+kubectl delete job gradle-wrapper-cache-seed -n gxa-jenkins --ignore-not-found
+kubectl apply -f jenkins/gradle-wrapper-cache-seed-job.yaml
+kubectl logs -n gxa-jenkins -f job/gradle-wrapper-cache-seed
+```
+
+If the seed job is not run, the first CI pod’s `init-gradle-wrapper` downloads the zip instead.
 
 ## npm download cache
 
@@ -135,7 +159,8 @@ Seed jobs use the `develop` branch by default. Edit the clone command in the see
 | `Task 'testCompileJava' not found` in Gradle seed job | Gradle 7+ uses `compileTestJava`; ensure seed job YAML is up to date |
 | Seed job stuck downloading | Proxy env vars missing or cluster has no outbound access |
 | `Insufficient cpu` scheduling seed pod | Reduce seed job resource requests or free worker capacity |
-| Builds still slow on first Gradle stage | Wrapper zip download is expected; only Maven deps use the shared cache |
+| Builds still slow on first Gradle stage | Wrapper zip missing on PVC — check init container logs or run `gradle-wrapper-cache-seed` |
+| `Gradle wrapper zip missing` in Provision Gradle | `init-gradle-wrapper` failed; check pod events and proxy access to `services.gradle.org` |
 | npm installs still slow after seed | `node_modules` is rebuilt each run; only tarball download is cached |
 
 Check seed job status:

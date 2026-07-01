@@ -34,6 +34,47 @@ spec:
         - name: codon-volume
           mountPath: /atlas-data/gxa_codon
           readOnly: true
+    # Populate shared PVC with gradle-7.0-bin.zip if missing (skips when seeded).
+    # gradlew reads GRADLE_USER_HOME/wrapper/dists/... (see gradle-wrapper.properties).
+    - name: init-gradle-wrapper
+      image: curlimages/curl:8.5.0
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      envFrom:
+        - configMapRef:
+            name: ebi-proxy
+      command: ["sh", "-c"]
+      args:
+        - |
+          set -eux
+          DIST_URL='https://services.gradle.org/distributions/gradle-7.0-bin.zip'
+          HASH='2p9ebqfz6ilrfozi676ogco7n'
+          DIST_ROOT="/tmp/gradle/wrapper/dists/gradle-7.0-bin/${HASH}"
+          ZIP="${DIST_ROOT}/gradle-7.0-bin.zip"
+          MIN_BYTES=90000000
+          if [ -f "${ZIP}" ] && [ "$(wc -c < "${ZIP}")" -ge "${MIN_BYTES}" ]; then
+            echo "Gradle wrapper zip already present: ${ZIP} ($(wc -c < "${ZIP}") bytes)"
+            exit 0
+          fi
+          rm -rf "${DIST_ROOT}/gradle-7.0"
+          rm -f "${DIST_ROOT}/gradle-7.0-bin.zip.lck" "${DIST_ROOT}/gradle-7.0-bin.zip.part"
+          mkdir -p "${DIST_ROOT}"
+          PROXY="${HTTP_PROXY:-http://hx-wwwcache.ebi.ac.uk:3128}"
+          curl -fsSL -x "${PROXY}" -L --retry 5 --retry-delay 10 --connect-timeout 30 \
+            -o "${ZIP}.part" "${DIST_URL}"
+          mv "${ZIP}.part" "${ZIP}"
+          echo "Downloaded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
+      volumeMounts:
+        - name: gradle-wrapper-cache
+          mountPath: /tmp/gradle/wrapper
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 500m
   containers:
     - name: jnlp
       envFrom:
@@ -113,6 +154,8 @@ spec:
         - mountPath: /gradle-ro-dep-cache
           name: gradle-ro-dep-cache
           readOnly: true
+        - mountPath: /tmp/gradle/wrapper
+          name: gradle-wrapper-cache
         - mountPath: /npm-cache
           name: npm-ci-cache
         - name: codon-volume
@@ -124,9 +167,9 @@ spec:
           subPath: species-properties.json
           readOnly: true
 
-    # Root only for apt/nvm and front-end native builds (gcc, libglu1-mesa).
+    # Node 14 for front-end builds; root for apt (gcc, libglu1-mesa for native npm modules).
     - name: node-build
-      image: eclipse-temurin:11
+      image: node:14.21.3-bullseye
       securityContext:
         runAsUser: 0
       envFrom:
@@ -191,6 +234,9 @@ spec:
       persistentVolumeClaim:
         claimName: gradle-7.0-ro-dep-cache-rox
         readOnly: true
+    - name: gradle-wrapper-cache
+      persistentVolumeClaim:
+        claimName: gradle-wrapper-cache-rwx
     - name: npm-ci-cache
       persistentVolumeClaim:
         claimName: npm-ci-cache-rwx

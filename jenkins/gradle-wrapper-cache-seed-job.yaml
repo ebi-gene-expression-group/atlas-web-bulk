@@ -47,7 +47,7 @@ spec:
               set -eux
               DIST_URL='https://services.gradle.org/distributions/gradle-7.0-bin.zip'
               HASH='2p9ebqfz6ilrfozi676ogco7n'
-              DIST_ROOT="/cache/wrapper/dists/gradle-7.0-bin/${HASH}"
+              DIST_ROOT="/tmp/gradle/wrapper/dists/gradle-7.0-bin/${HASH}"
               ZIP="${DIST_ROOT}/gradle-7.0-bin.zip"
               MIN_BYTES=90000000
               if [ -f "${ZIP}" ] && [ "$(wc -c < "${ZIP}")" -ge "${MIN_BYTES}" ]; then
@@ -64,7 +64,7 @@ spec:
               echo "Seeded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
           volumeMounts:
             - name: wrapper-cache
-              mountPath: /cache/wrapper
+              mountPath: /tmp/gradle/wrapper
       volumes:
         - name: wrapper-cache
           persistentVolumeClaim:

@@ -38,19 +38,27 @@ pipeline {
     stage('Provision Gradle') {
       options {
         timeout(time: 20, unit: 'MINUTES')
-        retry(5)
+        retry(2)
       }
       steps {
         sh '''
           set -eu
+          GRADLE_USER_HOME=/tmp/gradle
+          GRADLE_WRAPPER_ZIP="${GRADLE_USER_HOME}/wrapper/dists/gradle-7.0-bin/2p9ebqfz6ilrfozi676ogco7n/gradle-7.0-bin.zip"
+          export GRADLE_USER_HOME
           echo "Provision Gradle: starting (user=$(id -u), workspace=${WORKSPACE:-unset})"
+          if [ ! -s "${GRADLE_WRAPPER_ZIP}" ]; then
+            echo "ERROR: Gradle wrapper zip missing (init-gradle-wrapper should populate ${GRADLE_WRAPPER_ZIP})" >&2
+            exit 1
+          fi
+          echo "Gradle wrapper zip: ${GRADLE_WRAPPER_ZIP} ($(wc -c < "${GRADLE_WRAPPER_ZIP}") bytes)"
           if [ -d /gradle-ro-dep-cache/modules-2 ]; then
             echo "Gradle RO dep cache: /gradle-ro-dep-cache/modules-2 present"
           else
             echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
           fi
           mkdir -p build
-          ./gradlew --no-watch-fs --console=plain tasks
+          ./gradlew -g "${GRADLE_USER_HOME}" --no-watch-fs --console=plain tasks
         '''
       }
     }
@@ -137,10 +145,8 @@ pipeline {
                 mkdir -p /npm-cache
               '''
               sh 'echo \'APT::Acquire::Retries "10";\' > /etc/apt/apt.conf.d/80-retries'
-              sh 'apt update && apt install -y libglu1-mesa gcc'
-              sh 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash'
-              sh 'bash -lc "source $HOME/.nvm/nvm.sh && nvm install 14 --lts"'
-              sh 'bash -lc "source $HOME/.nvm/nvm.sh && npm install -g npm-check-updates"'
+              sh 'apt-get update && apt-get install -y libglu1-mesa gcc'
+              sh 'npm install -g npm-check-updates'
             }
           }
         }
@@ -151,8 +157,7 @@ pipeline {
           }
           steps {
             container('node-build') {
-              sh 'bash -lc \'if [ "$BRANCH_NAME" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi; ' +
-                      'source "$HOME/.nvm/nvm.sh"; ./compile-front-end-packages.sh ${WEBPACK_OPTS}\''
+              sh 'if [ "$BRANCH_NAME" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi; ./compile-front-end-packages.sh ${WEBPACK_OPTS}'
             }
           }
         }
