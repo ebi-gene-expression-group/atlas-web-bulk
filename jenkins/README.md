@@ -65,7 +65,7 @@ Uses npm’s global download cache (`_cacache`) via `npm_config_cache=/npm-cache
 - Cluster context for the target Jenkins cluster (e.g. `hh-webadmin-35`)
 - Namespace `gxa-jenkins` exists
 - Storage class `standard-nfs-production` is available
-- Outbound HTTP(S) via EBI proxy (`hx-wwwcache.ebi.ac.uk:3128`) from worker nodes
+- Outbound HTTP(S) via EBI proxy (`hh-wwwcache.ebi.ac.uk:3128`) from worker nodes
 
 ## One-time setup
 

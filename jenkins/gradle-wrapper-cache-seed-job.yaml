@@ -56,7 +56,7 @@ spec:
               fi
               rm -f "${DIST_ROOT}/gradle-7.0-bin.zip.lck" "${DIST_ROOT}/gradle-7.0-bin.zip.part"
               mkdir -p "${DIST_ROOT}"
-              PROXY="${HTTP_PROXY:-http://hx-wwwcache.ebi.ac.uk:3128}"
+              PROXY="${HTTP_PROXY:-http://hh-wwwcache.ebi.ac.uk:3128}"
               curl -fsSL -x "${PROXY}" -L --retry 5 --retry-delay 10 --connect-timeout 30 \
                 -o "${ZIP}.part" "${DIST_URL}"
               mv "${ZIP}.part" "${ZIP}"

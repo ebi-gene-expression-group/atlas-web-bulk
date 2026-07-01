@@ -19,7 +19,7 @@ spec:
             - sh
             - -c
             - |
-              PROXY=http://hx-wwwcache.ebi.ac.uk:3128
+              PROXY=http://hh-wwwcache.ebi.ac.uk:3128
               URL=https://services.gradle.org/distributions/gradle-7.0-bin.zip
               echo "curl -L full download (10 runs, follow redirects, no retry)"
               ok=0; fail=0; i=1

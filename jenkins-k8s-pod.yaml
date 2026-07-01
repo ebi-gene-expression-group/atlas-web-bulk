@@ -59,7 +59,7 @@ spec:
           fi
           rm -f "${DIST_ROOT}/gradle-7.0-bin.zip.lck" "${DIST_ROOT}/gradle-7.0-bin.zip.part"
           mkdir -p "${DIST_ROOT}"
-          PROXY="${HTTP_PROXY:-http://hx-wwwcache.ebi.ac.uk:3128}"
+          PROXY="${HTTP_PROXY:-http://hh-wwwcache.ebi.ac.uk:3128}"
           curl -fsSL -x "${PROXY}" -L --retry 5 --retry-delay 10 --connect-timeout 30 \
             -o "${ZIP}.part" "${DIST_URL}"
           mv "${ZIP}.part" "${ZIP}"
@@ -111,9 +111,9 @@ spec:
         value: >-
           -Dorg.gradle.daemon=false
           -Dorg.gradle.workers.max=4
-          -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
+          -Dhttp.proxyHost=hh-wwwcache.ebi.ac.uk
           -Dhttp.proxyPort=3128
-          -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
+          -Dhttps.proxyHost=hh-wwwcache.ebi.ac.uk
           -Dhttps.proxyPort=3128
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
@@ -123,9 +123,9 @@ spec:
         value: "/npm-cache"
       - name: JAVA_TOOL_OPTIONS
         value: >-
-          -Dhttp.proxyHost=hx-wwwcache.ebi.ac.uk
+          -Dhttp.proxyHost=hh-wwwcache.ebi.ac.uk
           -Dhttp.proxyPort=3128
-          -Dhttps.proxyHost=hx-wwwcache.ebi.ac.uk
+          -Dhttps.proxyHost=hh-wwwcache.ebi.ac.uk
           -Dhttps.proxyPort=3128
           -Dhttp.nonProxyHosts=localhost|127.0.0.1|dockerhub.ebi.ac.uk|.ebi.ac.uk|*.cluster.local|*.svc|*.svc.cluster.local|kubernetes.default|*.gxa-ci-solrcloud|*.gxa-jenkins
       command: [ "/bin/sh" ]
