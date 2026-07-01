@@ -38,6 +38,7 @@ pipeline {
     stage('Provision Gradle') {
       options {
         timeout(time: 20, unit: 'MINUTES')
+        retry(5)
       }
       steps {
         sh '''
@@ -49,10 +50,8 @@ pipeline {
             echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
           fi
           mkdir -p build
+          ./gradlew --no-watch-fs --console=plain tasks
         '''
-        retry(5) {
-          sh './gradlew --no-watch-fs --console=plain tasks'
-        }
       }
     }
 
