@@ -35,11 +35,9 @@ pipeline {
   }
 
   stages {
-
-
     stage('Provision Gradle') {
       options {
-        timeout (time: 20, unit: "MINUTES")
+        timeout(time: 20, unit: 'MINUTES')
       }
       steps {
         sh '''
@@ -51,19 +49,10 @@ pipeline {
             echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
           fi
           mkdir -p build
-          for attempt in 1 2 3 4 5; do
-            if ./gradlew --no-watch-fs --console=plain tasks; then
-              echo "Provision Gradle: succeeded on attempt ${attempt}"
-              exit 0
-            fi
-            if [ "${attempt}" -eq 5 ]; then
-              echo "Provision Gradle: failed after 5 attempts"
-              exit 1
-            fi
-            echo "gradlew failed (attempt ${attempt}/5), retrying in $((attempt * 2))s..."
-            sleep $((attempt * 2))
-          done
         '''
+        retry(5) {
+          sh './gradlew --no-watch-fs --console=plain tasks'
+        }
       }
     }
 
