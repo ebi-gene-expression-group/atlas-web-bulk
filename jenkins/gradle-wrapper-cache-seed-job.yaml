@@ -1,0 +1,71 @@
+# One-off job to populate gradle-wrapper-cache-rwx on hh-webadmin-35.
+#
+# gradlew expects the wrapper zip under:
+#   wrapper/dists/gradle-7.0-bin/2p9ebqfz6ilrfozi676ogco7n/gradle-7.0-bin.zip
+# (MD5 of distributionUrl, base-36 — see gradle-wrapper.jar PathAssembler)
+#
+# Apply:  kubectl delete job gradle-wrapper-cache-seed -n gxa-jenkins --ignore-not-found
+#         kubectl apply -f jenkins/gradle-wrapper-cache-seed-job.yaml
+# Watch:  kubectl logs -n gxa-jenkins -f job/gradle-wrapper-cache-seed
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gradle-wrapper-cache-seed
+  namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: gxa-jenkins
+    app.kubernetes.io/component: gradle-wrapper-cache-seed
+    app.kubernetes.io/managed-by: atlas-web-bulk
+    atlas.ebi.ac.uk/jenkins-integration: fg-public
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gxa-jenkins
+        app.kubernetes.io/component: gradle-wrapper-cache-seed
+        app.kubernetes.io/managed-by: atlas-web-bulk
+        atlas.ebi.ac.uk/jenkins-integration: fg-public
+    spec:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: seed
+          image: curlimages/curl:8.5.0
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          envFrom:
+            - configMapRef:
+                name: ebi-proxy
+          command:
+            - sh
+            - -c
+            - |
+              set -eux
+              DIST_URL='https://services.gradle.org/distributions/gradle-7.0-bin.zip'
+              HASH='2p9ebqfz6ilrfozi676ogco7n'
+              DIST_ROOT="/cache/wrapper/dists/gradle-7.0-bin/${HASH}"
+              ZIP="${DIST_ROOT}/gradle-7.0-bin.zip"
+              MIN_BYTES=90000000
+              if [ -f "${ZIP}" ] && [ "$(wc -c < "${ZIP}")" -ge "${MIN_BYTES}" ]; then
+                echo "Already seeded: ${ZIP} ($(wc -c < "${ZIP}") bytes)"
+                exit 0
+              fi
+              rm -rf "${DIST_ROOT}/gradle-7.0"
+              rm -f "${DIST_ROOT}/gradle-7.0-bin.zip.lck" "${DIST_ROOT}/gradle-7.0-bin.zip.part"
+              mkdir -p "${DIST_ROOT}"
+              PROXY="${HTTP_PROXY:-http://hx-wwwcache.ebi.ac.uk:3128}"
+              curl -fsSL -x "${PROXY}" -L --retry 5 --retry-delay 10 --connect-timeout 30 \
+                -o "${ZIP}.part" "${DIST_URL}"
+              mv "${ZIP}.part" "${ZIP}"
+              echo "Seeded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
+          volumeMounts:
+            - name: wrapper-cache
+              mountPath: /cache/wrapper
+      volumes:
+        - name: wrapper-cache
+          persistentVolumeClaim:
+            claimName: gradle-wrapper-cache-rwx

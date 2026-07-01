@@ -1,5 +1,5 @@
 # Shared Gradle wrapper distribution for Jenkins CI pods in gxa-jenkins.
-# Populated by init-gradle-wrapper in jenkins-k8s-pod.yaml (curl via EBI proxy).
+# Populated by init-gradle-wrapper / gradle-wrapper-cache-seed-job (curl via EBI proxy).
 # Mount at /tmp/gradle/wrapper (GRADLE_USER_HOME=/tmp/gradle).
 apiVersion: v1
 kind: PersistentVolumeClaim
