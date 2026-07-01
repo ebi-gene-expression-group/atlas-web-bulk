@@ -21,7 +21,7 @@ import uk.ac.ebi.atlas.experiments.ExperimentCellCountDao;
 public class TestConfig {
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        return RestTemplateFactory.createDefault();
     }
 
     @Bean

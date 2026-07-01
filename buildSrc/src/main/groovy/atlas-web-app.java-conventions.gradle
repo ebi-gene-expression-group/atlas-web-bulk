@@ -131,6 +131,29 @@ test {
     jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005'
   }
 
+  // HttpURLConnection (RestTemplate, URL.openStream) uses -Dhttp.proxyHost, not HTTP_PROXY env alone.
+  // Forked test JVMs get these from JAVA_TOOL_OPTIONS in CI; also map standard proxy env vars when present.
+  def httpProxy = System.getenv('HTTP_PROXY')
+  if (httpProxy) {
+    def proxyUri = URI.create(httpProxy)
+    if (proxyUri.host) {
+      def proxyPort = proxyUri.port > 0 ? proxyUri.port : 80
+      jvmArgs "-Dhttp.proxyHost=${proxyUri.host}", "-Dhttp.proxyPort=${proxyPort}"
+    }
+  }
+  def httpsProxy = System.getenv('HTTPS_PROXY') ?: httpProxy
+  if (httpsProxy) {
+    def proxyUri = URI.create(httpsProxy)
+    if (proxyUri.host) {
+      def proxyPort = proxyUri.port > 0 ? proxyUri.port : 80
+      jvmArgs "-Dhttps.proxyHost=${proxyUri.host}", "-Dhttps.proxyPort=${proxyPort}"
+    }
+  }
+  def noProxy = System.getenv('NO_PROXY')
+  if (noProxy) {
+    jvmArgs "-Dhttp.nonProxyHosts=${noProxy.replace(',', '|')}"
+  }
+
   if (project.hasProperty('excludeTests')) {
     exclude project.property('excludeTests')
   }
