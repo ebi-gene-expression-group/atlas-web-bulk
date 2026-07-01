@@ -55,7 +55,7 @@ pipeline {
       }
     }
 
-    stage('–– Compile ––') {
+    stage('-- Compile --') {
       options {
         timeout (time: 1, unit: "HOURS")
       }
@@ -85,7 +85,7 @@ pipeline {
       }
     }
 
-    stage('–– Unit Tests ––') {
+    stage('-- Unit Tests --') {
       when { expression { !params.SKIP_TESTS } }
       options {
         timeout (time: 2, unit: "HOURS")
@@ -98,7 +98,7 @@ pipeline {
       }
     }
 
-    stage('–– Integration Tests ––') {
+    stage('-- Integration Tests --') {
       when { expression { !params.SKIP_TESTS } }
       options {
         timeout (time: 2, unit: "HOURS")
@@ -117,7 +117,7 @@ pipeline {
       }
     }
 
-    stage('–– Build ––') {
+    stage('-- Build --') {
       when { anyOf {
         branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'; branch 'feature/*'
       } }

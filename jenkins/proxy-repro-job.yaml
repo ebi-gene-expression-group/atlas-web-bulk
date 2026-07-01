@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: proxy-repro-report
+  namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: proxy-repro-report
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: repro
+          image: eclipse-temurin:11
+          securityContext:
+            runAsUser: 0
+          envFrom:
+            - configMapRef:
+                name: ebi-proxy
+          env:
+            - name: RUNS
+              value: "10"
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              apt-get update -qq
+              DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl > /dev/null
+              cp /script/run.sh /tmp/run.sh
+              chmod +x /tmp/run.sh
+              /tmp/run.sh
+              echo "--- report.txt ---"
+              cat /report/report.txt
+          volumeMounts:
+            - name: script
+              mountPath: /script
+              readOnly: true
+      volumes:
+        - name: script
+          configMap:
+            name: proxy-repro-script
+            defaultMode: 0755

@@ -18,7 +18,7 @@ Uses Gradle’s [`GRADLE_RO_DEP_CACHE`](https://docs.gradle.org/current/userguid
 
 The seed job writes to `/home/gradle/.gradle/caches` (Gradle’s default cache location). Jenkins pods mount the same PVC at `/gradle-ro-dep-cache` and point `GRADLE_RO_DEP_CACHE` there.
 
-**Gradle wrapper zip:** `./gradlew` needs `gradle-7.0-bin.zip` under `GRADLE_USER_HOME/wrapper/dists/`. Java HTTPS via the EBI proxy often gets 503 on `services.gradle.org`; an init container downloads the zip with **curl** into shared PVC `gradle-wrapper-cache-rwx` (mount `/tmp/gradle/wrapper`). Apply `jenkins/gradle-wrapper-cache-pvc.yaml` once per cluster.
+**Gradle wrapper download:** `./gradlew` downloads `gradle-7.0-bin.zip` on first use (`GRADLE_USER_HOME=/tmp/gradle`). The *Provision Gradle* stage retries on intermittent proxy failures. See `jenkins/proxy-repro-report-2026-07-01.md` if IT needs evidence of proxy CONNECT issues.
 
 ## npm download cache
 

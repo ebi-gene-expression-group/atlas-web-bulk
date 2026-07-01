@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: proxy-repro-curl-follow
+  namespace: gxa-jenkins
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: curl
+          image: curlimages/curl:8.5.0
+          envFrom:
+            - configMapRef:
+                name: ebi-proxy
+          command:
+            - sh
+            - -c
+            - |
+              PROXY=http://hx-wwwcache.ebi.ac.uk:3128
+              URL=https://services.gradle.org/distributions/gradle-7.0-bin.zip
+              echo "curl -L full download (10 runs, follow redirects, no retry)"
+              ok=0; fail=0; i=1
+              while [ "$i" -le 10 ]; do
+                start=$(date +%s)
+                if curl -sS -L -x "$PROXY" -o /tmp/z.zip -w "http_code=%{http_code}\n" \
+                    --connect-timeout 30 --max-time 600 "$URL" 2>/tmp/e; then
+                  bytes=$(wc -c </tmp/z.zip | tr -d ' ')
+                  sec=$(($(date +%s)-start))
+                  echo "run=$i OK bytes=$bytes sec=$sec"
+                  ok=$((ok+1))
+                else
+                  sec=$(($(date +%s)-start))
+                  err=$(tr '\n' ' ' </tmp/e | cut -c1-180)
+                  echo "run=$i FAIL sec=$sec err=$err"
+                  fail=$((fail+1))
+                fi
+                i=$((i+1))
+              done
+              echo "SUMMARY ok=$ok fail=$fail / 10"
