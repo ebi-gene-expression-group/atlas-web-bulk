@@ -28,7 +28,7 @@ pipeline {
   environment {
     ORG_GRADLE_PROJECT_buildNumber = "${env.BUILD_NUMBER}"
     APP_NAME = 'gxa'
-    // SolrCloud Helm release in gxa-ci-solrcloud (not bare "gxa" — see atlas-k8s-ci-environment charts/solr-cloud/README.md)
+    // SolrCloud Helm release gxa-ci in namespace gxa-ci-solrcloud (see charts/solr-cloud/README.md)
     SOLR_RELEASE = "${APP_NAME}-ci"
     SOLR_NAMESPACE = "${APP_NAME}-ci-solrcloud"
     REGISTRY = 'dockerhub.ebi.ac.uk'
