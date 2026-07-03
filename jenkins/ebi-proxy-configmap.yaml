@@ -11,8 +11,12 @@ metadata:
     app.kubernetes.io/managed-by: atlas-web-bulk
     atlas.ebi.ac.uk/jenkins-integration: fg-public
 data:
+  PROXY_HOST: "hh-wwwcache.ebi.ac.uk"
+  PROXY_PORT: "3128"
   HTTP_PROXY: "http://hh-wwwcache.ebi.ac.uk:3128"
   HTTPS_PROXY: "http://hh-wwwcache.ebi.ac.uk:3128"
   http_proxy: "http://hh-wwwcache.ebi.ac.uk:3128"
   https_proxy: "http://hh-wwwcache.ebi.ac.uk:3128"
   NO_PROXY: "localhost,127.0.0.1,dockerhub.ebi.ac.uk,.ebi.ac.uk,*.cluster.local,*.svc,*.svc.cluster.local,*.gxa-ci-solrcloud,*.gxa-jenkins"
+  # Java http.nonProxyHosts (pipe-separated; mirrors NO_PROXY plus kubernetes.default)
+  HTTP_NON_PROXY_HOSTS: "localhost|127.0.0.1|dockerhub.ebi.ac.uk|.ebi.ac.uk|*.cluster.local|*.svc|*.svc.cluster.local|kubernetes.default|*.gxa-ci-solrcloud|*.gxa-jenkins"
