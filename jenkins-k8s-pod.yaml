@@ -59,8 +59,11 @@ spec:
           fi
           rm -f "${DIST_ROOT}/gradle-7.0-bin.zip.lck" "${DIST_ROOT}/gradle-7.0-bin.zip.part"
           mkdir -p "${DIST_ROOT}"
-          PROXY="${HTTP_PROXY:-http://hh-wwwcache.ebi.ac.uk:3128}"
-          curl -fsSL -x "${PROXY}" -L --retry 5 --retry-delay 10 --connect-timeout 30 \
+          if [ -z "${HTTP_PROXY}" ]; then
+            echo "ERROR: HTTP_PROXY not set (expected from ebi-proxy ConfigMap)" >&2
+            exit 1
+          fi
+          curl -fsSL -x "${HTTP_PROXY}" -L --retry 5 --retry-delay 10 --connect-timeout 30 \
             -o "${ZIP}.part" "${DIST_URL}"
           mv "${ZIP}.part" "${ZIP}"
           echo "Downloaded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
@@ -111,10 +114,10 @@ spec:
         value: >-
           -Dorg.gradle.daemon=false
           -Dorg.gradle.workers.max=4
-          -Dhttp.proxyHost=hh-wwwcache.ebi.ac.uk
-          -Dhttp.proxyPort=3128
-          -Dhttps.proxyHost=hh-wwwcache.ebi.ac.uk
-          -Dhttps.proxyPort=3128
+          -Dhttp.proxyHost=$(PROXY_HOST)
+          -Dhttp.proxyPort=$(PROXY_PORT)
+          -Dhttps.proxyHost=$(PROXY_HOST)
+          -Dhttps.proxyPort=$(PROXY_PORT)
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
       - name: GRADLE_RO_DEP_CACHE
@@ -123,11 +126,11 @@ spec:
         value: "/npm-cache"
       - name: JAVA_TOOL_OPTIONS
         value: >-
-          -Dhttp.proxyHost=hh-wwwcache.ebi.ac.uk
-          -Dhttp.proxyPort=3128
-          -Dhttps.proxyHost=hh-wwwcache.ebi.ac.uk
-          -Dhttps.proxyPort=3128
-          -Dhttp.nonProxyHosts=localhost|127.0.0.1|dockerhub.ebi.ac.uk|.ebi.ac.uk|*.cluster.local|*.svc|*.svc.cluster.local|kubernetes.default|*.gxa-ci-solrcloud|*.gxa-jenkins
+          -Dhttp.proxyHost=$(PROXY_HOST)
+          -Dhttp.proxyPort=$(PROXY_PORT)
+          -Dhttps.proxyHost=$(PROXY_HOST)
+          -Dhttps.proxyPort=$(PROXY_PORT)
+          -Dhttp.nonProxyHosts=$(HTTP_NON_PROXY_HOSTS)
       command: [ "/bin/sh" ]
       args: [ "-c", "mkdir -p /tmp/gradle /tmp/expdesign-rw && cp /test-data/expdesign/* /tmp/expdesign-rw/ ; sleep 2h" ]
       volumeMounts:
