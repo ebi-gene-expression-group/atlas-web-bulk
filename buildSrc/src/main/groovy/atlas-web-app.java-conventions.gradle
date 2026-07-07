@@ -88,6 +88,13 @@ dependencies {
 }
 
 processTestResources {
+  // Gradle does not track -P properties by default; declare Solr/JDBC expand inputs so
+  // solr.properties is regenerated when CI host props change between invocations.
+  inputs.property('zkHosts', { project.findProperty('zkHosts') ?: 'localhost:2181' })
+  inputs.property('solrHosts', { project.findProperty('solrHosts') ?: 'localhost:8983' })
+  inputs.property('solrUser', { project.findProperty('solrUser') ?: '' })
+  inputs.property('solrPassword', { project.findProperty('solrPassword') ?: '' })
+
   filesMatching('configuration.properties') {
     expand(
             dataFilesLocation: dataFilesLocation,

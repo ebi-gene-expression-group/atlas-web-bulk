@@ -31,10 +31,13 @@ pipeline {
     // SolrCloud Helm release gxa-ci in namespace gxa-ci-solrcloud (see charts/solr-cloud/README.md)
     SOLR_RELEASE = "${APP_NAME}-ci"
     SOLR_NAMESPACE = "${APP_NAME}-ci-solrcloud"
+    // Cross-namespace K8s DNS: service.namespace (resolver adds .svc.cluster.local). Avoid the
+    // 4-dot *.svc.cluster.local FQDN — with ndots:5 it is resolved only after search-list attempts.
+    GRADLE_CI_SOLR_HOST_PROPS = "-PzkHosts=${SOLR_RELEASE}-solrcloud-zookeeper-client.${SOLR_NAMESPACE}:2181 -PsolrHosts=http://${SOLR_RELEASE}-solrcloud-common.${SOLR_NAMESPACE}/solr"
     REGISTRY = 'dockerhub.ebi.ac.uk'
     IMAGE = 'dockerhub.ebi.ac.uk/ebi-gene-expression/atlas-web-bulk/gxa'
     // 4 parallel test forks × 20 default Hikari pool exceeds sidecar Postgres max_connections (100).
-    GRADLE_CI_TEST_PROPS = '-PjdbcMaxPoolSize=5'
+    GRADLE_CI_TEST_PROPS = "-PjdbcMaxPoolSize=5 ${GRADLE_CI_SOLR_HOST_PROPS}"
   }
 
   stages {
@@ -79,19 +82,21 @@ pipeline {
                 "-Pflyway.schemas=${env.APP_NAME} " +
                 'flywayMigrate'
         withSolrCredentials {
-          sh './gradlew --no-watch-fs ' +
-                  '-PdataFilesLocation=/test-data ' +
-                  "-PexperimentFilesLocation=/test-data/${env.APP_NAME} " +
-                  '-PexperimentDesignLocation=/tmp/expdesign-rw ' +
-                  "-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} " +
-                  '-PjdbcUsername=postgres ' +
-                  '-PjdbcPassword=postgres ' +
-                  "${env.GRADLE_CI_TEST_PROPS} " +
-                  "-PzkHosts=${env.SOLR_RELEASE}-solrcloud-zookeeper-client.${env.SOLR_NAMESPACE}.svc.cluster.local:2181 " +
-                  "-PsolrHosts=http://${env.SOLR_RELEASE}-solrcloud-common.${env.SOLR_NAMESPACE}.svc.cluster.local/solr " +
-                  '-PsolrUser=admin ' +
-                  '-PsolrPassword="${SOLR_PASS}" ' +
-                  ':atlas-web-core:testClasses :app:testClasses'
+          sh """
+            set -eu
+            export JAVA_TOOL_OPTIONS="\${JAVA_TOOL_OPTIONS:-} -Dsolr.httpclient.builder.factory=org.apache.solr.client.solrj.impl.PreemptiveBasicAuthClientBuilderFactory -Dbasicauth=admin:\${SOLR_PASS}"
+            ./gradlew --no-watch-fs \\
+              -PdataFilesLocation=/test-data \\
+              -PexperimentFilesLocation=/test-data/${env.APP_NAME} \\
+              -PexperimentDesignLocation=/tmp/expdesign-rw \\
+              -PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} \\
+              -PjdbcUsername=postgres \\
+              -PjdbcPassword=postgres \\
+              ${env.GRADLE_CI_TEST_PROPS} \\
+              -PsolrUser=admin \\
+              -PsolrPassword="\${SOLR_PASS}" \\
+              :atlas-web-core:testClasses :app:testClasses
+          """
         }
       }
     }
@@ -232,12 +237,7 @@ def withSolrCredentials(Closure body) {
   // kubectl get secret gxa-ci-solrcloud-security-bootstrap -n gxa-ci-solrcloud \
   //   -o jsonpath='{.data.admin}' | base64 -d
   withCredentials([string(credentialsId: 'gxa-ci-solr-admin', variable: 'SOLR_PASS')]) {
-    withEnv([
-      'SOLR_USER=admin',
-      "JAVA_TOOL_OPTIONS=${env.JAVA_TOOL_OPTIONS ?: ''} " +
-        '-Dsolr.httpclient.builder.factory=org.apache.solr.client.solrj.impl.PreemptiveBasicAuthClientBuilderFactory ' +
-        "-Dbasicauth=admin:${env.SOLR_PASS}",
-    ]) {
+    withEnv(['SOLR_USER=admin']) {
       body()
     }
   }
