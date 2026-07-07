@@ -115,13 +115,21 @@ pipeline {
         timeout (time: 2, unit: "HOURS")
       }
       steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
           withSolrCredentials {
-            sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=it :atlas-web-core:test --tests *IT"
-            sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT " +
-                    '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
-            sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=e2e :app:test --tests *WIT " +
-                    '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
+            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} "+
+                  "-PtestResultsPath=it :atlas-web-core:test --tests *IT"
+            }
+            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} "+
+                  "-PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT " +
+                        '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
+            }
+            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+              sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} "+
+                "-PtestResultsPath=e2e :app:test --tests *WIT " +
+                '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
+            }
           }
           sh './gradlew --no-watch-fs --parallel :atlas-web-core:jacocoTestReport :app:jacocoTestReport'
         }
