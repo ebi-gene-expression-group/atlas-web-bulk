@@ -5,12 +5,8 @@ import org.cache2k.jmx.CacheInfoMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
-@Component
-@Profile("!cli")
 public class EnsemblSpeciesCacheMonitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnsemblSpeciesCacheMonitor.class);
     private static final String CACHE_NAME = "ensemblSpecies";

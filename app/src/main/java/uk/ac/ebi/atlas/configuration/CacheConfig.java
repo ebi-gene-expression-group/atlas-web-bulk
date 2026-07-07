@@ -9,6 +9,8 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import uk.ac.ebi.atlas.monitoring.EnsemblSpeciesCacheMonitor;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -57,6 +59,12 @@ public class CacheConfig {
                 builder -> builder.name("publicSpecies").eternal(true),
 
                 builder -> builder.name("ensemblSpecies").entryCapacity(ensemblCacheEntryCapacity));
+    }
+
+    @Bean
+    @Profile("!cli")
+    public EnsemblSpeciesCacheMonitor ensemblSpeciesCacheMonitor(CacheManager cacheManager) {
+        return new EnsemblSpeciesCacheMonitor(cacheManager);
     }
 
     private Optional<Long> countExperimentDirectories() {
