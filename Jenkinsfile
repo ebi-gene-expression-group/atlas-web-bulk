@@ -105,7 +105,6 @@ pipeline {
         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
           sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=ut :atlas-web-core:test --tests *Test"
           sh "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=ut :app:test --tests *Test"
-        }
       }
     }
 
