@@ -114,7 +114,7 @@ pipeline {
     stage('-- Integration Tests --') {
       when { expression { !params.SKIP_TESTS } }
       options {
-        timeout(time: 2, unit: 'HOURS\)
+        timeout(time: 2, unit: 'HOURS')
       }
       steps {
         withSolrCredentials {
