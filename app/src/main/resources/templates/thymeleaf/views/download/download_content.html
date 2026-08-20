@@ -6,6 +6,30 @@
             You can download data for every dataset individually in Expression Atlas through our
             <a href="http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/" target="_blank">FTP site</a>.
         </p>
+        <p>
+            You can also browse datasets and files grouped by criteria such as species, file type and experiment type
+            in the
+            <a href="http://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/indexes/" target="_blank">indexes</a>
+            directory. Groupings are organised in <i>by-*</i> subdirectories, for example
+            <i>by-species</i>, <i>by-file-type</i> and <i>by-experiment-type</i>.
+        </p>
+
+        <h3>Download using the command line</h3>
+        <p>
+            You can also download multiple experiment files as a single ZIP archive using the command line with <code>curl</code>.<br>
+            For example:<br>
+            <code>
+                curl -O "https://<span id='atlas-host'></span>/gxa/experiments/download/zip?accession=&lt;accession1&gt;&accession=&lt;accession2&gt;"
+            </code>
+            <br>
+            Replace <code>&lt;accession1&gt;</code> and <code>&lt;accession2&gt;</code> with the experiment accessions you wish to download.
+        </p>
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                var host = window.location.host;
+                document.getElementById('atlas-host').textContent = host;
+            });
+        </script>
 
         <h3>From experiment pages</h3>
         <p>
