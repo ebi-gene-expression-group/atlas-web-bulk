@@ -9,6 +9,7 @@ import uk.ac.ebi.atlas.experimentpage.link.LinkToEga;
 import uk.ac.ebi.atlas.experimentpage.link.LinkToEna;
 import uk.ac.ebi.atlas.experimentpage.link.LinkToGeo;
 import uk.ac.ebi.atlas.experimentpage.link.LinkToPride;
+import uk.ac.ebi.atlas.experimentpage.qc.MultiqcReportSupplier;
 import uk.ac.ebi.atlas.experimentpage.qc.RnaSeqQcReport;
 import uk.ac.ebi.atlas.model.download.ExternallyAvailableContent;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
@@ -61,6 +62,7 @@ public class ExpressionAtlasContentService {
             ExperimentDesignFile.RnaSeq rnaSeqDifferentialExperimentDesignFile,
             ExperimentDesignFile.Microarray microarrayExperimentDesignFile,
             RnaSeqQcReport rnaSeqQCReport,
+            MultiqcReportSupplier multiqcReportSupplier,
             LinkToArrayExpress linkToArrayExpress,
             LinkToPride linkToPride,
             LinkToEna linkToEna,
@@ -95,6 +97,7 @@ public class ExpressionAtlasContentService {
                                 rnaSeqDifferentialStaticFilesDownload,
                                 rnaSeqDifferentialExperimentDesignFile,
                                 rnaSeqQCReport,
+                                multiqcReportSupplier,
                                 rnaSeqDifferentialContrastImageSupplier));
 
         this.microarrayExperimentExternallyAvailableContentService =

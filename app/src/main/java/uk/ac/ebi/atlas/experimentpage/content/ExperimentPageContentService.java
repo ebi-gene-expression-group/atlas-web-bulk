@@ -14,6 +14,7 @@ import uk.ac.ebi.atlas.experimentpage.ExperimentDesignFile;
 import uk.ac.ebi.atlas.experimentpage.ExternallyAvailableContentService;
 import uk.ac.ebi.atlas.experimentpage.json.JsonBaselineExperimentController;
 import uk.ac.ebi.atlas.experimentpage.qc.MicroarrayQcFiles;
+import uk.ac.ebi.atlas.experimentpage.qc.MultiqcReportController;
 import uk.ac.ebi.atlas.experimentpage.qc.QcReportController;
 import uk.ac.ebi.atlas.model.download.ExternallyAvailableContent;
 import uk.ac.ebi.atlas.model.experiment.Experiment;
@@ -110,6 +111,22 @@ public class ExperimentPageContentService {
                         "url",
                         new JsonPrimitive(ExternallyAvailableContentService.listResourcesUrl(
                                 experiment.getAccession(), accessKey, ExternallyAvailableContent.ContentType.DATA))));
+
+        // MultiQC reports are only produced for bulk RNA-seq experiments
+        if ((experiment.getType().isRnaSeqBaseline() || experiment.getType().isRnaSeqDifferential()) &&
+                dataFileHub.getExperimentFiles(experiment.getAccession()).multiqcReport.exists()) {
+            availableTabs.add(
+                    customContentTab(
+                            "qc-report",
+                            "MultiQC Report",
+                            "reports",
+                            pairsToArrayOfObjects(
+                                    List.of(
+                                            Pair.of(
+                                                    "MultiQC report",
+                                                    MultiqcReportController.getMultiqcReportUrl(
+                                                            experiment.getAccession(), accessKey))))));
+        }
 
         result.add("tabs", availableTabs);
 
