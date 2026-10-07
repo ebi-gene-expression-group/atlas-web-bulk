@@ -44,6 +44,9 @@ spec:
       envFrom:
         - configMapRef:
             name: ebi-proxy
+      env:
+        - name: GRADLE_RO_DEP_CACHE
+          value: "/gradle-ro-dep-cache"
       command: ["sh", "-c"]
       args:
         - |
@@ -70,6 +73,8 @@ spec:
       volumeMounts:
         - name: gradle-wrapper-cache
           mountPath: /gradle-wrapper-cache
+        - name: gradle-ro-dep-cache
+          mountPath: /gradle-ro-dep-cache
       resources:
         requests:
           memory: 128Mi
