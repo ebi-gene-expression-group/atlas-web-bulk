@@ -19,6 +19,7 @@ variables:
 stages:
   - build
   - deploy
+  - build-war
 
 copy-war-from-jenkins:
   stage: build
@@ -81,3 +82,72 @@ deploy-staging:
       "${TOMCAT_URL}/manager/text/list"
       | grep "${TOMCAT_CONTEXT}" | grep running
       || { echo "App ${TOMCAT_CONTEXT} not found or not running"; exit 1; }
+
+# ── Build gxa.war in GitLab (manual) ─────────────────────────────
+# Independent of the Jenkins-based jobs above: press "build-frontend" in
+# the pipeline view and build-war follows, leaving webapps/gxa.war as a
+# downloadable artifact. Lives in the last stage and uses needs: so the
+# jobs above never wait on it.
+#
+# Submodules (atlas-web-core, schemas, two JS modules) are public GitHub
+# repos cloned over HTTPS; their referenced commits must be on GitHub.
+.war-build-variables: &war-build-variables
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_DEPTH: 0
+
+build-frontend:
+  stage: build-war
+  needs: []
+  # Node 14 matches the Jenkins node-build container; the full (non-slim)
+  # bullseye image already ships gcc for native npm modules.
+  image: node:14.21.3-bullseye
+  variables:
+    <<: *war-build-variables
+    npm_config_cache: "$CI_PROJECT_DIR/.npm-cache"
+  cache:
+    key: npm-$CI_COMMIT_REF_SLUG
+    fallback_keys: [npm-develop]
+    paths:
+      - .npm-cache/
+  before_script:
+    # compile-front-end-packages.sh refuses to run without ncu on PATH.
+    # npm-check-updates 17+ requires a newer Node than 14.
+    - npm install -g npm-check-updates@16
+  script:
+    # Same flags as Jenkins: development bundles on develop, production elsewhere.
+    - if [ "$CI_COMMIT_BRANCH" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi
+    - ./compile-front-end-packages.sh $WEBPACK_OPTS
+  artifacts:
+    paths:
+      - app/src/main/webapp/resources/js-bundles/
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+      # Without this a manual job marks the pipeline "blocked".
+      allow_failure: true
+
+build-war:
+  stage: build-war
+  needs: [build-frontend]
+  image: eclipse-temurin:11
+  variables:
+    <<: *war-build-variables
+    GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home"
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4"
+  cache:
+    key: gradle-$CI_COMMIT_REF_SLUG
+    fallback_keys: [gradle-develop]
+    paths:
+      - .gradle-home/caches/
+      - .gradle-home/wrapper/
+  script:
+    - ./gradlew --no-watch-fs --console=plain -PbuildNumber="$CI_PIPELINE_IID" :app:war
+    - ls -lh webapps/gxa.war
+  artifacts:
+    name: "gxa-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - webapps/gxa.war
+    expire_in: 30 days
+  rules:
+    - if: $CI_COMMIT_BRANCH
