@@ -1,3 +1,4 @@
+# This pod is used to run the Jenkins pipeline
 apiVersion: v1
 kind: Pod
 metadata:

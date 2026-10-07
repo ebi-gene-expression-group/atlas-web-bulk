@@ -61,11 +61,50 @@ pipeline {
             echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
           fi
           mkdir -p build
-          ./gradlew --no-watch-fs --console=plain tasks
-          echo "Number of files in /gradle-ro-dep-cache:"
-          find /gradle-ro-dep-cache -type f | wc -l
         '''
       }
+    }
+
+    stage('Update Gradle dependency cache') {
+        agent {
+            kubernetes {
+                yamlFile 'jenkins-gradle-cache.yaml'
+                defaultContainer 'gradle-dep-cache-seed'
+            }
+        }
+        when {
+          anyOf {
+            expression { params.UPDATE_GRADLE_CACHE }
+            changeset '**/build.gradle'
+            changeset '**/build.gradle.kts'
+            changeset '**/settings.gradle'
+            changeset '**/settings.gradle.kts'
+            changeset '**/gradle/libs.versions.toml'
+          }
+        }
+        steps {
+          sh '''
+            set -eux
+            echo "Seeding gradle dependencies cache"
+            export GRADLE_USER_HOME=/tmp/gradle-home
+            rm -rf "$GRADLE_USER_HOME"
+            mkdir -p "$GRADLE_USER_HOME"
+            echo "Listing current directory:"
+            ls ./
+
+            for configuration in $(./gradlew -q listResolvableConfigurations); do
+                echo "Resolving $configuration"
+                ./gradlew dependencies --configuration "$configuration"
+            done
+
+            rm -rf /gradle-ro-dep-cache/modules-2
+            cp -a "$GRADLE_USER_HOME/caches/modules-2" \
+                  /gradle-ro-dep-cache/
+
+            find /gradle-ro-dep-cache/modules-2 -name '*.lock' -delete
+            find /gradle-ro-dep-cache/modules-2 -name 'gc.properties' -delete
+          '''
+        }
     }
 
     stage('-- Compile --') {

@@ -116,3 +116,13 @@ tasks.register('e2eTests', Test) {
         includeTestsMatching '*WIT'
     }
 }
+
+tasks.register("listResolvableConfigurations") {
+    doLast {
+        configurations
+            .findAll { it.canBeResolved }
+            .collect { it.name }
+            .sort()
+            .each { println it }
+    }
+}
