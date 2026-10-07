@@ -44,6 +44,9 @@ spec:
       envFrom:
         - configMapRef:
             name: ebi-proxy
+      env:
+        - name: GRADLE_RO_DEP_CACHE
+          value: "/gradle-ro-dep-cache"
       command: ["sh", "-c"]
       args:
         - |
@@ -67,17 +70,11 @@ spec:
             -o "${ZIP}.part" "${DIST_URL}"
           mv "${ZIP}.part" "${ZIP}"
           echo "Downloaded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
-          echo "GRADLE_USER_HOME: $GRADLE_USER_HOME"
-          ls $GRADLE_USER_HOME/caches
-          echo "Listing /tmp/gradle/.gradle/caches"
-          ls /tmp/gradle/.gradle/caches
-          echo "Listing /home/gradle/.gradle/caches"
-          ls /home/gradle/.gradle/caches
       volumeMounts:
         - name: gradle-wrapper-cache
           mountPath: /gradle-wrapper-cache
-        - name: gradle-dep-cache
-          mountPath: /tmp/gradle/.gradle/caches
+        - name: gradle-ro-dep-cache
+          mountPath: /gradle-ro-dep-cache
       resources:
         requests:
           memory: 128Mi
@@ -159,8 +156,8 @@ spec:
           name: services-volume
           subPath: fg/atlas/bioentity_properties
           readOnly: true
-        - mountPath: /tmp/gradle/.gradle/caches
-          name: gradle-dep-cache
+        - mountPath: /gradle-ro-dep-cache
+          name: gradle-ro-dep-cache
           readOnly: true
         - mountPath: /gradle-wrapper-cache
           name: gradle-wrapper-cache
@@ -239,9 +236,10 @@ spec:
       nfs:
         server: hh-isi-srv-vlan1496.ebi.ac.uk
         path: /ifs/public/services
-    - name: gradle-dep-cache
+    - name: gradle-ro-dep-cache
       persistentVolumeClaim:
         claimName: gradle-7.0-ro-dep-cache-rox
+        readOnly: true
     - name: gradle-wrapper-cache
       persistentVolumeClaim:
         claimName: gradle-wrapper-cache-rwx

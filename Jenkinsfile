@@ -62,6 +62,8 @@ pipeline {
           fi
           mkdir -p build
           ./gradlew --no-watch-fs --console=plain tasks
+          echo "Number of files in /gradle-ro-dep-cache:"
+          find /gradle-ro-dep-cache -type f | wc -l
         '''
       }
     }
