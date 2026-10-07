@@ -2,7 +2,10 @@
 
 ## CI/CD
 
-Jenkins Build job is [Bulk Expression Atlas - Develop](https://gene-expression.ebi.ac.uk/jenkins/job/Bulk%20Expression%20Atlas%20-%20Develop/)
+Jenkins Build job is [Bulk Expression Atlas - Develop](https://wwwint.ebi.ac.uk/jenkins/job/Bulk%20Expression%20Atlas%20-%20Develop/)
+
+Jenkins Deployment Jobs: [gxa-deploy](https://wwwint.ebi.ac.uk/fg/jenkins/view/Expression%20Atlas%20web%20apps/job/gxa-deploy/)
+
 
 ## IDE Setup
 
