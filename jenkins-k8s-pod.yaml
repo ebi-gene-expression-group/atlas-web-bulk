@@ -66,10 +66,13 @@ spec:
             echo "ERROR: HTTP_PROXY not set (expected from ebi-proxy ConfigMap)" >&2
             exit 1
           fi
+          echo "Downloading gradle distribution from ${DIST_URL} to ${ZIP}"
           curl -fsSL -x "${HTTP_PROXY}" -L --retry 5 --retry-delay 10 --connect-timeout 30 \
             -o "${ZIP}.part" "${DIST_URL}"
           mv "${ZIP}.part" "${ZIP}"
           echo "Downloaded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
+          echo "Running seeding gradle dependencies cache"
+          ./gradlew dependencies --refresh-dependencies
       volumeMounts:
         - name: gradle-wrapper-cache
           mountPath: /gradle-wrapper-cache
