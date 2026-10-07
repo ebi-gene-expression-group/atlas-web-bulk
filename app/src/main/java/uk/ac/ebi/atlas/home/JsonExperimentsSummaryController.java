@@ -58,7 +58,7 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
     @GetMapping(value = "/json/experiments-summary",
                 produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getLatestExperiments() {
-        String json = GSON.toJson(
+        return GSON.toJson(
                 ImmutableMap.of(
                         "latestExperiments",
                         latestExperimentsService.fetchLatestExperimentsAttributes().get("latestExperiments"),
@@ -66,19 +66,6 @@ public class JsonExperimentsSummaryController extends JsonExceptionHandlingContr
                         featuredExperimentsCards().stream()
                                 .map(CardModelAdapter::serialize)
                                 .collect(toImmutableList())));
-        // #region agent log
-        try {
-            int iconKey = json.indexOf("\"iconSrc\":\"");
-            String sample = iconKey < 0 ? null : json.substring(iconKey, Math.min(json.length(), iconKey + 180));
-            uk.ac.ebi.atlas.utils.UrlHelpers.agentLogFromController(
-                    "E",
-                    "JsonExperimentsSummaryController.java:getLatestExperiments",
-                    "experiments-summary json sample",
-                    "{\"sample\":" + (sample == null ? "null" : "\"" + sample.replace("\\", "\\\\").replace("\"", "\\\"") + "\"")
-                            + ",\"jsonLen\":" + json.length() + "}");
-        } catch (Exception ignored) { }
-        // #endregion
-        return json;
     }
 
 
