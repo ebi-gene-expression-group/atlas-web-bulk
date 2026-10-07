@@ -158,7 +158,7 @@ pipeline {
                 mkdir -p /npm-cache
               '''
               sh 'echo \'APT::Acquire::Retries "10";\' > /etc/apt/apt.conf.d/80-retries'
-              sh 'apt-get update && apt-get install -y libglu1-mesa gcc'
+              sh 'apt-get update && apt-get install -y gcc'
               sh 'npm install -g npm-check-updates'
             }
           }
