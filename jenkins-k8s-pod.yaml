@@ -67,6 +67,8 @@ spec:
             -o "${ZIP}.part" "${DIST_URL}"
           mv "${ZIP}.part" "${ZIP}"
           echo "Downloaded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
+          echo "GRADLE_USER_HOME: $GRADLE_USER_HOME"
+          ls $GRADLE_USER_HOME/caches
           echo "Listing /tmp/gradle/.gradle/caches"
           ls /tmp/gradle/.gradle/caches
           echo "Listing /home/gradle/.gradle/caches"
