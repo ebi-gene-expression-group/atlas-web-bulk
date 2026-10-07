@@ -72,8 +72,6 @@ spec:
             -o "${ZIP}.part" "${DIST_URL}"
           mv "${ZIP}.part" "${ZIP}"
           echo "Downloaded ${ZIP} ($(wc -c < "${ZIP}") bytes)"
-          echo "Running seeding gradle dependencies cache"
-          ./gradlew dependencies --refresh-dependencies
       volumeMounts:
         - name: gradle-wrapper-cache
           mountPath: /gradle-wrapper-cache
