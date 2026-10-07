@@ -73,8 +73,8 @@ spec:
       volumeMounts:
         - name: gradle-wrapper-cache
           mountPath: /gradle-wrapper-cache
-        - name: gradle-ro-dep-cache
-          mountPath: /gradle-ro-dep-cache
+        - name: gradle-dep-cache
+          mountPath: /home/gradle/.gradle/caches
       resources:
         requests:
           memory: 128Mi
@@ -125,8 +125,6 @@ spec:
           -Dhttps.proxyPort=$(PROXY_PORT)
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
-      - name: GRADLE_RO_DEP_CACHE
-        value: "/gradle-ro-dep-cache"
       - name: npm_config_cache
         value: "/npm-cache"
       - name: JAVA_TOOL_OPTIONS
@@ -158,8 +156,8 @@ spec:
           name: services-volume
           subPath: fg/atlas/bioentity_properties
           readOnly: true
-        - mountPath: /gradle-ro-dep-cache
-          name: gradle-ro-dep-cache
+        - mountPath: /home/gradle/.gradle/caches
+          name: gradle-dep-cache
           readOnly: true
         - mountPath: /gradle-wrapper-cache
           name: gradle-wrapper-cache
