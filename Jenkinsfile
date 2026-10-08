@@ -18,7 +18,7 @@ pipeline {
 
   agent {
     kubernetes {
-      cloud 'hh-webadmin-35'
+      cloud "${params.ENV == 'fallback' ? 'hx-webadmin-121' : 'hh-webadmin-35'}"
       workspaceVolume dynamicPVC(storageClassName: 'standard-nfs-production', accessModes: 'ReadWriteOnce', requestsSize: '6Gi')
       defaultContainer 'openjdk'
       yamlFile 'jenkins-k8s-pod.yaml'
@@ -75,10 +75,19 @@ pipeline {
                 timeout (time: 1, unit: "HOURS")
               }
               steps {
-                echo 'Checking dependency on ae-efo-loader'
-                sh './gradlew :app:dependencyInsight ' +
+                echo "GRADLE_RO_DEP_CACHE=$GRADLE_RO_DEP_CACHE"
+                echo "Checking contents of GRADLE_RO_DEP_CACHE"
+                sh 'ls -la "$GRADLE_RO_DEP_CACHE/modules-2/files-2.1/uk.ac.ebi.fg/ae-efo-loader/1.0.5"' 
+                echo 'Checking dependency on ae-efo-loader offline'
+                sh './gradlew :app:dependencyInsight --offline ' +
                       '--dependency ae-efo-loader ' +
                       '--configuration runtimeClasspath ' +
+                      '--info'
+                
+                echo 'Checking dependencies offline'
+                sh './gradlew :app:dependencies ' +
+                      '--configuration runtimeClasspath ' +
+                      '--offline ' +
                       '--info'
                 echo 'Running compile'
                 sh './gradlew --no-watch-fs ' +
