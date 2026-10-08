@@ -75,6 +75,12 @@ pipeline {
                 timeout (time: 1, unit: "HOURS")
               }
               steps {
+                echo 'Checking dependency on ae-efo-loader'
+                sh './gradlew :app:dependencyInsight ' +
+                      '--dependency ae-efo-loader ' +
+                      '--configuration runtimeClasspath ' +
+                      '--info'
+                echo 'Running compile'
                 sh './gradlew --no-watch-fs ' +
                         '-Pflyway.url=jdbc:postgresql://localhost:5432/postgres ' +
                         '-Pflyway.user=postgres ' +
