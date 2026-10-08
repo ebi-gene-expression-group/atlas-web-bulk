@@ -38,182 +38,185 @@ pipeline {
   }
 
   stages {
-    stage('Provision Gradle') {
-      options {
-        timeout(time: 20, unit: 'MINUTES')
-        retry(2)
-      }
-      steps {
-        sh '''
-          set -eu
-          GRADLE_WRAPPER_ZIP="/gradle-wrapper-cache/dists/gradle-7.0-bin/2p9ebqfz6ilrfozi676ogco7n/gradle-7.0-bin.zip"
-          echo "Provision Gradle: starting (user=$(id -u), workspace=${WORKSPACE:-unset})"
-          if [ ! -s "${GRADLE_WRAPPER_ZIP}" ]; then
-            echo "ERROR: Gradle wrapper zip missing (init-gradle-wrapper should populate ${GRADLE_WRAPPER_ZIP})" >&2
-            exit 1
-          fi
-          echo "Gradle wrapper zip: ${GRADLE_WRAPPER_ZIP} ($(wc -c < "${GRADLE_WRAPPER_ZIP}") bytes)"
-          sed -i "s|^distributionUrl=.*|distributionUrl=file\\://${GRADLE_WRAPPER_ZIP}|" gradle/wrapper/gradle-wrapper.properties
-          echo "gradle-wrapper.properties distributionUrl -> file://${GRADLE_WRAPPER_ZIP}"
-          if [ -d /gradle-ro-dep-cache/modules-2 ]; then
-            echo "Gradle RO dep cache: /gradle-ro-dep-cache/modules-2 present"
-          else
-            echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
-          fi
-          mkdir -p build
-        '''
-      }
-    }
 
-    stage('-- Compile --') {
-      options {
-        timeout (time: 1, unit: "HOURS")
-      }
-      steps {
-        sh './gradlew --no-watch-fs ' +
-                '-Pflyway.url=jdbc:postgresql://localhost:5432/postgres ' +
-                '-Pflyway.user=postgres ' +
-                '-Pflyway.password=postgres ' +
-                "-Pflyway.locations=filesystem:./schemas/flyway/${env.APP_NAME} " +
-                "-Pflyway.schemas=${env.APP_NAME} " +
-                'flywayMigrate'
-        withSolrCredentials {
-          sh './gradlew --no-watch-fs ' +
-                  '-PdataFilesLocation=/test-data ' +
-                  "-PexperimentFilesLocation=/test-data/${env.APP_NAME} " +
-                  '-PexperimentDesignLocation=/tmp/expdesign-rw ' +
-                  "-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} " +
-                  '-PjdbcUsername=postgres ' +
-                  '-PjdbcPassword=postgres ' +
-                  "${env.GRADLE_CI_TEST_PROPS} " +
-                  "-PzkHosts=${env.SOLR_RELEASE}-solrcloud-zookeeper-client.${env.SOLR_NAMESPACE}.svc.cluster.local:2181 " +
-                  "-PsolrHosts=http://${env.SOLR_RELEASE}-solrcloud-common.${env.SOLR_NAMESPACE}.svc.cluster.local/solr " +
-                  '-PsolrUser=admin ' +
-                  '-PsolrPassword="${SOLR_PASS}" ' +
-                  ':atlas-web-core:testClasses :app:testClasses'
-        }
-      }
-    }
-
-    stage('-- Unit Tests --') {
-      when { expression { !params.SKIP_TESTS } }
-      options {
-        timeout(time: 2, unit: 'HOURS')
-      }
-      steps {
-        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-          sh label: 'unit tests: atlas-web-core',
-             script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=ut :atlas-web-core:test --tests *Test"
-          sh label: 'unit tests: app',
-             script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=ut :app:test --tests *Test"
-        }
-      }
-    }
-
-    stage('-- Integration Tests --') {
-      when { expression { !params.SKIP_TESTS } }
-      options {
-        timeout(time: 2, unit: 'HOURS')
-      }
-      steps {
-        withSolrCredentials {
-          catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-            sh label: 'integration tests: atlas-web-core',
-               script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=it :atlas-web-core:test --tests *IT"
-       
-          }
-          catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-            sh label: 'integration tests: app',
-               script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT " +
-                '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
-          }
-          catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-            sh label: 'integration tests: e2e',
-               script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=e2e :app:test --tests *WIT " +
-                '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
-          }
-        }
-        sh './gradlew --no-watch-fs --parallel :atlas-web-core:jacocoTestReport :app:jacocoTestReport'
-      }
-    }
-
-    stage('-- Build --') {
-      when { anyOf {
-        branch 'develop'; branch 'main'; branch 'release/*'; branch 'chore/*'; branch 'feature/*'
-      } }
-      stages {
-        stage('Provision Node.js build environment') {
-          options {
-            timeout (time: 1, unit: "HOURS")
-          }
-          steps {
-            container('node-build') {
+    stage('Build backend and frontend in parallel') {
+      parallel {
+        stage('backend') {
+          stage('Provision Gradle') {
+            options {
+              timeout(time: 20, unit: 'MINUTES')
+              retry(2)
+            }
+            steps {
               sh '''
-                if [ -d /npm-cache/_cacache ]; then
-                  echo "npm CI cache: reusing /npm-cache"
-                else
-                  echo "npm CI cache: empty or not seeded; npm install will populate /npm-cache"
+                set -eu
+                GRADLE_WRAPPER_ZIP="/gradle-wrapper-cache/dists/gradle-7.0-bin/2p9ebqfz6ilrfozi676ogco7n/gradle-7.0-bin.zip"
+                echo "Provision Gradle: starting (user=$(id -u), workspace=${WORKSPACE:-unset})"
+                if [ ! -s "${GRADLE_WRAPPER_ZIP}" ]; then
+                  echo "ERROR: Gradle wrapper zip missing (init-gradle-wrapper should populate ${GRADLE_WRAPPER_ZIP})" >&2
+                  exit 1
                 fi
-                mkdir -p /npm-cache
+                echo "Gradle wrapper zip: ${GRADLE_WRAPPER_ZIP} ($(wc -c < "${GRADLE_WRAPPER_ZIP}") bytes)"
+                sed -i "s|^distributionUrl=.*|distributionUrl=file\\://${GRADLE_WRAPPER_ZIP}|" gradle/wrapper/gradle-wrapper.properties
+                echo "gradle-wrapper.properties distributionUrl -> file://${GRADLE_WRAPPER_ZIP}"
+                if [ -d /gradle-ro-dep-cache/modules-2 ]; then
+                  echo "Gradle RO dep cache: /gradle-ro-dep-cache/modules-2 present"
+                else
+                  echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
+                fi
+                mkdir -p build
               '''
-              sh 'echo \'APT::Acquire::Retries "10";\' > /etc/apt/apt.conf.d/80-retries'
-              sh 'apt-get update && apt-get install -y gcc'
-              sh 'npm install -g npm-check-updates'
+            }
+          }
+
+          stage('-- Compile --') {
+            options {
+              timeout (time: 1, unit: "HOURS")
+            }
+            steps {
+              sh './gradlew --no-watch-fs ' +
+                      '-Pflyway.url=jdbc:postgresql://localhost:5432/postgres ' +
+                      '-Pflyway.user=postgres ' +
+                      '-Pflyway.password=postgres ' +
+                      "-Pflyway.locations=filesystem:./schemas/flyway/${env.APP_NAME} " +
+                      "-Pflyway.schemas=${env.APP_NAME} " +
+                      'flywayMigrate'
+              withSolrCredentials {
+                sh './gradlew --no-watch-fs ' +
+                        '-PdataFilesLocation=/test-data ' +
+                        "-PexperimentFilesLocation=/test-data/${env.APP_NAME} " +
+                        '-PexperimentDesignLocation=/tmp/expdesign-rw ' +
+                        "-PjdbcUrl=jdbc:postgresql://localhost:5432/postgres?currentSchema=${env.APP_NAME} " +
+                        '-PjdbcUsername=postgres ' +
+                        '-PjdbcPassword=postgres ' +
+                        "${env.GRADLE_CI_TEST_PROPS} " +
+                        "-PzkHosts=${env.SOLR_RELEASE}-solrcloud-zookeeper-client.${env.SOLR_NAMESPACE}.svc.cluster.local:2181 " +
+                        "-PsolrHosts=http://${env.SOLR_RELEASE}-solrcloud-common.${env.SOLR_NAMESPACE}.svc.cluster.local/solr " +
+                        '-PsolrUser=admin ' +
+                        '-PsolrPassword="${SOLR_PASS}" ' +
+                        ':atlas-web-core:testClasses :app:testClasses'
+              }
+            }
+          }
+
+          stage('-- Unit Tests --') {
+            when { expression { !params.SKIP_TESTS } }
+            options {
+              timeout(time: 2, unit: 'HOURS')
+            }
+            steps {
+              catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                sh label: 'unit tests: atlas-web-core',
+                  script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=ut :atlas-web-core:test --tests *Test"
+                sh label: 'unit tests: app',
+                  script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=ut :app:test --tests *Test"
+              }
+            }
+          }
+
+          stage('-- Integration Tests --') {
+            when { expression { !params.SKIP_TESTS } }
+            options {
+              timeout(time: 2, unit: 'HOURS')
+            }
+            steps {
+              withSolrCredentials {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                  sh label: 'integration tests: atlas-web-core',
+                    script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=it :atlas-web-core:test --tests *IT"
+            
+                }
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                  sh label: 'integration tests: app',
+                    script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=it -PexcludeTests=**/*WIT.class :app:test --tests *IT " +
+                      '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
+                }
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                  sh label: 'integration tests: e2e',
+                    script: "./gradlew --no-watch-fs ${env.GRADLE_CI_TEST_PROPS} -PtestResultsPath=e2e :app:test --tests *WIT " +
+                      '-PsolrUser=admin -PsolrPassword="${SOLR_PASS}"'
+                }
+              }
+              sh './gradlew --no-watch-fs --parallel :atlas-web-core:jacocoTestReport :app:jacocoTestReport'
             }
           }
         }
-
-        stage('Update and build ES bundles') {
-          options {
-            timeout (time: 1, unit: "HOURS")
-          }
-          steps {
-            container('node-build') {
-              sh 'if [ "$BRANCH_NAME" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi; ./compile-front-end-packages.sh ${WEBPACK_OPTS}'
+        stage('frontend') {
+          stage('Provision Node.js build environment') {
+            options {
+              timeout (time: 1, unit: "HOURS")
+            }
+            steps {
+              container('node-build') {
+                sh '''
+                  if [ -d /npm-cache/_cacache ]; then
+                    echo "npm CI cache: reusing /npm-cache"
+                  else
+                    echo "npm CI cache: empty or not seeded; npm install will populate /npm-cache"
+                  fi
+                  mkdir -p /npm-cache
+                '''
+                sh 'echo \'APT::Acquire::Retries "10";\' > /etc/apt/apt.conf.d/80-retries'
+                sh 'apt-get update && apt-get install -y gcc'
+                sh 'npm install -g npm-check-updates'
+              }
             }
           }
-        }
 
-        stage('Assemble WAR file') {
-          options {
-            timeout (time: 1, unit: "HOURS")
-          }
-          steps {
-            sh './gradlew --no-watch-fs :app:war'
-            archiveArtifacts artifacts: "webapps/${env.APP_NAME}.war", fingerprint: true
-          }
-        }
-
-        stage('Build and push Docker image') {
-          options {
-            timeout (time: 1, unit: "HOURS")
-          }
-          steps {
-            script {
-              echo 'Resolving application version from WAR manifest...'
-              def appVersion = resolveAppVersion()
-              echo "Resolved application version: ${appVersion}"
-              pushDockerImage(appVersion)
+          stage('Update and build ES bundles') {
+            options {
+              timeout (time: 1, unit: "HOURS")
+            }
+            steps {
+              container('node-build') {
+                sh 'if [ "$BRANCH_NAME" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi; ./compile-front-end-packages.sh ${WEBPACK_OPTS}'
+              }
             }
           }
         }
       }
     }
+    stage('package, docker image and tag') {
+      stage('Assemble WAR file') {
+        options {
+          timeout (time: 1, unit: "HOURS")
+        }
+        steps {
+          sh './gradlew --no-watch-fs :app:war'
+          archiveArtifacts artifacts: "webapps/${env.APP_NAME}.war", fingerprint: true
+        }
+      }
 
-    stage('Tag release') {
-      when { branch 'develop' }
-      steps {
-        script {
-          def ver = sh(
-            script: './gradlew --no-watch-fs -q :app:printVersion',
-            returnStdout: true
-          ).trim()
+      stage('Build and push Docker image') {
+        options {
+          timeout (time: 1, unit: "HOURS")
+        }
+        steps {
+          script {
+            echo 'Resolving application version from WAR manifest...'
+            def appVersion = resolveAppVersion()
+            echo "Resolved application version: ${appVersion}"
+            pushDockerImage(appVersion)
+          }
+        }
+      }
 
-          echo "Tagging and pushing version ${ver}"
-          pushGitTags(ver)
+      stage('Tag release') {
+        when { branch 'develop' }
+        steps {
+          script {
+            def ver = sh(
+              script: './gradlew --no-watch-fs -q :app:printVersion',
+              returnStdout: true
+            ).trim()
+
+            echo "Tagging and pushing version ${ver}"
+            pushGitTags(ver)
+          }
         }
       }
     }
+
   }
 
   post {
