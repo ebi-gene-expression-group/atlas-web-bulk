@@ -181,41 +181,43 @@ pipeline {
       }
     }
     stage('package, docker image and tag') {
-      stage('Assemble WAR file') {
-        options {
-          timeout (time: 1, unit: "HOURS")
-        }
-        steps {
-          sh './gradlew --no-watch-fs :app:war'
-          archiveArtifacts artifacts: "webapps/${env.APP_NAME}.war", fingerprint: true
-        }
-      }
-
-      stage('Build and push Docker image') {
-        options {
-          timeout (time: 1, unit: "HOURS")
-        }
-        steps {
-          script {
-            echo 'Resolving application version from WAR manifest...'
-            def appVersion = resolveAppVersion()
-            echo "Resolved application version: ${appVersion}"
-            pushDockerImage(appVersion)
+      stages('package, docker image and tag stages'){
+        stage('Assemble WAR file') {
+          options {
+            timeout (time: 1, unit: "HOURS")
+          }
+          steps {
+            sh './gradlew --no-watch-fs :app:war'
+            archiveArtifacts artifacts: "webapps/${env.APP_NAME}.war", fingerprint: true
           }
         }
-      }
 
-      stage('Tag release') {
-        when { branch 'develop' }
-        steps {
-          script {
-            def ver = sh(
-              script: './gradlew --no-watch-fs -q :app:printVersion',
-              returnStdout: true
-            ).trim()
+        stage('Build and push Docker image') {
+          options {
+            timeout (time: 1, unit: "HOURS")
+          }
+          steps {
+            script {
+              echo 'Resolving application version from WAR manifest...'
+              def appVersion = resolveAppVersion()
+              echo "Resolved application version: ${appVersion}"
+              pushDockerImage(appVersion)
+            }
+          }
+        }
 
-            echo "Tagging and pushing version ${ver}"
-            pushGitTags(ver)
+        stage('Tag release') {
+          when { branch 'develop' }
+          steps {
+            script {
+              def ver = sh(
+                script: './gradlew --no-watch-fs -q :app:printVersion',
+                returnStdout: true
+              ).trim()
+
+              echo "Tagging and pushing version ${ver}"
+              pushGitTags(ver)
+            }
           }
         }
       }
