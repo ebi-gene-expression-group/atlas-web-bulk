@@ -127,6 +127,8 @@ spec:
           -Dhttps.proxyPort=$(PROXY_PORT)
       - name: GRADLE_USER_HOME
         value: "/tmp/gradle"
+      - name: GRADLE_RO_DEP_CACHE
+        value: "/gradle-ro-dep-cache"
       - name: npm_config_cache
         value: "/npm-cache"
       - name: JAVA_TOOL_OPTIONS
