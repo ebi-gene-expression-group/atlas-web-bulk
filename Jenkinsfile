@@ -26,6 +26,8 @@ pipeline {
   }
 
   environment {
+    // Set the build number for the project using an env variable that's read by Gradle.
+    // See gradle documentation: https://docs.gradle.org/7.0.2/userguide/build_environment.html#sec:project_properties
     ORG_GRADLE_PROJECT_buildNumber = "${env.BUILD_NUMBER}"
     APP_NAME = 'gxa'
     // SolrCloud Helm release gxa-ci in namespace gxa-ci-solrcloud (see charts/solr-cloud/README.md)
