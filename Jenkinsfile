@@ -355,8 +355,34 @@ def pushGitTags(String ver) {
   }
 }
 
+// Docker tag: <semver>-<branch>, e.g. 37.6.1-feature-amnon-gxa-1050-build-optimisation.
+// Slashes and other characters that are illegal in a tag become single hyphens.
+def cleanBranchName(String branch) {
+  def cleaned = (branch ?: 'unknown').toLowerCase()
+      .replaceAll('[^a-z0-9]+', '-')
+      .replaceAll(/^-+|-+$/, '')
+  return cleaned ?: 'branch'
+}
+
+def dockerImageTag(String appVersion) {
+  def tag = "${appVersion}-${cleanBranchName(env.BRANCH_NAME)}"
+  if (tag.length() > 128) {
+    tag = tag.substring(0, 128).replaceAll(/-+$/, '')
+  }
+  return tag
+}
+
 def pushDockerImage(String appVersion) {
-  echo "Building and pushing ${env.IMAGE}:${appVersion} and ${env.IMAGE}:latest"
+  def branchTag = dockerImageTag(appVersion)
+  // develop also publishes the plain version and latest, which deploys already pull.
+  // Other branches publish only the branch tag, so they do not move those.
+  def destinations = ["${env.IMAGE}:${branchTag}"]
+  if (env.BRANCH_NAME == 'develop') {
+    destinations << "${env.IMAGE}:${appVersion}"
+    destinations << "${env.IMAGE}:latest"
+  }
+  echo "Building and pushing ${destinations.join(', ')}"
+  def destinationArgs = destinations.collect { "--destination ${it}" }.join(' \\\n            ')
   container('kaniko') {
     sh """
       set -eu
@@ -384,8 +410,7 @@ def pushDockerImage(String appVersion) {
             --verbosity=info \\
             --context "\${WORKSPACE}" \\
             --dockerfile "\${WORKSPACE}/Dockerfile" \\
-            --destination ${env.IMAGE}:${appVersion} \\
-            --destination ${env.IMAGE}:latest
+            ${destinationArgs}
       """
     }
   }
