@@ -55,8 +55,14 @@ function update_npm_package {
   fi
   echo ">> [$BASENAME] Running npm install..."
   npm install
-  echo ">> [$BASENAME] Running npm audit fix..."
-  npm audit fix
+  # npm 6 treats CI=true as cipm and fails lockfileVersion 3 trees, so Jenkins
+  # sets SKIP_NPM_AUDIT instead of CI.
+  if [ -n "${SKIP_NPM_AUDIT:-}" ]; then
+    echo ">> [$BASENAME] Skipping npm audit fix"
+  else
+    echo ">> [$BASENAME] Running npm audit fix..."
+    npm audit fix
+  fi
 }
 
 export -f update_npm_package

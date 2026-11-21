@@ -44,6 +44,32 @@ kubectl logs -n gxa-jenkins -f job/gradle-wrapper-cache-seed
 
 If the seed job is not run, the first CI pod’s `init-gradle-wrapper` downloads the zip instead.
 
+## Gradle build cache
+
+Reuses task outputs such as `compileJava` across builds. Enabled only when `GRADLE_BUILD_CACHE` is set, so local builds are unchanged. `GRADLE_USER_HOME` stays on local disk (`/tmp/gradle`); the shared volume holds only the build cache, not the Gradle distribution.
+
+`disableConcurrentBuilds()` keeps a single writer. The cache directory uses file locks. If an NFS lock error shows up in Provision Gradle or during `./gradlew`, the volume is not usable as a build cache.
+
+### Layout
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| PVC | `gradle-build-cache-pvc.yaml` | NFS-backed volume for Gradle’s local build cache |
+| Pod template | `../jenkins-k8s-pod.yaml` | Mounts the PVC at `/gradle-build-cache`, sets `GRADLE_BUILD_CACHE`, and `-Dorg.gradle.caching=true` |
+| Settings | `../settings.gradle` | Points the local build cache at `GRADLE_BUILD_CACHE` when the variable is set |
+| Pipeline | `../Jenkinsfile` | *Provision Gradle* checks the directory is writable |
+
+No seed job. The first build populates the cache. The next build with unchanged sources should log `FROM-CACHE` for compile tasks. Tasks that embed the Jenkins build number (`processTestResources`, the WAR manifest, `git.properties`) still run.
+
+### One-time setup
+
+```bash
+kubectl apply -f jenkins/gradle-build-cache-pvc.yaml
+kubectl get pvc gradle-build-cache-rwx -n gxa-jenkins
+```
+
+Wait until `STATUS` is `Bound`.
+
 ## npm download cache
 
 Uses npm’s global download cache (`_cacache`) via `npm_config_cache=/npm-cache`. Each package still gets a local `node_modules` in the workspace; only registry tarballs are shared.
@@ -161,7 +187,8 @@ Seed jobs use the `develop` branch by default. Edit the clone command in the see
 | `Insufficient cpu` scheduling seed pod | Reduce seed job resource requests or free worker capacity |
 | Builds still slow on first Gradle stage | Wrapper zip missing on PVC — check init container logs or run `gradle-wrapper-cache-seed` |
 | `Gradle wrapper zip missing` in Provision Gradle | `init-gradle-wrapper` failed; check pod events and proxy access to `services.gradle.org` |
-| npm installs still slow after seed | `node_modules` is rebuilt each run; only tarball download is cached |
+| `Gradle build cache not writable` in Provision Gradle | PVC missing, not bound, or not writable by uid 1000 |
+| npm installs still slow after seed | `node_modules` is rebuilt each run; only tarball download is cached. Jenkins sets `SKIP_NPM_AUDIT=1` and does not pass `-i` |
 
 Check seed job status:
 

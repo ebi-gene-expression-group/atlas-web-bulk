@@ -62,10 +62,21 @@ pipeline {
                   echo "Gradle wrapper zip: ${GRADLE_WRAPPER_ZIP} ($(wc -c < "${GRADLE_WRAPPER_ZIP}") bytes)"
                   sed -i "s|^distributionUrl=.*|distributionUrl=file\\://${GRADLE_WRAPPER_ZIP}|" gradle/wrapper/gradle-wrapper.properties
                   echo "gradle-wrapper.properties distributionUrl -> file://${GRADLE_WRAPPER_ZIP}"
+                  echo "GRADLE_RO_DEP_CACHE=${GRADLE_RO_DEP_CACHE:-unset}"
                   if [ -d /gradle-ro-dep-cache/modules-2 ]; then
                     echo "Gradle RO dep cache: /gradle-ro-dep-cache/modules-2 present"
                   else
                     echo "WARNING: Gradle RO dep cache not seeded (/gradle-ro-dep-cache/modules-2 missing)"
+                  fi
+                  echo "GRADLE_BUILD_CACHE=${GRADLE_BUILD_CACHE:-unset}"
+                  if [ -z "${GRADLE_BUILD_CACHE:-}" ]; then
+                    echo "WARNING: GRADLE_BUILD_CACHE is unset; compile tasks will not be reused across builds" >&2
+                  elif ! touch "${GRADLE_BUILD_CACHE}/.write-probe"; then
+                    echo "ERROR: Gradle build cache not writable: ${GRADLE_BUILD_CACHE}" >&2
+                    exit 1
+                  else
+                    rm -f "${GRADLE_BUILD_CACHE}/.write-probe"
+                    echo "Gradle build cache: ${GRADLE_BUILD_CACHE} is writable"
                   fi
                   mkdir -p build
                 '''
@@ -77,11 +88,6 @@ pipeline {
                 timeout (time: 1, unit: "HOURS")
               }
               steps {
-                echo 'GRADLE_RO_DEP_CACHE=$GRADLE_RO_DEP_CACHE'
-                sh 'ls -la "$GRADLE_RO_DEP_CACHE/modules-2/files-2.1/uk.ac.ebi.fg/ae-efo-loader/1.0.5"' 
-
-                
-
                 echo 'Running compile'
                 sh './gradlew --no-watch-fs ' +
                         '-Pflyway.url=jdbc:postgresql://localhost:5432/postgres ' +
@@ -180,7 +186,15 @@ pipeline {
               }
               steps {
                 container('node-build') {
-                  sh 'if [ "$BRANCH_NAME" = "develop" ]; then WEBPACK_OPTS=-i; else WEBPACK_OPTS=-ip; fi; ./compile-front-end-packages.sh ${WEBPACK_OPTS}'
+                  sh '''
+                    set -eu
+                    export SKIP_NPM_AUDIT=1
+                    if [ "$BRANCH_NAME" = "develop" ]; then
+                      ./compile-front-end-packages.sh
+                    else
+                      ./compile-front-end-packages.sh -p
+                    fi
+                  '''
                 }
               }
             }

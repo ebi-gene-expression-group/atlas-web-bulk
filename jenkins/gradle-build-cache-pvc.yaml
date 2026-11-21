@@ -1,0 +1,23 @@
+# Shared Gradle build cache for Jenkins CI pods in gxa-jenkins.
+# Task outputs (compileJava and similar) are reused across builds.
+# Mount at /gradle-build-cache and set GRADLE_BUILD_CACHE. No seed job:
+# the first build writes entries; later builds read FROM-CACHE.
+#
+#   kubectl apply -f jenkins/gradle-build-cache-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gradle-build-cache-rwx
+  namespace: gxa-jenkins
+  labels:
+    app.kubernetes.io/name: gxa-jenkins
+    app.kubernetes.io/component: gradle-build-cache
+    app.kubernetes.io/managed-by: atlas-web-bulk
+    atlas.ebi.ac.uk/jenkins-integration: fg-public
+spec:
+  storageClassName: standard-nfs-production
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

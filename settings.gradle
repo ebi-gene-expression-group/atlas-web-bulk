@@ -10,3 +10,14 @@
 rootProject.name = 'atlas-web-bulk'
 include 'atlas-web-core', 'app', 'cli'
 
+// CI sets GRADLE_BUILD_CACHE to a shared volume. Local builds leave it unset.
+def buildCacheDir = System.getenv('GRADLE_BUILD_CACHE')
+if (buildCacheDir) {
+    buildCache {
+        local {
+            directory = new File(buildCacheDir)
+            removeUnusedEntriesAfterDays = 14
+        }
+    }
+}
+

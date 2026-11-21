@@ -120,6 +120,7 @@ spec:
       - name: GRADLE_OPTS
         value: >-
           -Dorg.gradle.daemon=false
+          -Dorg.gradle.caching=true
           -Dorg.gradle.workers.max=4
           -Dhttp.proxyHost=$(PROXY_HOST)
           -Dhttp.proxyPort=$(PROXY_PORT)
@@ -129,6 +130,8 @@ spec:
         value: "/tmp/gradle"
       - name: GRADLE_RO_DEP_CACHE
         value: "/gradle-ro-dep-cache"
+      - name: GRADLE_BUILD_CACHE
+        value: "/gradle-build-cache"
       - name: npm_config_cache
         value: "/npm-cache"
       - name: JAVA_TOOL_OPTIONS
@@ -166,6 +169,8 @@ spec:
         - mountPath: /gradle-wrapper-cache
           name: gradle-wrapper-cache
           readOnly: true
+        - mountPath: /gradle-build-cache
+          name: gradle-build-cache
         - mountPath: /npm-cache
           name: npm-ci-cache
         - name: codon-volume
@@ -192,10 +197,10 @@ spec:
       resources:
         requests:
           memory: "2Gi"
-          cpu: "200m"
+          cpu: "1"
         limits:
           memory: "4Gi"
-          cpu: "1"
+          cpu: "2"
       volumeMounts:
         - mountPath: /npm-cache
           name: npm-ci-cache
@@ -250,3 +255,6 @@ spec:
     - name: npm-ci-cache
       persistentVolumeClaim:
         claimName: npm-ci-cache-rwx
+    - name: gradle-build-cache
+      persistentVolumeClaim:
+        claimName: gradle-build-cache-rwx
