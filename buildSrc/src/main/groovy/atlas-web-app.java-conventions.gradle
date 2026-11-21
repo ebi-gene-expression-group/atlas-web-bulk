@@ -11,8 +11,6 @@ def minor = versionParts.size() > 1 ? versionParts[1] : '0'
 def patch = project.findProperty('buildNumber') ?: new Date().format('yyyyMMddHHmmss')
 
 version = "${major}.${minor}.${patch}"
-println "Project version set to: ${version}"
-
 
 sourceCompatibility = 11
 targetCompatibility = 11
